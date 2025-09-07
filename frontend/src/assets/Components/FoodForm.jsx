@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from "react";
+import {
+  Card,
+  Text,
+  TextInput,
+  NumberInput,
+  Checkbox,
+  Textarea,
+  Button,
+  FileInput,
+  Stack,
+  Image,
+} from "@mantine/core";
 
-export default function FoodForm({ food = null }) {
+export default function FoodForm({ food = null, onSuccess }) {
   const [formData, setFormData] = useState({
     food_name: "",
-    price: "",
+    price: 0,
     available: true,
     description: "",
     thumbnail: null,
@@ -11,177 +23,167 @@ export default function FoodForm({ food = null }) {
 
   const [preview, setPreview] = useState(null);
 
-  // Load existing food data if editing
+  // Load existing food if editing
   useEffect(() => {
     if (food) {
       setFormData({
         food_name: food.food_name || "",
-        price: food.price || "",
-        available: food.available || true,
+        price: food.price || 0,
+        available: food.available ?? true,
         description: food.description || "",
         thumbnail: null,
       });
 
-      // Show existing thumbnail if available
       if (food.thumbnail) {
-        setPreview(food.thumbnail.startsWith("http") ? food.thumbnail : `http://127.0.0.1:8000/storage/${food.thumbnail}`);
+        setPreview(
+          food.thumbnail.startsWith("http")
+            ? food.thumbnail
+            : `http://127.0.0.1:8000/storage/${food.thumbnail}`
+        );
       }
     }
   }, [food]);
 
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    if (files && files[0]) {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }));
-      setPreview(URL.createObjectURL(files[0]));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+    const data = new FormData();
+    if (formData.thumbnail) data.append("thumbnail", formData.thumbnail);
+    data.append("food_name", formData.food_name);
+    data.append("price", formData.price);
+    data.append("available", formData.available ? 1 : 0);
+    data.append("description", formData.description);
+
+    const url = food
+      ? `http://127.0.0.1:8000/api/foods/${food.id}`
+      : "http://127.0.0.1:8000/api/foods";
+
+    if (food) data.append("_method", "PUT");
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        body: data,
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        console.error(errorData);
+        throw new Error("Failed to save food");
+      }
+
+      alert(food ? "Food updated successfully!" : "Food created successfully!");
+      if (onSuccess) onSuccess(); // callback to refresh list or close modal
+
+      if (!food) {
+        setFormData({
+          food_name: "",
+          price: 0,
+          available: true,
+          description: "",
+          thumbnail: null,
+        });
+        setPreview(null);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong.");
     }
   };
-
-  const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        const data = new FormData();
-        if (formData.thumbnail) data.append("thumbnail", formData.thumbnail);
-        data.append("food_name", formData.food_name);
-        data.append("price", formData.price);
-        data.append("available", formData.available ? 1 : 0); // ✅ boolean fix
-        data.append("description", formData.description);
-
-        const url = food
-            ? `http://127.0.0.1:8000/api/foods/${food.id}`
-            : "http://127.0.0.1:8000/api/foods";
-
-        const method = food ? "POST" : "POST"; 
-        if (food) data.append("_method", "PUT");
-
-        try {
-            const res = await fetch(url, {
-            method,
-            body: data,
-            credentials: "include",
-            headers: { Accept: "application/json" },
-            });
-
-            if (!res.ok) {
-            const errorData = await res.json().catch(() => null);
-            console.error(errorData);
-            throw new Error("Failed to save food");
-            }
-
-            alert(food ? "Food updated successfully!" : "Food created successfully!");
-
-            if (!food) {
-            setFormData({
-                food_name: "",
-                price: "",
-                available: true,
-                description: "",
-                thumbnail: null,
-            });
-            setPreview(null);
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Something went wrong.");
-        }
-        };
-
+  const url = "http://127.0.0.1:8000";
 
   return (
     <div className="max-w-md mx-auto mt-10">
-      <div className="bg-white shadow-lg rounded-2xl p-6 border">
-        <h2 className="text-2xl font-bold mb-6 text-center">
+      <Card shadow="lg" padding="xl" radius="md" withBorder>
+        <Text size="xl" weight={700} align="center" mb="md">
           {food ? "Update Food" : "Create Food"}
-        </h2>
+        </Text>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Thumbnail Input */}
-          <div>
-            <label className="block font-medium">Thumbnail</label>
-            <input
-              type="file"
-              name="thumbnail"
-              onChange={handleChange}
+        <form onSubmit={handleSubmit}>
+          <Stack spacing="md">
+            {/* Thumbnail Input */}
+            <FileInput
+              label="Thumbnail"
+              placeholder="Choose an image"
               accept="image/*"
-              className="mt-1 block w-full text-sm"
+              onChange={(file) => {
+                setFormData((prev) => ({ ...prev, thumbnail: file }));
+                setPreview(file ? URL.createObjectURL(file) : null);
+              }}
             />
-            {preview && (
-              <img
-                src={preview}
-                alt="Preview"
-                className="mt-3 h-32 w-32 object-cover rounded-lg border shadow-sm"
-              />
-            )}
-          </div>
 
-          {/* Food Name */}
-          <div>
-            <label className="block font-medium">Food Name</label>
-            <input
-              type="text"
-              name="food_name"
+            {/* Image Preview */}
+            {(preview || (food && food.thumbnail)) && (
+                <div className="w-[200px] h-[200px] mx-auto mt-2 overflow-hidden rounded-lg border shadow-sm">
+                    <Image
+                    src={
+                    food
+                        ? `${url}/storage/${food.thumbnail}`
+                        : preview
+                    }
+                    height={200}
+                    className="object-cover w-full"
+                />
+                </div>
+                )}
+            {/* Food Name */}
+            <TextInput
+              label="Food Name"
+              placeholder="Enter food name"
+              required
               value={formData.food_name}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full border rounded-lg p-2 focus:ring focus:ring-blue-200"
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, food_name: e.target.value }))
+              }
             />
-          </div>
 
-          {/* Price */}
-          <div>
-            <label className="block font-medium">Price</label>
-            <input
-              type="number"
-              name="price"
+            {/* Price */}
+            <NumberInput
+              label="Price"
+              placeholder="Enter price"
+              required
+              min={0}
               value={formData.price}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full border rounded-lg p-2 focus:ring focus:ring-blue-200"
+              onChange={(value) =>
+                setFormData((prev) => ({ ...prev, price: value ?? 0 }))
+              }
             />
-          </div>
 
-          {/* Available */}
-          <div>
-            <label className="block font-medium">Available</label>
-            <input
-                type="checkbox"
-                name="available"
-                checked={formData.available}
-                onChange={(e) =>
+            {/* Available */}
+            <Checkbox
+              label="Available"
+              checked={formData.available}
+              onChange={(e) =>
                 setFormData((prev) => ({
-                    ...prev,
-                    available: e.target.checked,
+                  ...prev,
+                  available: e.currentTarget.checked,
                 }))
-                }
-                className="mt-1 h-4 w-4"
+              }
             />
-            <span className="ml-2">{formData.available ? "Yes" : "No"}</span>
-        </div>
 
-          {/* Description */}
-          <div>
-            <label className="block font-medium">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
+            {/* Description */}
+            <Textarea
+              label="Description"
+              placeholder="Enter description"
               required
-              className="mt-1 block w-full border rounded-lg p-2 focus:ring focus:ring-blue-200"
-            ></textarea>
-          </div>
+              value={formData.description}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
+            />
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 shadow-md"
-          >
-            {food ? "Update" : "Save"}
-          </button>
+            {/* Submit Button */}
+            <Button type="submit" fullWidth color="blue" radius="md">
+              {food ? "Update Food" : "Create Food"}
+            </Button>
+          </Stack>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

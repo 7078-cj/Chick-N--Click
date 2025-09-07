@@ -1,11 +1,34 @@
-import { Card, Image, Text, Button } from "@mantine/core";
+import React, { useState } from "react";
+import { Card, Image, Text, Button, Modal } from "@mantine/core";
+import FoodForm from "./FoodForm";
 
-export default function FoodCard({ food, url }) {
+export default function FoodCard({ food, url, onDelete, onUpdate }) {
+  const [opened, setOpened] = useState(false);
+
   if (!food) return null;
 
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this food?")) return;
+
+    try {
+      const res = await fetch(`${url}/api/foods/${food.id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) throw new Error("Failed to delete food");
+      alert("Food deleted successfully!");
+      if (onDelete) onDelete(food.id);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while deleting.");
+    }
+  };
+  
+
   return (
-    <div className="w-[300px] p-4 h-full">
-      <Card shadow="sm" padding="lg" radius="md" withBorder>
+    <>
+      <Card shadow="sm" padding="lg" radius="md" withBorder className="w-[300px]">
         {/* Thumbnail */}
         <Card.Section>
           <Image
@@ -20,7 +43,7 @@ export default function FoodCard({ food, url }) {
         </Card.Section>
 
         {/* Name */}
-        <Text fw={700} size="lg" align="left" mt="md">
+        <Text fw={700} size="lg" mt="md">
           {food.food_name || "Unnamed Food"}
         </Text>
 
@@ -42,19 +65,25 @@ export default function FoodCard({ food, url }) {
           {food.description || "No description"}
         </Text>
 
-        {/* Action Button */}
+        {/* Actions */}
         <div className="flex justify-between items-center mt-3">
-          <Button
-            size="xs"
-            color="pink"
-            variant="light"
-            radius="xl"
-            className="px-3 py-1"
-          >
-            Order
+          <Button size="xs" color="blue" onClick={() => setOpened(true)} radius="xl">
+            Edit
+          </Button>
+          <Button size="xs" color="red" onClick={handleDelete} radius="xl">
+            Delete
           </Button>
         </div>
       </Card>
-    </div>
+
+      {/* Edit Modal */}
+      <Modal opened={opened} onClose={() => setOpened(false)} title="Edit Food" size="lg">
+        <FoodForm
+          food={food}
+          onClose={() => setOpened(false)}
+          onUpdate={onUpdate} // optional callback to update parent list
+        />
+      </Modal>
+    </>
   );
 }
