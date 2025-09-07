@@ -29,9 +29,9 @@ class FoodController extends Controller
             'description' => ['required', 'string', 'max:100'],
         ]);
 
-        if ($request->hasFile('Thumbnail')) {
-            $file = $request->file('Thumbnail');
-            $filePath = $file->store('Thumbnails', 'public');
+        if ($request->hasFile('thumbnail')) {
+            $file = $request->file('thumbnail');
+            $filePath = $file->store('thumbnails', 'public');
             $validated['thumbnail'] = $filePath;
         }
 

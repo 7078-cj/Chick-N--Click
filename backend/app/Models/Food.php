@@ -14,7 +14,7 @@ class Food extends Model
         'thumbnail',
         'food_name',
         'price',
-        'available_stock',
+        'available',
         'description'
     ];
 }
