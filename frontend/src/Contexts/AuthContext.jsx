@@ -24,7 +24,7 @@ export function AuthProvider({children}) {
         e.preventDefault();
 
         try {
-            const response = await fetch(url + 'login', {   // Laravel login route
+            const response = await fetch(url + '/api/login', {   // Laravel login route
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
