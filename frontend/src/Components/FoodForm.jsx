@@ -22,6 +22,7 @@ export default function FoodForm({ food = null, onSuccess }) {
   });
 
   const [preview, setPreview] = useState(null);
+  const preUrl = import.meta.env.VITE_API_URL
 
   // Load existing food if editing
   useEffect(() => {
@@ -38,7 +39,7 @@ export default function FoodForm({ food = null, onSuccess }) {
         setPreview(
           food.thumbnail.startsWith("http")
             ? food.thumbnail
-            : `http://127.0.0.1:8000/storage/${food.thumbnail}`
+            : `${preUrl}/storage/${food.thumbnail}`
         );
       }
     }
@@ -55,8 +56,8 @@ export default function FoodForm({ food = null, onSuccess }) {
     data.append("description", formData.description);
 
     const url = food
-      ? `http://127.0.0.1:8000/api/foods/${food.id}`
-      : "http://127.0.0.1:8000/api/foods";
+      ? `${preUrl}/api/foods/${food.id}`
+      : `${preUrl}/api/foods`;
 
     if (food) data.append("_method", "PUT");
 
