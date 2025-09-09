@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Card, Image, Text, Button, Modal } from "@mantine/core";
 import FoodForm from "./FoodForm";
+import AuthContext from "../Contexts/AuthContext";
 
 export default function FoodCard({ food, url, onDelete, onUpdate }) {
+  let { token } = useContext(AuthContext)
   const [opened, setOpened] = useState(false);
 
   if (!food) return null;
@@ -14,7 +16,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
       const res = await fetch(`${url}/api/foods/${food.id}`, {
         method: "DELETE",
         credentials: "include",
-        headers: { Accept: "application/json" },
+        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to delete food");
       alert("Food deleted successfully!");

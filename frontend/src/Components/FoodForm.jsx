@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Card,
   Text,
@@ -11,8 +11,11 @@ import {
   Stack,
   Image,
 } from "@mantine/core";
+import AuthContext from "../Contexts/AuthContext";
 
 export default function FoodForm({ food = null, onSuccess }) {
+
+  let { token } = useContext(AuthContext)
   const [formData, setFormData] = useState({
     food_name: "",
     price: 0,
@@ -66,7 +69,7 @@ export default function FoodForm({ food = null, onSuccess }) {
         method: "POST",
         body: data,
         credentials: "include",
-        headers: { Accept: "application/json" },
+        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
       });
 
       if (!res.ok) {
@@ -93,7 +96,7 @@ export default function FoodForm({ food = null, onSuccess }) {
       alert("Something went wrong.");
     }
   };
-  const url = "http://127.0.0.1:8000";
+  const url = import.meta.env.VITE_API_URL;
 
   return (
     <div className="max-w-md mx-auto mt-10">

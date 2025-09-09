@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import FoodCard from "./FoodCard";
+import AuthContext from "../Contexts/AuthContext";
 
 export default function FoodList() {
   const [foods, setFoods] = useState([]);
   const url = import.meta.env.VITE_API_URL
+  let { token } = useContext(AuthContext)
 
   const fetchFoods = async () => {
     try {
       const res = await fetch(`${url}/api/foods`, {
         credentials: "include",
-        headers: { Accept: "application/json" },
+        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       setFoods(data);
