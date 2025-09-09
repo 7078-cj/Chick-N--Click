@@ -6,9 +6,17 @@ use App\Models\Cart;
 use App\Http\Requests\StoreCartRequest;
 use App\Http\Requests\UpdateCartRequest;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class CartController extends Controller
+class CartController extends Controller  implements HasMiddleware
 {
+     public static function middleware()
+    {
+        return [
+            new Middleware('auth:sanctum')
+        ];
+    }
     public function addToCart(Request $request, $foodId)
     {
         $user = $request->user();

@@ -5,9 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Food;
 use App\Http\Requests\StoreFoodRequest;
 use App\Http\Requests\UpdateFoodRequest;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class FoodController extends Controller
+class FoodController extends Controller implements HasMiddleware
 {
+
+      public static function middleware()
+    {
+        return [
+            new Middleware('auth:sanctum')
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
