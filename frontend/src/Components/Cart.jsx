@@ -8,9 +8,9 @@ export default function Cart() {
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const url = import.meta.env.VITE_API_URL
+  const url = import.meta.env.VITE_API_URL;
 
-  // Fetch cart
+  
   const fetchCart = async () => {
     try {
       setLoading(true);
@@ -27,7 +27,6 @@ export default function Cart() {
       setTotal(data.total || 0);
     } catch (err) {
       console.error(err);
-      
     } finally {
       setLoading(false);
     }
@@ -37,20 +36,85 @@ export default function Cart() {
     fetchCart();
   }, []);
 
-  // Update quantity in state
-  const handleUpdate = (foodId, newQty) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.food_id === foodId ? { ...item, quantity: newQty, subtotal: newQty * item.price } : item
-      )
-    );
-    setTotal((prev) => cart.reduce((sum, i) => sum + i.subtotal, 0));
+  
+  const updateCartItem = async (foodId, newQty) => {
+    try {
+      const res = await fetch(`${url}/api/cart/${foodId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ quantity: newQty }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update cart item");
+
+      const data = await res.json();
+
+     
+      setCart(data.cart || []);
+      setTotal(data.total || 0);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  // Remove item
+ 
+  const removeCartItem = async (foodId) => {
+    try {
+      const res = await fetch(`${url}/api/cart/${foodId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to remove cart item");
+
+      const data = await res.json();
+
+      setCart(data.cart || []);
+      setTotal(data.total || 0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  
+  const handleUpdate = (foodId, newQty) => {
+  
+    setCart((prev) =>
+      prev.map((item) =>
+        item.food_id === foodId
+          ? { ...item, quantity: newQty, subtotal: newQty * item.price }
+          : item
+      )
+    );
+    setTotal((prev) =>
+      cart.reduce(
+        (sum, i) =>
+          sum + (i.food_id === foodId ? newQty * i.price : i.subtotal),
+        0
+      )
+    );
+
+   
+    updateCartItem(foodId, newQty);
+  };
+
+  
   const handleRemove = (foodId) => {
+   
     setCart((prev) => prev.filter((item) => item.food_id !== foodId));
-    setTotal((prev) => cart.reduce((sum, i) => sum + i.subtotal, 0));
+    setTotal((prev) =>
+      cart
+        .filter((i) => i.food_id !== foodId)
+        .reduce((sum, i) => sum + i.subtotal, 0)
+    );
+
+   
+    removeCartItem(foodId);
   };
 
   if (loading) return <Loader />;
