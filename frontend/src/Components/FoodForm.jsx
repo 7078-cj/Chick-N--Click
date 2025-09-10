@@ -12,9 +12,11 @@ import {
   Image,
 } from "@mantine/core";
 import AuthContext from "../Contexts/AuthContext";
+import { FoodContext } from "../Contexts/FoodProvider";
+
 
 export default function FoodForm({ food = null, onSuccess }) {
-
+  const { setFoods } = useContext(FoodContext);
   let { token } = useContext(AuthContext)
   const [formData, setFormData] = useState({
     food_name: "",
@@ -90,6 +92,10 @@ export default function FoodForm({ food = null, onSuccess }) {
           thumbnail: null,
         });
         setPreview(null);
+      }
+      if(res){
+        food = await res.json()
+        setFoods((prev) => [...prev, food])
       }
     } catch (err) {
       console.error(err);

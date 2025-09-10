@@ -10,6 +10,7 @@ import Login from './Pages/Login'
 import Register from './Pages/Register'
 import Home from './Pages/Home'
 import PrivateRoutes from './Contexts/PrivateRoutes'
+import { FoodProvider } from './Contexts/FoodProvider'
 
 function App() {
   
@@ -19,15 +20,17 @@ function App() {
       
       <Router>
         <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-              
-            <Route element={<PrivateRoutes />} >
-              <Route path="/" element={<Home />} />
-            </Route>
-              
-          </Routes>
+          <FoodProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+                
+              <Route element={<PrivateRoutes />} >
+                <Route path="/" element={<Home />} />
+              </Route>
+                
+            </Routes>
+          </FoodProvider>
         </AuthProvider>
       </Router>
       

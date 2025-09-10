@@ -1,9 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import FoodCard from "./FoodCard";
 import AuthContext from "../Contexts/AuthContext";
+import { FoodContext } from "../Contexts/FoodProvider";
+
+
 
 export default function FoodList() {
-  const [foods, setFoods] = useState([]);
+  const { setFoods, foods } = useContext(FoodContext);
   const url = import.meta.env.VITE_API_URL
   let { token } = useContext(AuthContext)
 
