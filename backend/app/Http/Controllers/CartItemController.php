@@ -73,7 +73,7 @@ class CartItemController extends Controller  implements HasMiddleware
         $user = $request->user();
 
        
-        $cartItem = $user->cartItems()->where('food_id', $foodId)->first();
+        $cartItem = $user->Cart()->where('food_id', $foodId)->first();
 
         if (!$cartItem) {
             return response()->json([
