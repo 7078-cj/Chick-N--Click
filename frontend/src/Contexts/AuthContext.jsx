@@ -12,9 +12,7 @@ export function AuthProvider({children}) {
         JSON.parse(localStorage.getItem('token')) || null
     );
 
-    const [user, setUser] = useState(
-        JSON.parse(localStorage.getItem('user')) || null
-    );
+    const [user, setUser] = useState();
 
     const nav = useNavigate()
 
@@ -43,9 +41,13 @@ export function AuthProvider({children}) {
                 setUser(data.user);
 
                 localStorage.setItem('token', JSON.stringify(data.token));
-                localStorage.setItem('user', JSON.stringify(data.user));
-
-                nav('/');
+               
+                if (user.role == "admin"){
+                    nav('/admin')
+                }else{
+                    nav('/')
+                }
+                
             } else {
                 console.error("Login failed");
             }
@@ -58,17 +60,46 @@ export function AuthProvider({children}) {
         setUser(null);
         setToken(null);
         localStorage.removeItem('token');
-        localStorage.removeItem('user');
+       
+    }
+
+    const getUserDetails =  async () => {
+        if (token){
+            const result = await fetch(url + '/api/user', {   
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                }
+            })
+        
+         if (result.ok) {
+                const data = await result.json();
+                setUser(data);
+                if (data.role == "admin"){
+                    nav('/admin')
+                }else{
+                    nav('/')
+                }
+            }
+        
+        else {
+                console.error("user fetch failed");
+            }
+        }
+        
     }
 
 
-    
+    useEffect(()=>{
+        getUserDetails()
+    },[])
 
     var context = {
         loginUser:loginUser,
         logOut:logoutUser,
         user:user,
         token:token,
+       
         
 
 

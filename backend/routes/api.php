@@ -16,6 +16,7 @@ Route::get('/test', function (Request $request) {
 
 Route::post('/register',[AuthController::class, 'register']);
 Route::post('/login',[AuthController::class, 'login']);
+Route::get('/user',[AuthController::class, 'userDetails'])->middleware('auth:sanctum');
 Route::post('/logout',[AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::get('/cart', [CartItemController::class, 'userCart']);
