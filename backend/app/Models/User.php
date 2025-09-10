@@ -48,10 +48,8 @@ class User extends Authenticatable
         ];
     }
 
-    public function foodsInCart()
+    public function Cart()
     {
-        return $this->belongsToMany(Food::class, 'carts')
-                    ->withPivot('quantity')
-                    ->withTimestamps();
+        return $this->hasMany(CartItem::class);
     }
 }

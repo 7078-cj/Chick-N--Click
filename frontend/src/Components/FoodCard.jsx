@@ -1,14 +1,17 @@
 import React, { useContext, useState } from "react";
-import { Card, Image, Text, Button, Modal } from "@mantine/core";
+import { Card, Image, Text, Button, Modal, NumberInput } from "@mantine/core";
 import FoodForm from "./FoodForm";
 import AuthContext from "../Contexts/AuthContext";
 
 export default function FoodCard({ food, url, onDelete, onUpdate }) {
-  let { token } = useContext(AuthContext)
+  let { token } = useContext(AuthContext);
   const [opened, setOpened] = useState(false);
+  const [cartOpened, setCartOpened] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   if (!food) return null;
 
+  // 🔹 Delete food
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this food?")) return;
 
@@ -16,7 +19,10 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
       const res = await fetch(`${url}/api/foods/${food.id}`, {
         method: "DELETE",
         credentials: "include",
-        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (!res.ok) throw new Error("Failed to delete food");
       alert("Food deleted successfully!");
@@ -26,7 +32,29 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
       alert("Something went wrong while deleting.");
     }
   };
-  
+
+  // 🔹 Add to cart
+  const handleAddToCart = async () => {
+    try {
+      const res = await fetch(`${url}/api/cart/add/${food.id}`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ quantity }),
+      });
+
+      if (!res.ok) throw new Error("Failed to add to cart");
+      const data = await res.json();
+      alert(data.add_to_cart || "Added to cart!");
+      setCartOpened(false);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while adding to cart.");
+    }
+  };
 
   return (
     <>
@@ -76,15 +104,44 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
             Delete
           </Button>
         </div>
+
+        {/* Add to Cart Button */}
+        <div className="mt-3">
+          <Button
+            size="sm"
+            color="teal"
+            radius="xl"
+            fullWidth
+            onClick={() => setCartOpened(true)}
+            disabled={!food.available}
+          >
+            Add to Cart
+          </Button>
+        </div>
       </Card>
 
       {/* Edit Modal */}
       <Modal opened={opened} onClose={() => setOpened(false)} title="Edit Food" size="lg">
-        <FoodForm
-          food={food}
-          onClose={() => setOpened(false)}
-          onUpdate={onUpdate} // optional callback to update parent list
+        <FoodForm food={food} onClose={() => setOpened(false)} onUpdate={onUpdate} />
+      </Modal>
+
+      {/* Quantity Modal for Cart */}
+      <Modal
+        opened={cartOpened}
+        onClose={() => setCartOpened(false)}
+        title={`Add ${food.food_name} to Cart`}
+        centered
+      >
+        <NumberInput
+          label="Quantity"
+          value={quantity}
+          min={1}
+          onChange={setQuantity}
+          required
         />
+        <Button fullWidth mt="md" onClick={handleAddToCart}>
+          Confirm Add
+        </Button>
       </Modal>
     </>
   );

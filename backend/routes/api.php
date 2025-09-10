@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CartController;
+use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\FoodController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,7 +18,8 @@ Route::post('/register',[AuthController::class, 'register']);
 Route::post('/login',[AuthController::class, 'login']);
 Route::post('/logout',[AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-Route::post('/cart/add/{foodId}', [CartController::class, 'addToCart']);
-Route::delete('/cart/remove/{foodId}', [CartController::class, 'removeToCart']);
+Route::get('/cart', [CartItemController::class, 'userCart']);
+Route::post('/cart/add/{foodId}', [CartItemController::class, 'addToCart']);
+Route::delete('/cart/remove/{foodId}', [CartItemController::class, 'removeToCart']);
 
 Route::apiResource('foods', FoodController::class);

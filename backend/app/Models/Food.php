@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Cart;
+use App\Models\CartItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +21,7 @@ class Food extends Model
 
     public function cartItems()
     {
-        return $this->hasMany(Cart::class);
+        return $this->hasMany(CartItem::class);
     }
 
 }
