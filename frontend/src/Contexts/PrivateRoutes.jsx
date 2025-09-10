@@ -1,13 +1,20 @@
-import React, { useContext } from 'react'
-import { Navigate, Outlet } from 'react-router-dom'
-import AuthContext from './AuthContext'
+import { useContext } from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import AuthContext from "../Contexts/AuthContext";
 
-function PrivateRoutes({children,...rest}) {
+function PrivateRoutes({ allowedRoles }) {
     
-    let {user} = useContext(AuthContext)
+    const { user } = useContext(AuthContext);
 
-  
-    return user ? <Outlet /> : <Navigate to="/login" />;
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return allowedRoles.includes(user.role) ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/unauthorized" replace /> // or show a 403 page
+  );
   
 }
 

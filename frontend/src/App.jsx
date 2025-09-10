@@ -11,6 +11,8 @@ import Register from './Pages/Register'
 import Home from './Pages/Home'
 import PrivateRoutes from './Contexts/PrivateRoutes'
 import { FoodProvider } from './Contexts/FoodProvider'
+import Admin from './Pages/Admin'
+import Unauthorized from './Pages/Unauthorized'
 
 function App() {
   
@@ -25,9 +27,17 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
                 
-              <Route element={<PrivateRoutes />} >
+              <Route element={<PrivateRoutes allowedRoles={["user"]} />} >
                 <Route path="/" element={<Home />} />
               </Route>
+
+              <Route element={<PrivateRoutes allowedRoles={["admin"]} />} >
+                <Route path="/admin" element={<Admin />} />
+              </Route>
+
+              <Route path="/unauthorized" element={<Unauthorized />} />
+
+              
                 
             </Routes>
           </FoodProvider>
