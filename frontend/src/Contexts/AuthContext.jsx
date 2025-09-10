@@ -64,9 +64,7 @@ export function AuthProvider({children}) {
        
     }
 
-    const getUserDetails = async () => {
-        
-
+   const getUserDetails = async () => {
         if (token) {
             SetFetchingUser(true);
             try {
@@ -75,39 +73,40 @@ export function AuthProvider({children}) {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
                 },
-            })
+            });
 
             if (result.ok) {
                 const data = await result.json();
                 setUser(data);
                 SetFetchingUser(false);
-
-                
-                if (window.location.pathname === "/login") {
-                    if (data.role === "admin") {
-                        nav("/admin");
-                    } else {
-                        nav("/");
-                    }
-                }
-
-                
             } else {
                 console.error("user fetch failed");
-                setUser(null)
-                nav("/login")
+                setUser(null);
+                SetFetchingUser(false);
+
+               
+                if (!["/login", "/register"].includes(window.location.pathname)) {
+                nav("/login");
+                }
             }
             } catch (err) {
-            console.error("Error fetching user", err)
-            setUser(null)
-            nav("/login")
+            console.error("Error fetching user", err);
+            setUser(null);
+            SetFetchingUser(false);
+
+            if (!["/login", "/register"].includes(window.location.pathname)) {
+                nav("/login");
+            }
             }
         } else {
             setUser(null);
-            nav("/login"); 
+            SetFetchingUser(false);
+
+            if (!["/login", "/register"].includes(window.location.pathname)) {
+            nav("/login");
+            }
         }
         };
-
 
     useEffect(()=>{
         getUserDetails()

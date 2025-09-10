@@ -25,14 +25,6 @@ function Home() {
 
        
         <Grid.Col span={{ base: 12, md: 4 }}>
-          <Card shadow="sm" padding="lg" radius="md" withBorder className="mb-6">
-            <Title order={3} size="h4" mb="md">
-              Add / Update Food
-            </Title>
-            <FoodForm />
-          </Card>
-
-         
           <CartModal />
         </Grid.Col>
       </Grid>

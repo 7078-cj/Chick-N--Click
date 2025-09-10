@@ -4,7 +4,7 @@ import FoodForm from "./FoodForm";
 import AuthContext from "../Contexts/AuthContext";
 
 export default function FoodCard({ food, url, onDelete, onUpdate }) {
-  let { token } = useContext(AuthContext);
+  let { token, user } = useContext(AuthContext);
   const [opened, setOpened] = useState(false);
   const [cartOpened, setCartOpened] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -96,28 +96,31 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
         </Text>
 
         {/* Actions */}
-        <div className="flex justify-between items-center mt-3">
-          <Button size="xs" color="blue" onClick={() => setOpened(true)} radius="xl">
-            Edit
-          </Button>
-          <Button size="xs" color="red" onClick={handleDelete} radius="xl">
-            Delete
-          </Button>
-        </div>
+        { user.role == "admin" ? 
+          <div className="flex justify-between items-center mt-3">
+            <Button size="xs" color="blue" onClick={() => setOpened(true)} radius="xl">
+              Edit
+            </Button>
+            <Button size="xs" color="red" onClick={handleDelete} radius="xl">
+              Delete
+            </Button>
+          </div>: 
+          <div className="mt-3">
+            <Button
+              size="sm"
+              color="teal"
+              radius="xl"
+              fullWidth
+              onClick={() => setCartOpened(true)}
+              disabled={!food.available}
+            >
+              Add to Cart
+            </Button>
+          </div>
+        }
+        
 
-        {/* Add to Cart Button */}
-        <div className="mt-3">
-          <Button
-            size="sm"
-            color="teal"
-            radius="xl"
-            fullWidth
-            onClick={() => setCartOpened(true)}
-            disabled={!food.available}
-          >
-            Add to Cart
-          </Button>
-        </div>
+       
       </Card>
 
       {/* Edit Modal */}
