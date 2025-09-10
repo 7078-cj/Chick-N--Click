@@ -68,12 +68,23 @@ class CartItemController extends Controller  implements HasMiddleware
         ]);
     }
 
-    public function removeToCart(Request $request, $foodId){
-
+   public function removeToCart(Request $request, $foodId)
+    {
         $user = $request->user();
 
-        $user->Cart()->detach($foodId);
+       
+        $cartItem = $user->cartItems()->where('food_id', $foodId)->first();
 
-        return ["removed_to_cart" => 'Food removed to cart!'];
+        if (!$cartItem) {
+            return response()->json([
+                'message' => 'Food not found in cart.'
+            ], 404);
+        }
+
+        $cartItem->delete();
+
+        return response()->json([
+            'message' => 'Food removed from cart!'
+        ]);
     }
 }
