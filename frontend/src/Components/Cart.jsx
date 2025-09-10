@@ -121,6 +121,7 @@ export default function Cart() {
 
   return (
     <div className="space-y-4">
+      <h1>Total: {total}</h1>
       {cart.length > 0 ? (
         cart.map((item) => (
           <CartItemCard
