@@ -3,8 +3,10 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\FoodController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -22,5 +24,7 @@ Route::post('/logout',[AuthController::class, 'logout'])->middleware('auth:sanct
 Route::get('/cart', [CartItemController::class, 'userCart']);
 Route::post('/cart/add/{foodId}', [CartItemController::class, 'addToCart']);
 Route::delete('/cart/remove/{foodId}', [CartItemController::class, 'removeToCart']);
+
+Route::post('/order/place', [OrderController::class, 'placeOrder'])->middleware('auth:sanctum');
 
 Route::apiResource('foods', FoodController::class);
