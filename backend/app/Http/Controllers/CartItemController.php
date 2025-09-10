@@ -59,10 +59,6 @@ class CartItemController extends Controller  implements HasMiddleware
         $total = $cartData->sum('subtotal');
 
         return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-            ],
             'cart' => $cartData,
             'total' => $total,
         ]);
