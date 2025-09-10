@@ -13,6 +13,7 @@ export function AuthProvider({children}) {
     );
 
     const [user, setUser] = useState();
+    const [fetchingUser, SetFetchingUser] = useState(false)
 
     const nav = useNavigate()
 
@@ -63,31 +64,49 @@ export function AuthProvider({children}) {
        
     }
 
-    const getUserDetails =  async () => {
-        if (token){
-            const result = await fetch(url + '/api/user', {   
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                }
-            })
+    const getUserDetails = async () => {
         
-         if (result.ok) {
+
+        if (token) {
+            SetFetchingUser(true);
+            try {
+            const result = await fetch(url + "/api/user", {
+                headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+                },
+            })
+
+            if (result.ok) {
                 const data = await result.json();
                 setUser(data);
-                if (data.role == "admin"){
-                    nav('/admin')
-                }else{
-                    nav('/')
+                SetFetchingUser(false);
+
+                
+                if (window.location.pathname === "/login") {
+                    if (data.role === "admin") {
+                        nav("/admin");
+                    } else {
+                        nav("/");
+                    }
                 }
-            }
-        
-        else {
+
+                
+            } else {
                 console.error("user fetch failed");
+                setUser(null)
+                nav("/login")
             }
+            } catch (err) {
+            console.error("Error fetching user", err)
+            setUser(null)
+            nav("/login")
+            }
+        } else {
+            setUser(null);
+            nav("/login"); 
         }
-        
-    }
+        };
 
 
     useEffect(()=>{
@@ -99,6 +118,7 @@ export function AuthProvider({children}) {
         logOut:logoutUser,
         user:user,
         token:token,
+        fetchingUser:fetchingUser
        
         
 

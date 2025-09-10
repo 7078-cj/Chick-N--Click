@@ -22,10 +22,10 @@ export default function CartItemCard({ item, url, onUpdate, onRemove }) {
       if (!res.ok) throw new Error("Failed to update quantity");
       const data = await res.json();
       onUpdate(item.food_id, quantity);
-      alert(data.message || "Quantity updated!");
+      
     } catch (err) {
       console.error(err);
-      alert("Error updating quantity.");
+     
     }
   };
 

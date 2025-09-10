@@ -27,7 +27,7 @@ export default function Cart() {
       setTotal(data.total || 0);
     } catch (err) {
       console.error(err);
-      alert("Error loading cart.");
+      
     } finally {
       setLoading(false);
     }

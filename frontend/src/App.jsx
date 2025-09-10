@@ -13,6 +13,8 @@ import PrivateRoutes from './Contexts/PrivateRoutes'
 import { FoodProvider } from './Contexts/FoodProvider'
 import Admin from './Pages/Admin'
 import Unauthorized from './Pages/Unauthorized'
+import Loading from './Pages/Loading'
+import Cart from './Pages/Cart'
 
 function App() {
   
@@ -31,12 +33,14 @@ function App() {
                 
               <Route element={<PrivateRoutes allowedRoles={["user"]} />} >
                 <Route path="/" element={<Home />} />
+                <Route path="/cart" element={<Cart />} />
               </Route>
 
               <Route element={<PrivateRoutes allowedRoles={["admin"]} />} >
                 <Route path="/admin" element={<Admin />} />
               </Route>
 
+              <Route path="/loading" element={<Loading />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
 
               
