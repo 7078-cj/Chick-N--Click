@@ -9,9 +9,19 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class OrderController extends Controller
+class OrderController extends Controller implements HasMiddleware
 {
+
+    
+      public static function middleware()
+    {
+        return [
+            new Middleware('auth:sanctum')
+        ];
+    }
    public function placeOrder(Request $request)
     {
         $user = $request->user();
@@ -71,6 +81,49 @@ class OrderController extends Controller
         return response()->json([
             'orders' => $orders
         ], 200);
+    }
+
+     /**
+     * Cancel order if still pending
+     */
+    public function cancelOrder(Request $request, $orderId)
+    {
+        $user = $request->user();
+        $order = $user->Orders()->where('id', $orderId)->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        if ($order->status !== 'pending') {
+            return response()->json(['message' => 'Order cannot be cancelled'], 400);
+        }
+
+        $order->status = 'cancelled';
+        $order->save();
+
+        return response()->json(['message' => 'Order cancelled successfully', 'order' => $order], 200);
+    }
+
+    /**
+     * Admin updates order status
+     */
+    public function updateOrderStatus(Request $request, $orderId)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,approved,declined,completed'
+        ]);
+
+        $order = Order::find($orderId);
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        $order->status = $request->status;
+        $order->save();
+
+        return response()->json(['message' => 'Order status updated', 'order' => $order], 200);
     }
 
 }
