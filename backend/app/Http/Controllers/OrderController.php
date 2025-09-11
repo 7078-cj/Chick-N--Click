@@ -126,4 +126,23 @@ class OrderController extends Controller implements HasMiddleware
         return response()->json(['message' => 'Order status updated', 'order' => $order], 200);
     }
 
+    public function allOrders(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user && $user->role === "admin") {
+            $all_orders = Order::with(['items.food', 'user'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'orders' => $all_orders
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'Unauthorized'
+        ], 403);
+    }
+
 }

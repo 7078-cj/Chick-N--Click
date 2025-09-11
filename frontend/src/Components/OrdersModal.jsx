@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Modal, Loader, Text, Card, Image } from "@mantine/core";
+import { Modal, Loader, Text, Card, Image, Button } from "@mantine/core";
 import AuthContext from "../Contexts/AuthContext";
 
 export default function OrdersModal({ opened, onClose }) {
@@ -12,7 +12,6 @@ export default function OrdersModal({ opened, onClose }) {
     try {
       setLoading(true);
       const res = await fetch(`${url}/api/orders`, {
-        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -30,6 +29,31 @@ export default function OrdersModal({ opened, onClose }) {
     }
   };
 
+  const cancelOrder = async (orderId) => {
+    if (!confirm("Are you sure you want to cancel this order?")) return;
+
+    try {
+      const res = await fetch(`${url}/api/order/${orderId}/cancel`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Failed to cancel order");
+
+      // Refresh orders after cancellation
+      fetchOrders();
+      alert("Order cancelled successfully!");
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
+
   useEffect(() => {
     if (opened) {
       fetchOrders();
@@ -44,9 +68,20 @@ export default function OrdersModal({ opened, onClose }) {
         <div className="space-y-4">
           {orders.map((order) => (
             <Card key={order.id} shadow="sm" padding="lg" radius="md" withBorder>
-              <Text fw={600}>
-                Order #{order.id} - {order.status}
-              </Text>
+              <div className="flex justify-between items-center">
+                <Text fw={600}>
+                  Order #{order.id} - {order.status}
+                </Text>
+                {order.status === "pending" && (
+                  <Button
+                    color="red"
+                    size="xs"
+                    onClick={() => cancelOrder(order.id)}
+                  >
+                    Cancel Order
+                  </Button>
+                )}
+              </div>
               <Text size="sm" c="dimmed">
                 Placed on {new Date(order.created_at).toLocaleString()}
               </Text>
@@ -60,22 +95,25 @@ export default function OrdersModal({ opened, onClose }) {
                     key={item.id}
                     className="flex items-center gap-3 border p-2 rounded-md"
                   >
-
                     <Image
-                        src={
-                            item.food.thumbnail
-                            ? `${url}/storage/${item.food.thumbnail}`
-                            : "https://via.placeholder.com/100x100?text=No+Image"
-                        }
-                        height={200}
-                        className="object-cover w-full"
+                      src={
+                        item.food.thumbnail
+                          ? `${url}/storage/${item.food.thumbnail}`
+                          : "https://via.placeholder.com/100x100?text=No+Image"
+                      }
+                      height={80}
+                      width={80}
+                      fit="contain"
+                      className="rounded-md"
                     />
                     <div>
                       <Text fw={500}>{item.food.food_name}</Text>
                       <Text size="sm" c="dimmed">
                         Qty: {item.quantity} × ${item.price}
                       </Text>
-                      <Text fw={600}>Subtotal: ${item.quantity * item.price}</Text>
+                      <Text fw={600}>
+                        Subtotal: ${item.quantity * item.price}
+                      </Text>
                     </div>
                   </div>
                 ))}
