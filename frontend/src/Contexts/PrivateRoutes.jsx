@@ -13,13 +13,15 @@ function PrivateRoutes({ allowedRoles }) {
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }else{
+     return allowedRoles.includes(user.role) ? (
+    <Outlet />
+    ) : (
+      <Navigate to="/unauthorized" replace />
+    );
   }
 
-  return allowedRoles.includes(user.role) ? (
-    <Outlet />
-  ) : (
-    <Navigate to="/unauthorized" replace />
-  );
+ 
 }
 
 export default PrivateRoutes;

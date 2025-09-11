@@ -24,8 +24,8 @@ function App() {
   return (
     <>
       
-      <Router>
-        <AuthProvider>
+     
+      
           <FoodProvider>
             <Routes>
               <Route path="/login" element={<Login />} />
@@ -47,8 +47,8 @@ function App() {
                 
             </Routes>
           </FoodProvider>
-        </AuthProvider>
-      </Router>
+        
+      
       
       
     </>

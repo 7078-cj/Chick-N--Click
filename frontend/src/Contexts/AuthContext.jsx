@@ -42,8 +42,8 @@ export function AuthProvider({children}) {
                 setUser(data.user);
 
                 localStorage.setItem('token', JSON.stringify(data.token));
-               
-                if (user.role == "admin"){
+                
+                if (await user.role == "admin"){
                     nav('/admin')
                 }else{
                     nav('/')
