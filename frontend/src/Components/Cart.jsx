@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Text, Loader } from "@mantine/core";
+import { Text, Loader, Button } from "@mantine/core";
 import AuthContext from "../Contexts/AuthContext";
 import CartItemCard from "./CartItemCard";
 
@@ -8,6 +8,7 @@ export default function Cart() {
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [placingOrder, setPlacingOrder] = useState(false);
   const url = import.meta.env.VITE_API_URL;
 
   
@@ -15,9 +16,7 @@ export default function Cart() {
     try {
       setLoading(true);
       const res = await fetch(`${url}/api/cart`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
       });
 
@@ -36,7 +35,7 @@ export default function Cart() {
     fetchCart();
   }, []);
 
-  
+
   const updateCartItem = async (foodId, newQty) => {
     try {
       const res = await fetch(`${url}/api/cart/${foodId}`, {
@@ -49,10 +48,7 @@ export default function Cart() {
       });
 
       if (!res.ok) throw new Error("Failed to update cart item");
-
       const data = await res.json();
-
-     
       setCart(data.cart || []);
       setTotal(data.total || 0);
     } catch (err) {
@@ -60,20 +56,16 @@ export default function Cart() {
     }
   };
 
- 
+  
   const removeCartItem = async (foodId) => {
     try {
       const res = await fetch(`${url}/api/cart/${foodId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!res.ok) throw new Error("Failed to remove cart item");
-
       const data = await res.json();
-
       setCart(data.cart || []);
       setTotal(data.total || 0);
     } catch (err) {
@@ -83,7 +75,6 @@ export default function Cart() {
 
   
   const handleUpdate = (foodId, newQty) => {
-  
     setCart((prev) =>
       prev.map((item) =>
         item.food_id === foodId
@@ -98,23 +89,49 @@ export default function Cart() {
         0
       )
     );
-
-   
     updateCartItem(foodId, newQty);
   };
 
-  
+
   const handleRemove = (foodId) => {
-   
     setCart((prev) => prev.filter((item) => item.food_id !== foodId));
     setTotal((prev) =>
       cart
         .filter((i) => i.food_id !== foodId)
         .reduce((sum, i) => sum + i.subtotal, 0)
     );
-
-   
     removeCartItem(foodId);
+  };
+
+
+  const placeOrder = async () => {
+    if (cart.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+
+    try {
+      setPlacingOrder(true);
+      const res = await fetch(`${url}/api/order/place`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Failed to place order");
+      const data = await res.json();
+
+      alert(data.message || "Order placed successfully!");
+      setCart([]); // clear UI cart
+      setTotal(0);
+    } catch (err) {
+      console.error(err);
+      alert("Error placing order.");
+    } finally {
+      setPlacingOrder(false);
+    }
   };
 
   if (loading) return <Loader />;
@@ -122,16 +139,30 @@ export default function Cart() {
   return (
     <div className="space-y-4">
       <h1>Total: {total}</h1>
+
       {cart.length > 0 ? (
-        cart.map((item) => (
-          <CartItemCard
-            key={item.food_id}
-            item={item}
-            url={url}
-            onUpdate={handleUpdate}
-            onRemove={handleRemove}
-          />
-        ))
+        <>
+          {cart.map((item) => (
+            <CartItemCard
+              key={item.food_id}
+              item={item}
+              url={url}
+              onUpdate={handleUpdate}
+              onRemove={handleRemove}
+            />
+          ))}
+
+          {/* Place Order Button */}
+          <Button
+            fullWidth
+            color="green"
+            mt="md"
+            onClick={placeOrder}
+            loading={placingOrder}
+          >
+            Place Order
+          </Button>
+        </>
       ) : (
         <Text>No items in cart</Text>
       )}

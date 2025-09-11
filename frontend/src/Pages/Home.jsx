@@ -3,6 +3,7 @@ import FoodList from "../Components/FoodList";
 import FoodForm from "../Components/FoodForm";
 import CartModal from "../Components/CartModal";
 import { Container, Title, Grid, Card } from "@mantine/core";
+import Order from "../Components/Order";
 
 function Home() {
   return (
@@ -26,6 +27,7 @@ function Home() {
        
         <Grid.Col span={{ base: 12, md: 4 }}>
           <CartModal />
+          <Order/>
         </Grid.Col>
       </Grid>
     </Container>

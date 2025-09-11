@@ -26,5 +26,6 @@ Route::post('/cart/add/{foodId}', [CartItemController::class, 'addToCart']);
 Route::delete('/cart/remove/{foodId}', [CartItemController::class, 'removeToCart']);
 
 Route::post('/order/place', [OrderController::class, 'placeOrder'])->middleware('auth:sanctum');
+Route::post('/orders', [OrderController::class, 'getUserOrder'])->middleware('auth:sanctum');
 
 Route::apiResource('foods', FoodController::class);

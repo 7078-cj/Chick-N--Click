@@ -56,4 +56,21 @@ class OrderController extends Controller
             return response()->json(['message' => 'Failed to place order', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function getUserOrder(Request $request)
+    {
+        $user = $request->user();
+
+        
+        $orders = $user->Orders()->with('items.food')->orderBy('created_at', 'desc')->get();
+
+        if ($orders->isEmpty()) {
+            return response()->json(['message' => 'No orders found'], 404);
+        }
+
+        return response()->json([
+            'orders' => $orders
+        ], 200);
+    }
+
 }
