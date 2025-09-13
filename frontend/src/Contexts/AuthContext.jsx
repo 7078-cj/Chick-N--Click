@@ -36,14 +36,15 @@ export function AuthProvider({children}) {
 
             if (response.ok) {
                 const data = await response.json();
-
-                // Save token & user properly
-                setToken(data.token);
-                setUser(data.user);
+               
+               
+                await setToken(data.token);
+                await setUser(data.user);
+                
 
                 localStorage.setItem('token', JSON.stringify(data.token));
                 
-                if (await user.role == "admin"){
+                if (data.user.role == "admin"){
                     nav('/admin')
                 }else{
                     nav('/')
