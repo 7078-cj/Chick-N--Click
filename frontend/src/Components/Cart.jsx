@@ -47,7 +47,7 @@ export default function Cart() {
         body: JSON.stringify({ quantity: newQty }),
       });
 
-      if (!res.ok) throw new Error("Failed to update cart item");
+     
       const data = await res.json();
       setCart(data.cart || []);
       setTotal(data.total || 0);
@@ -64,7 +64,7 @@ export default function Cart() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) throw new Error("Failed to remove cart item");
+      
       const data = await res.json();
       setCart(data.cart || []);
       setTotal(data.total || 0);
@@ -120,10 +120,10 @@ export default function Cart() {
         credentials: "include",
       });
 
-      if (!res.ok) throw new Error("Failed to place order");
+     
       const data = await res.json();
 
-      alert(data.message || "Order placed successfully!");
+      
       setCart([]); // clear UI cart
       setTotal(0);
     } catch (err) {

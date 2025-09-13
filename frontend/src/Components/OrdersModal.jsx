@@ -45,9 +45,9 @@ export default function OrdersModal({ opened, onClose }) {
 
       if (!res.ok) throw new Error(data.message || "Failed to cancel order");
 
-      // Refresh orders after cancellation
+      
       fetchOrders();
-      alert("Order cancelled successfully!");
+     
     } catch (err) {
       console.error(err);
       alert(err.message);

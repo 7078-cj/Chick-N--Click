@@ -30,7 +30,7 @@ export default function CartItemCard({ item, url, onUpdate, onRemove }) {
         body: JSON.stringify({ quantity: newQty }),
       });
 
-      if (!res.ok) throw new Error("Failed to update quantity");
+     
       await res.json();
 
     
@@ -53,11 +53,11 @@ export default function CartItemCard({ item, url, onUpdate, onRemove }) {
         },
       });
 
-      if (!res.ok) throw new Error("Failed to remove item");
+     
       const data = await res.json();
 
       onRemove(item.food_id);
-      alert(data.message || "Item removed!");
+      
     } catch (err) {
       console.error(err);
       alert("Error removing item.");

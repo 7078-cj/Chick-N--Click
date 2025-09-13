@@ -78,6 +78,8 @@ class FoodController extends Controller implements HasMiddleware
         }
 
         $food->update($validated);
+
+        return $food;
     }
 
     /**

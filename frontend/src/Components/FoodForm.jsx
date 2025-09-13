@@ -16,7 +16,7 @@ import { FoodContext } from "../Contexts/FoodProvider";
 
 
 export default function FoodForm({ food = null, onSuccess }) {
-  const { setFoods } = useContext(FoodContext);
+  const { setFoods,foods } = useContext(FoodContext);
   let { token } = useContext(AuthContext)
   const [formData, setFormData] = useState({
     food_name: "",
@@ -80,8 +80,8 @@ export default function FoodForm({ food = null, onSuccess }) {
         throw new Error("Failed to save food");
       }
 
-      alert(food ? "Food updated successfully!" : "Food created successfully!");
-      if (onSuccess) onSuccess(); // callback to refresh list or close modal
+    
+      if (onSuccess) onSuccess(); 
 
       if (!food) {
         setFormData({
@@ -95,7 +95,19 @@ export default function FoodForm({ food = null, onSuccess }) {
       }
       if(res){
         food = await res.json()
-        setFoods((prev) => [...prev, food])
+        console.log(food)
+        setFoods((prev) => {
+            const exists = prev.find((f) => f.id === food.id);
+
+            if (exists) {
+             
+              return prev.map((f) => (f.id === food.id ? food : f));
+            } else {
+            
+              return [...prev, food];
+            }
+          });
+          console.log(foods)
       }
     } catch (err) {
       console.error(err);
@@ -168,7 +180,7 @@ export default function FoodForm({ food = null, onSuccess }) {
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
-                  available: e.currentTarget.checked,
+                  available: e.target.checked,
                 }))
               }
             />

@@ -11,7 +11,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
 
   if (!food) return null;
 
-  // 🔹 Delete food
+ 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this food?")) return;
 
@@ -24,8 +24,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!res.ok) throw new Error("Failed to delete food");
-      alert("Food deleted successfully!");
+      
       if (onDelete) onDelete(food.id);
     } catch (err) {
       console.error(err);
@@ -33,7 +32,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
     }
   };
 
-  // 🔹 Add to cart
+  
   const handleAddToCart = async () => {
     try {
       const res = await fetch(`${url}/api/cart/add/${food.id}`, {
@@ -46,9 +45,8 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
         body: JSON.stringify({ quantity }),
       });
 
-      if (!res.ok) throw new Error("Failed to add to cart");
+     
       const data = await res.json();
-      alert(data.add_to_cart || "Added to cart!");
       setCartOpened(false);
     } catch (err) {
       console.error(err);
