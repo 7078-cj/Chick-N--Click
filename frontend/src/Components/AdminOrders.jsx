@@ -185,9 +185,6 @@ function AdminOrders() {
 
               {/* Actions */}
               <div className="flex justify-between mt-4 items-center">
-                <Button size="xs" variant="light" color="blue">
-                  See Details
-                </Button>
 
                 {/* If cancelled, disable updates */}
                 {order.status === "cancelled" ? (
