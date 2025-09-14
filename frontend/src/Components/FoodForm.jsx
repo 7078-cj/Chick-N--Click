@@ -10,26 +10,45 @@ import {
   FileInput,
   Stack,
   Image,
+  MultiSelect,
 } from "@mantine/core";
 import AuthContext from "../Contexts/AuthContext";
 import { FoodContext } from "../Contexts/FoodProvider";
 
-
-export default function FoodForm({ food = null, onSuccess }) {
-  const { setFoods,foods } = useContext(FoodContext);
-  let { token } = useContext(AuthContext)
+export default function FoodForm({ food = null, onSuccess, onClose }) {
+  const { setFoods } = useContext(FoodContext);
+  const { token } = useContext(AuthContext);
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     food_name: "",
     price: 0,
     available: true,
     description: "",
     thumbnail: null,
+    categories: [],
   });
 
   const [preview, setPreview] = useState(null);
-  const preUrl = import.meta.env.VITE_API_URL
+  const preUrl = import.meta.env.VITE_API_URL;
 
-  // Load existing food if editing
+  // Load categories
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${preUrl}/api/category`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setCategories(
+          data.map((cat) => ({ value: cat.id.toString(), label: cat.name }))
+        );
+      } catch (err) {
+        console.error("Failed to load categories", err);
+      }
+    })();
+  }, []);
+
+  // Load food if editing
   useEffect(() => {
     if (food) {
       setFormData({
@@ -38,6 +57,7 @@ export default function FoodForm({ food = null, onSuccess }) {
         available: food.available ?? true,
         description: food.description || "",
         thumbnail: null,
+        categories: food.categories?.map((c) => c.id.toString()) || [],
       });
 
       if (food.thumbnail) {
@@ -59,6 +79,7 @@ export default function FoodForm({ food = null, onSuccess }) {
     data.append("price", formData.price);
     data.append("available", formData.available ? 1 : 0);
     data.append("description", formData.description);
+    formData.categories.forEach((catId) => data.append("categories[]", catId));
 
     const url = food
       ? `${preUrl}/api/foods/${food.id}`
@@ -70,18 +91,21 @@ export default function FoodForm({ food = null, onSuccess }) {
       const res = await fetch(url, {
         method: "POST",
         body: data,
-        credentials: "include",
-        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        console.error(errorData);
-        throw new Error("Failed to save food");
-      }
+      if (!res.ok) throw new Error("Failed to save food");
+      const savedFood = await res.json();
 
-    
-      if (onSuccess) onSuccess(); 
+      // Update provider state
+      setFoods((prev) =>
+        food
+          ? prev.map((f) => (f.id === savedFood.id ? savedFood : f))
+          : [...prev, savedFood.food]
+      );
+
+      if (onSuccess) onSuccess();
+      if (onClose) onClose();
 
       if (!food) {
         setFormData({
@@ -90,42 +114,26 @@ export default function FoodForm({ food = null, onSuccess }) {
           available: true,
           description: "",
           thumbnail: null,
+          categories: [],
         });
         setPreview(null);
-      }
-      if(res){
-        food = await res.json()
-        console.log(food)
-        setFoods((prev) => {
-            const exists = prev.find((f) => f.id === food.id);
-
-            if (exists) {
-             
-              return prev.map((f) => (f.id === food.id ? food : f));
-            } else {
-            
-              return [...prev, food];
-            }
-          });
-          console.log(foods)
       }
     } catch (err) {
       console.error(err);
       alert("Something went wrong.");
     }
   };
-  const url = import.meta.env.VITE_API_URL;
 
   return (
-    <div className="max-w-md mx-auto mt-10">
+    <div className="max-w-md mx-auto mt-6">
       <Card shadow="lg" padding="xl" radius="md" withBorder>
-        <Text size="xl" weight={700} align="center" mb="md">
+        <Text size="xl" fw={700} align="center" mb="md">
           {food ? "Update Food" : "Create Food"}
         </Text>
 
         <form onSubmit={handleSubmit}>
-          <Stack spacing="md">
-            {/* Thumbnail Input */}
+          <Stack gap="md">
+            {/* Thumbnail */}
             <FileInput
               label="Thumbnail"
               placeholder="Choose an image"
@@ -135,22 +143,12 @@ export default function FoodForm({ food = null, onSuccess }) {
                 setPreview(file ? URL.createObjectURL(file) : null);
               }}
             />
+            {preview && (
+              <div className="w-[200px] h-[200px] mx-auto overflow-hidden rounded-lg border shadow">
+                <Image src={preview} height={200} className="object-cover" />
+              </div>
+            )}
 
-            {/* Image Preview */}
-            {(preview || (food && food.thumbnail)) && (
-                <div className="w-[200px] h-[200px] mx-auto mt-2 overflow-hidden rounded-lg border shadow-sm">
-                    <Image
-                    src={
-                    food
-                        ? `${url}/storage/${food.thumbnail}`
-                        : preview
-                    }
-                    height={200}
-                    className="object-cover w-full"
-                />
-                </div>
-                )}
-            {/* Food Name */}
             <TextInput
               label="Food Name"
               placeholder="Enter food name"
@@ -161,19 +159,16 @@ export default function FoodForm({ food = null, onSuccess }) {
               }
             />
 
-            {/* Price */}
             <NumberInput
               label="Price"
-              placeholder="Enter price"
               required
               min={0}
               value={formData.price}
-              onChange={(value) =>
-                setFormData((prev) => ({ ...prev, price: value ?? 0 }))
+              onChange={(val) =>
+                setFormData((prev) => ({ ...prev, price: val ?? 0 }))
               }
             />
 
-            {/* Available */}
             <Checkbox
               label="Available"
               checked={formData.available}
@@ -185,10 +180,8 @@ export default function FoodForm({ food = null, onSuccess }) {
               }
             />
 
-            {/* Description */}
             <Textarea
               label="Description"
-              placeholder="Enter description"
               required
               value={formData.description}
               onChange={(e) =>
@@ -199,7 +192,17 @@ export default function FoodForm({ food = null, onSuccess }) {
               }
             />
 
-            {/* Submit Button */}
+            {/* Categories */}
+            <MultiSelect
+              data={categories}
+              label="Categories"
+              placeholder="Select categories"
+              value={formData.categories}
+              onChange={(value) =>
+                setFormData((prev) => ({ ...prev, categories: value }))
+              }
+            />
+
             <Button type="submit" fullWidth color="blue" radius="md">
               {food ? "Update Food" : "Create Food"}
             </Button>

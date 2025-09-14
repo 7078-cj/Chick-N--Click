@@ -32,11 +32,11 @@ export default function FoodList() {
   };
 
   const handleUpdate = (updatedFood) => {
+    if (!updatedFood?.id) return;
     setFoods((prev) =>
       prev.map((f) => (f.id === updatedFood.id ? updatedFood : f))
     );
   };
-
   return (
     <div className="flex flex-wrap gap-6 justify-center mt-10">
       {foods.map((food) => (

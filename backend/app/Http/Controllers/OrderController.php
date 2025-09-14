@@ -72,7 +72,7 @@ class OrderController extends Controller implements HasMiddleware
         $user = $request->user();
 
         
-        $orders = $user->Orders()->with('items.food')->orderBy('created_at', 'desc')->get();
+        $orders = $user->Orders()->with('items.food','items.food.categories')->orderBy('created_at', 'desc')->get();
 
         if ($orders->isEmpty()) {
             return response()->json(['message' => 'No orders found'], 404);
@@ -131,7 +131,7 @@ class OrderController extends Controller implements HasMiddleware
         $user = $request->user();
 
         if ($user && $user->role === "admin") {
-            $all_orders = Order::with(['items.food', 'user'])
+            $all_orders = Order::with(['items.food', 'user','items.food.categories'])
                 ->orderBy('created_at', 'desc')
                 ->get();
 
