@@ -116,7 +116,7 @@ function AdminOrders() {
       {loading ? (
         <Loader />
       ) : filteredOrders.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
           {filteredOrders.map((order) => (
             <Card
               key={order.id}
@@ -124,7 +124,7 @@ function AdminOrders() {
               padding="lg"
               radius="md"
               withBorder
-              className="hover:shadow-lg transition"
+              className="hover:shadow-lg transition h-auto"
             >
               {/* Header */}
               <div className="flex justify-between items-center mb-2">
@@ -142,7 +142,7 @@ function AdminOrders() {
               </Text>
 
               {/* Items */}
-              <div className="mt-3 space-y-2 max-h-32 overflow-y-auto pr-1">
+              <div className="mt-3 space-y-2">
                 {order.items.map((item) => (
                   <div
                     key={item.id}
@@ -150,19 +150,18 @@ function AdminOrders() {
                   >
                     {/* Thumbnail */}
                     <div>
-                        <Image
-                            src={
-                                item.food.thumbnail
-                                ? `${url}/storage/${item.food.thumbnail}`
-                                : "https://via.placeholder.com/40x40?text=No+Img"
-                            }
-                            
-                            fit="cover"
-                            radius="sm"
-                            className="h-20 w-20 object-cover"
-                            />
+                      <Image
+                        src={
+                          item.food.thumbnail
+                            ? `${url}/storage/${item.food.thumbnail}`
+                            : "https://via.placeholder.com/40x40?text=No+Img"
+                        }
+                        fit="cover"
+                        radius="sm"
+                        className="h-20 w-20 object-cover"
+                      />
                     </div>
-                    
+
                     {/* Food name + qty */}
                     <div className="flex-1 px-2">
                       <Text size="sm" fw={500}>
@@ -185,8 +184,6 @@ function AdminOrders() {
 
               {/* Actions */}
               <div className="flex justify-between mt-4 items-center">
-
-                {/* If cancelled, disable updates */}
                 {order.status === "cancelled" ? (
                   <Button size="xs" color="gray" disabled>
                     Cancelled

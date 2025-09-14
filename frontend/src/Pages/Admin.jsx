@@ -16,7 +16,7 @@ function Admin() {
         </p>
       </Card>
 
-      <Tabs defaultValue="foods" variant="pills" radius="md">
+      <Tabs defaultValue="orders" variant="pills" radius="md">
         <Tabs.List>
           <Tabs.Tab value="foods">🍔 Food Management</Tabs.Tab>
           <Tabs.Tab value="categories">📂 Categories</Tabs.Tab>
