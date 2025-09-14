@@ -1,29 +1,16 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Card, Text, Button, TextInput, Group } from "@mantine/core";
 import AuthContext from "../Contexts/AuthContext";
+import { FoodContext } from "../Contexts/FoodProvider";
 
 export default function CategoryList() {
-  const { token } = useContext(AuthContext);
-  const [categories, setCategories] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [editName, setEditName] = useState("");
-  const preUrl = import.meta.env.VITE_API_URL;
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch(`${preUrl}/api/category`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setCategories(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    const { token } = useContext(AuthContext);
+ 
+    const [editingId, setEditingId] = useState(null);
+    const [editName, setEditName] = useState("");
+    const preUrl = import.meta.env.VITE_API_URL;
+    const { categories } = useContext(FoodContext);
+  
 
   const handleDelete = async (id) => {
     if (!confirm("Delete this category?")) return;

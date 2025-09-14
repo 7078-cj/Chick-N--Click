@@ -16,9 +16,9 @@ import AuthContext from "../Contexts/AuthContext";
 import { FoodContext } from "../Contexts/FoodProvider";
 
 export default function FoodForm({ food = null, onSuccess, onClose }) {
-  const { setFoods } = useContext(FoodContext);
+  const { setFoods,categories } = useContext(FoodContext);
   const { token } = useContext(AuthContext);
-  const [categories, setCategories] = useState([]);
+  
   const [formData, setFormData] = useState({
     food_name: "",
     price: 0,
@@ -31,22 +31,7 @@ export default function FoodForm({ food = null, onSuccess, onClose }) {
   const [preview, setPreview] = useState(null);
   const preUrl = import.meta.env.VITE_API_URL;
 
-  // Load categories
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch(`${preUrl}/api/category`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        setCategories(
-          data.map((cat) => ({ value: cat.id.toString(), label: cat.name }))
-        );
-      } catch (err) {
-        console.error("Failed to load categories", err);
-      }
-    })();
-  }, []);
+  
 
   // Load food if editing
   useEffect(() => {
