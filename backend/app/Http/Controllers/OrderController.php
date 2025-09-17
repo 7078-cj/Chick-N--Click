@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Http;
 
 class OrderController extends Controller implements HasMiddleware
 {
@@ -59,6 +60,12 @@ class OrderController extends Controller implements HasMiddleware
             CartItem::where('user_id', $user->id)->delete();
 
             DB::commit();
+
+            Http::post("http://127.0.0.1:8000/broadcast/order", [
+                'event' => 'create',
+                'order' => $order->load('items'),
+            ]);
+
             return response()->json(['message' => 'Order placed successfully', 'order' => $order->load('items')], 201);
 
         } catch (\Exception $e) {
@@ -102,6 +109,11 @@ class OrderController extends Controller implements HasMiddleware
         $order->status = 'cancelled';
         $order->save();
 
+        Http::post("http://127.0.0.1:8000/broadcast/order", [
+            'event' => 'cancelled',
+            'order' => $order->load('items'),
+        ]);
+
         return response()->json(['message' => 'Order cancelled successfully', 'order' => $order], 200);
     }
 
@@ -110,6 +122,7 @@ class OrderController extends Controller implements HasMiddleware
      */
     public function updateOrderStatus(Request $request, $orderId)
     {
+        
         $request->validate([
             'status' => 'required|in:pending,approved,declined,completed'
         ]);
@@ -122,6 +135,12 @@ class OrderController extends Controller implements HasMiddleware
 
         $order->status = $request->status;
         $order->save();
+
+        Http::post("http://127.0.0.1:8000/broadcast/order", [
+            'event' => 'update',
+            'user_id' => $order->user->id,
+            'order' => $order->load('items'),
+        ]);
 
         return response()->json(['message' => 'Order status updated', 'order' => $order], 200);
     }

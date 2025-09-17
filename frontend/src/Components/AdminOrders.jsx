@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import AuthContext from "../Contexts/AuthContext";
 import {
   Card,
@@ -20,7 +20,11 @@ function AdminOrders() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const url = import.meta.env.VITE_API_URL;
+  const wsUrl = import.meta.env.VITE_WS_URL; // e.g. ws://127.0.0.1:8001
 
+  const wsRef = useRef(null);
+
+  // Fetch all orders initially
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -33,7 +37,7 @@ function AdminOrders() {
 
       if (!res.ok) throw new Error("Failed to fetch orders");
       const data = await res.json();
-      setOrders(data.orders || data || []);
+      setOrders(data.orders || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -41,6 +45,7 @@ function AdminOrders() {
     }
   };
 
+  // Update order status manually
   const updateStatus = async (orderId, status) => {
     try {
       const res = await fetch(`${url}/api/order/${orderId}/status`, {
@@ -55,7 +60,7 @@ function AdminOrders() {
       if (!res.ok) throw new Error("Failed to update status");
       const data = await res.json();
 
-      // Update UI instantly
+      // Optimistic UI update
       setOrders((prev) =>
         prev.map((o) =>
           o.id === orderId ? { ...o, status: data.order.status } : o
@@ -67,9 +72,56 @@ function AdminOrders() {
     }
   };
 
+  // Handle WebSocket events
+  const handleOrderEvent = (msg) => {
+    const { event, order } = msg;
+
+    setOrders((prev) => {
+      switch (event) {
+        case "create":
+          return [order, ...prev]; // add new order at top
+        case "cancelled":
+          return prev.map((o) =>
+            o.id === order.id ? { ...o, status: "cancelled" } : o
+          );
+        default:
+          return prev;
+      }
+    });
+  };
+
+  // WebSocket setup
   useEffect(() => {
     fetchOrders();
-  }, []);
+
+    if (!token) return;
+
+    const ws = new WebSocket(`${wsUrl}/ws/order/${Date.now()}`);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log("✅ Connected to order WebSocket");
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "order") {
+          handleOrderEvent(msg);
+        }
+      } catch (err) {
+        console.error("WS error", err);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log("❌ Order WebSocket closed");
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [token]);
 
   const statusColors = {
     pending: "yellow",
@@ -126,7 +178,6 @@ function AdminOrders() {
               withBorder
               className="hover:shadow-lg transition h-auto"
             >
-              {/* Header */}
               <div className="flex justify-between items-center mb-2">
                 <Text fw={600}>Order #{order.id}</Text>
                 <Badge color={statusColors[order.status]} size="lg">
@@ -141,28 +192,23 @@ function AdminOrders() {
                 Customer: {order.user?.name || "Unknown"}
               </Text>
 
-              {/* Items */}
               <div className="mt-3 space-y-2">
                 {order.items.map((item) => (
                   <div
                     key={item.id}
                     className="flex items-center justify-between gap-2 border-b pb-1"
                   >
-                    {/* Thumbnail */}
-                    <div>
-                      <Image
-                        src={
-                          item.food.thumbnail
-                            ? `${url}/storage/${item.food.thumbnail}`
-                            : "https://via.placeholder.com/40x40?text=No+Img"
-                        }
-                        fit="cover"
-                        radius="sm"
-                        className="h-20 w-20 object-cover"
-                      />
-                    </div>
+                    <Image
+                      src={
+                        item.food.thumbnail
+                          ? `${url}/storage/${item.food.thumbnail}`
+                          : "https://via.placeholder.com/40x40?text=No+Img"
+                      }
+                      fit="cover"
+                      radius="sm"
+                      className="h-20 w-20 object-cover"
+                    />
 
-                    {/* Food name + qty */}
                     <div className="flex-1 px-2">
                       <Text size="sm" fw={500}>
                         {item.food.food_name}
@@ -171,18 +217,15 @@ function AdminOrders() {
                         Qty: {item.quantity}
                       </Text>
                     </div>
-                    {/* Price */}
                     <Text size="sm">${item.quantity * item.price}</Text>
                   </div>
                 ))}
               </div>
 
-              {/* Total */}
               <Text fw={700} mt="sm" className="text-right text-green-700">
                 Total: ${order.total_price}
               </Text>
 
-              {/* Actions */}
               <div className="flex justify-between mt-4 items-center">
                 {order.status === "cancelled" ? (
                   <Button size="xs" color="gray" disabled>

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Http;
 
 class FoodController extends Controller implements HasMiddleware
 {
@@ -55,6 +56,11 @@ class FoodController extends Controller implements HasMiddleware
             $food->categories()->sync($validated['categories']);
         }
 
+        Http::post("http://127.0.0.1:8000/broadcast/food", [
+            "event" => "created",
+            "food"  => $food->load('categories')
+        ]);
+
         return $food->load('categories');
     }
 
@@ -102,6 +108,11 @@ class FoodController extends Controller implements HasMiddleware
             $food->categories()->sync([]);
         }
 
+        Http::post("http://127.0.0.1:8000/broadcast/food", [
+            "event" => "updated",
+            "food"  => $food
+        ]);
+
         return $food->load('categories');
     }
 
@@ -115,7 +126,13 @@ class FoodController extends Controller implements HasMiddleware
             Storage::disk('public')->delete($food->thumbnail);
         }
 
+        $foodData = $food->load('categories');
         $food->delete();
+
+        Http::post("http://127.0.0.1:8000/broadcast/food", [
+            "event" => "deleted",
+            "food"  => $foodData
+        ]);
 
         return response()->json(['message' => 'Food deleted successfully'], 200);
     }

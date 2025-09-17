@@ -1,8 +1,24 @@
 from fastapi import WebSocket, WebSocketDisconnect, FastAPI
 from fastapi import Request
+from fastapi.middleware.cors import CORSMiddleware
 import json
+import uvicorn
+from dotenv import load_dotenv
+import os
+
 
 app = FastAPI()
+load_dotenv()
+
+origins = os.getenv("CORS_ORIGINS", "").split(",")
+
+app.add_middleware(
+    CORSMiddleware,
+     allow_origins=[origin.strip() for origin in origins if origin.strip()],
+    allow_credentials = True,
+    allow_methods=['*'],
+    allow_headers=['*']
+)
 
 class ConnectionManager:
     def __init__(self):
@@ -19,12 +35,17 @@ class ConnectionManager:
         for connection in self.active_connections:
             if connection != sender:  
                 await connection.send_text(message)
+    
+    async def send(self, message: str, sender):
+        for connection in self.active_connections:
+            if connection == sender:  
+                await connection.send_text(message)
 
 
 order_manager = ConnectionManager()
 food_manager = ConnectionManager()
 
-@app.websocket("/ws/order")
+@app.websocket('/ws/order/{client_id}')
 async def order_ws(websocket: WebSocket, client_id: int):
     await order_manager.connect(websocket)
     try:
@@ -35,7 +56,7 @@ async def order_ws(websocket: WebSocket, client_id: int):
         order_manager.disconnect(websocket)
         await order_manager.broadcast(f"Client {client_id} left", sender=websocket)
 
-@app.websocket("/ws/food")
+@app.websocket('/ws/food/{client_id}')
 async def food_ws(websocket: WebSocket, client_id: int):
     await food_manager.connect(websocket)
     try:
@@ -51,15 +72,18 @@ async def food_ws(websocket: WebSocket, client_id: int):
 async def broadcast_order(request: Request):
     data = await request.json()
     event = data.get("event", "")
-    order = data.get("order", {})  
+    order = data.get("order", {})
+    user_id = data.get("user_id", "")    
     
     payload = {
         "type": "order",
         "event": event,
         "order": order
     }
-
-    await order_manager.broadcast(json.dumps(payload))
+    if event == "update":
+        await order_manager.send(json.dumps(payload), user_id)
+    else:
+         await order_manager.broadcast(json.dumps(payload))
 
     return {"status": "ok", "broadcasted": payload}
 
@@ -78,3 +102,8 @@ async def broadcast_food(request: Request):
     await food_manager.broadcast(json.dumps(payload))
 
     return {"status": "ok", "broadcasted": payload}
+
+
+
+if __name__ == "main" :
+    uvicorn.run(app, host="0.0.0.0", port=8001)
