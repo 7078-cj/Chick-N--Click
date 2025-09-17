@@ -35,11 +35,7 @@ class ConnectionManager:
         for connection in self.active_connections:
             if connection != sender:  
                 await connection.send_text(message)
-    
-    async def send(self, message: str, sender):
-        for connection in self.active_connections:
-            if connection == sender:  
-                await connection.send_text(message)
+
 
 
 order_manager = ConnectionManager()
@@ -80,10 +76,8 @@ async def broadcast_order(request: Request):
         "event": event,
         "order": order
     }
-    if event == "update":
-        await order_manager.send(json.dumps(payload), user_id)
-    else:
-         await order_manager.broadcast(json.dumps(payload))
+    
+    await order_manager.broadcast(json.dumps(payload))
 
     return {"status": "ok", "broadcasted": payload}
 
@@ -105,5 +99,5 @@ async def broadcast_food(request: Request):
 
 
 
-if __name__ == "main" :
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)

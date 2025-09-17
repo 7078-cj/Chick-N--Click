@@ -14,7 +14,7 @@ import {
 import { IconSearch } from "@tabler/icons-react";
 
 function AdminOrders() {
-  const { token } = useContext(AuthContext);
+  const { token,user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("all");
@@ -96,7 +96,7 @@ function AdminOrders() {
 
     if (!token) return;
 
-    const ws = new WebSocket(`${wsUrl}/ws/order/${Date.now()}`);
+    const ws = new WebSocket(`${wsUrl}/ws/order/${user?.id}`);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -121,7 +121,7 @@ function AdminOrders() {
     return () => {
       ws.close();
     };
-  }, [token]);
+  }, [token,user]);
 
   const statusColors = {
     pending: "yellow",

@@ -61,9 +61,9 @@ class OrderController extends Controller implements HasMiddleware
 
             DB::commit();
 
-            Http::post("http://127.0.0.1:8000/broadcast/order", [
+            Http::post(config('services.websocket.http_url') . "/broadcast/order",[
                 'event' => 'create',
-                'order' => $order->load('items'),
+                'order' => $order->load('items.food','items.food.categories'),
             ]);
 
             return response()->json(['message' => 'Order placed successfully', 'order' => $order->load('items')], 201);
@@ -109,7 +109,7 @@ class OrderController extends Controller implements HasMiddleware
         $order->status = 'cancelled';
         $order->save();
 
-        Http::post("http://127.0.0.1:8000/broadcast/order", [
+        Http::post(config('services.websocket.http_url') ."/broadcast/order", [
             'event' => 'cancelled',
             'order' => $order->load('items'),
         ]);
@@ -136,10 +136,10 @@ class OrderController extends Controller implements HasMiddleware
         $order->status = $request->status;
         $order->save();
 
-        Http::post("http://127.0.0.1:8000/broadcast/order", [
+        Http::post(config('services.websocket.http_url') ."/broadcast/order", [
             'event' => 'update',
             'user_id' => $order->user->id,
-            'order' => $order->load('items'),
+            'order' => $order->load('items.food','items.food.categories'),
         ]);
 
         return response()->json(['message' => 'Order status updated', 'order' => $order], 200);

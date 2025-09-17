@@ -55,7 +55,7 @@ export const FoodProvider = ({ children }) => {
   useEffect(() => {
     if (!token) return;
 
-    const ws = new WebSocket(`${wsUrl}/ws/food/${user.id}`);
+    const ws = new WebSocket(`${wsUrl}/ws/food/${user?.id}`);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -80,7 +80,7 @@ export const FoodProvider = ({ children }) => {
     return () => {
       ws.close();
     };
-  }, [token]);
+  }, [token,user]);
 
   // Handle incoming food events
   const handleFoodEvent = (msg) => {

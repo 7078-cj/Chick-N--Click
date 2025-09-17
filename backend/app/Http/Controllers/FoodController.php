@@ -56,7 +56,7 @@ class FoodController extends Controller implements HasMiddleware
             $food->categories()->sync($validated['categories']);
         }
 
-        Http::post("http://127.0.0.1:8000/broadcast/food", [
+        Http::post(config('services.websocket.http_url') ."/broadcast/food", [
             "event" => "created",
             "food"  => $food->load('categories')
         ]);
@@ -100,6 +100,7 @@ class FoodController extends Controller implements HasMiddleware
         }
 
         $food->update($validated);
+        $food->refresh();
 
         // Sync categories if provided
         if (isset($validated['categories'])) {
@@ -108,9 +109,9 @@ class FoodController extends Controller implements HasMiddleware
             $food->categories()->sync([]);
         }
 
-        Http::post("http://127.0.0.1:8000/broadcast/food", [
+        Http::post(config('services.websocket.http_url') ."/broadcast/food", [
             "event" => "updated",
-            "food"  => $food
+            "food"  => $food->load('categories')
         ]);
 
         return $food->load('categories');
@@ -129,7 +130,7 @@ class FoodController extends Controller implements HasMiddleware
         $foodData = $food->load('categories');
         $food->delete();
 
-        Http::post("http://127.0.0.1:8000/broadcast/food", [
+        Http::post(config('services.websocket.http_url') ."/broadcast/food", [
             "event" => "deleted",
             "food"  => $foodData
         ]);

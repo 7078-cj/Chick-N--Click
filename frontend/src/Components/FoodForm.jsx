@@ -82,12 +82,6 @@ export default function FoodForm({ food = null, onSuccess, onClose }) {
       if (!res.ok) throw new Error("Failed to save food");
       const savedFood = await res.json();
 
-      // Update provider state
-      setFoods((prev) =>
-        food
-          ? prev.map((f) => (f.id === savedFood.id ? savedFood : f))
-          : [...prev, savedFood.food]
-      );
 
       if (onSuccess) onSuccess();
       if (onClose) onClose();
