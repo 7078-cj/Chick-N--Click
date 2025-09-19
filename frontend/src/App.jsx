@@ -35,7 +35,7 @@ function App() {
               <Route element={<PrivateRoutes allowedRoles={["user","admin"]} />} >
                 <Route path="/" element={<Home />} />
                 <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout/success/{order_id}" element={<CheckoutSuccess />} />
+                <Route path="/checkout/success/:order_id" element={<CheckoutSuccess />} />
               </Route>
 
               <Route element={<PrivateRoutes allowedRoles={["admin"]} />} >

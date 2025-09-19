@@ -35,7 +35,7 @@ export const FoodProvider = ({ children }) => {
         );
 
         // Fetch foods
-        const foodRes = await fetch(`${preUrl}/api/food`, {
+        const foodRes = await fetch(`${preUrl}/api/foods`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const foodData = await foodRes.json();

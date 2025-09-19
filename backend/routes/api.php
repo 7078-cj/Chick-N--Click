@@ -27,9 +27,10 @@ Route::get('/orders', [OrderController::class, 'getUserOrder']);
 Route::get('/orders/all', [OrderController::class, 'allOrders']);
 Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder']);
 Route::put('/order/{id}/status', [OrderController::class, 'updateOrderStatus']);
+Route::delete('/order/{id}/delete', [OrderController::class, 'deleteOrder']);
 
 Route::apiResource('foods', FoodController::class);
 Route::apiResource('category', CategoryController::class);
 
 Route::post('/payments/create-checkout', [PaymongoController::class, 'createCheckout']);
-Route::get('/payments/verify-by-order/{orderId}', [PaymongoController::class, 'verifyByOrder']);
+Route::get('/payments/verify/{orderId}', [PaymongoController::class, 'verifyByOrder']);

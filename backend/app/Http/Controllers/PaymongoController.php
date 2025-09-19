@@ -21,7 +21,8 @@ class PaymongoController extends Controller
 
         $client = new Client([
             'base_uri' => 'https://api.paymongo.com/v1/',
-            'auth' => [env('PAYMONGO_SECRET'), '']
+            'auth' => [env('PAYMONGO_SECRET'), ''],
+            'verify' => false 
         ]);
 
         try {
