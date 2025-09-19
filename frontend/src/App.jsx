@@ -15,6 +15,7 @@ import Admin from './Pages/Admin'
 import Unauthorized from './Pages/Unauthorized'
 import Loading from './Pages/Loading'
 import Cart from './Pages/Cart'
+import CheckoutSuccess from './Pages/CheckoutSuccess'
 
 function App() {
   
@@ -34,6 +35,7 @@ function App() {
               <Route element={<PrivateRoutes allowedRoles={["user","admin"]} />} >
                 <Route path="/" element={<Home />} />
                 <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout/success/{order_id}" element={<CheckoutSuccess />} />
               </Route>
 
               <Route element={<PrivateRoutes allowedRoles={["admin"]} />} >

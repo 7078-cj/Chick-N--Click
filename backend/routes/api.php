@@ -5,9 +5,11 @@ use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FoodController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymongoController;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -28,3 +30,6 @@ Route::put('/order/{id}/status', [OrderController::class, 'updateOrderStatus']);
 
 Route::apiResource('foods', FoodController::class);
 Route::apiResource('category', CategoryController::class);
+
+Route::post('/payments/create-checkout', [PaymongoController::class, 'createCheckout']);
+Route::get('/payments/verify-by-order/{orderId}', [PaymongoController::class, 'verifyByOrder']);

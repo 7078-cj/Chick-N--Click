@@ -8,54 +8,49 @@ export const FoodProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const { token, user } = useContext(AuthContext);
 
-  const preUrl = import.meta.env.VITE_API_URL;   // Laravel API
-  const wsUrl = import.meta.env.VITE_WS_URL;     // FastAPI WS
+  const preUrl = import.meta.env.VITE_API_URL;  
+  const wsUrl = import.meta.env.VITE_WS_URL;     
 
   const wsRef = useRef(null);
-
-  // Load categories (initial fetch)
+  const hasLoadedRef = useRef(false); 
+  // Load categories + foods once
   useEffect(() => {
+    if (!token || hasLoadedRef.current) return;
+    hasLoadedRef.current = true; // mark as loaded
+
     (async () => {
       try {
-        const res = await fetch(`${preUrl}/api/category`, {
+        // Fetch categories
+        const catRes = await fetch(`${preUrl}/api/category`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
-
+        const catData = await catRes.json();
         setCategories(
-          data.map((cat) => ({
+          catData.map((cat) => ({
             id: cat.id,
             name: cat.name,
             value: cat.id.toString(),
             label: cat.name,
           }))
         );
-      } catch (err) {
-        console.error("Failed to load categories", err);
-      }
-    })();
-  }, [token]);
 
-  // Load foods initially
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch(`${preUrl}/api/food`, {
+        // Fetch foods
+        const foodRes = await fetch(`${preUrl}/api/food`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
-        setFoods(data);
+        const foodData = await foodRes.json();
+        setFoods(foodData);
       } catch (err) {
-        console.error("Failed to load foods", err);
+        console.error("Failed to load initial data", err);
       }
     })();
   }, [token]);
 
   // WebSocket connection for real-time updates
   useEffect(() => {
-    if (!token) return;
+    if (!token || !user) return;
 
-    const ws = new WebSocket(`${wsUrl}/ws/food/${user?.id}`);
+    const ws = new WebSocket(`${wsUrl}/ws/food/${user.id}`);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -80,7 +75,7 @@ export const FoodProvider = ({ children }) => {
     return () => {
       ws.close();
     };
-  }, [token,user]);
+  }, [token, user]);
 
   // Handle incoming food events
   const handleFoodEvent = (msg) => {

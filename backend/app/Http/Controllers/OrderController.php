@@ -7,10 +7,11 @@ use App\Http\Requests\UpdateOrderRequest;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Utils\GcashCheckout;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class OrderController extends Controller implements HasMiddleware
@@ -66,7 +67,9 @@ class OrderController extends Controller implements HasMiddleware
                 'order' => $order->load('items.food','items.food.categories'),
             ]);
 
-            return response()->json(['message' => 'Order placed successfully', 'order' => $order->load('items')], 201);
+           
+
+            return GcashCheckout::createCheckout($order);
 
         } catch (\Exception $e) {
             DB::rollBack();

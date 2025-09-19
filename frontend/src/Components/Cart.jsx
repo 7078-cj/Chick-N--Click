@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Text, Loader, Button } from "@mantine/core";
 import AuthContext from "../Contexts/AuthContext";
 import CartItemCard from "./CartItemCard";
+import PayWithGcash from "./PayWithGcash";
 
 export default function Cart() {
   const { token } = useContext(AuthContext);
@@ -122,10 +123,14 @@ export default function Cart() {
 
      
       const data = await res.json();
-
+      console.log(data)
       
-      setCart([]); // clear UI cart
+      
+      
+      setCart([]); 
       setTotal(0);
+
+      PayWithGcash(data)
     } catch (err) {
       console.error(err);
       alert("Error placing order.");
