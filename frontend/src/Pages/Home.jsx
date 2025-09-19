@@ -4,6 +4,7 @@ import FoodForm from "../Components/FoodForm";
 import CartModal from "../Components/CartModal";
 import { Container, Title, Grid, Card } from "@mantine/core";
 import Order from "../Components/Order";
+import LeafletMap from "../Components/LeafletMap";
 
 function Home() {
   return (
@@ -30,6 +31,8 @@ function Home() {
           <Order/>
         </Grid.Col>
       </Grid>
+
+      <LeafletMap/>
     </Container>
   );
 }
