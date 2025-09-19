@@ -84,6 +84,8 @@ function AdminOrders() {
           return prev.map((o) =>
             o.id === order.id ? { ...o, status: "cancelled" } : o
           );
+        case "delete":
+          return prev.filter((o) => o.id !== order.id);
         default:
           return prev;
       }
