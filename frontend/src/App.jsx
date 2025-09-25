@@ -1,11 +1,6 @@
-import { useContext, useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
 import './App.css'
-import FoodForm from './Components/FoodForm'
-import FoodList from './Components/FoodList'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { AuthProvider } from './Contexts/AuthContext'
 import Login from './Pages/Login'
 import Register from './Pages/Register'
 import Home from './Pages/Home'
@@ -17,6 +12,7 @@ import Loading from './Pages/Loading'
 import Cart from './Pages/Cart'
 import CheckoutSuccess from './Pages/CheckoutSuccess'
 import AdminRoutes from './Contexts/AdminRoutes'
+import LandingPage from './Pages/LandingPage'
 
 function App() {
   
@@ -34,7 +30,7 @@ function App() {
               <Route path="/register" element={<Register />} />
                 
               <Route element={<PrivateRoutes allowedRoles={["user","admin"]} />} >
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout/success/:order_id" element={<CheckoutSuccess />} />
               </Route>
