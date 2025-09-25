@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import AppButton from "../Components/AppButton";
 import chickenBucket from "../assets/chicken_bucket.png";
 
-// ✅ your exported SVGs
+
 import orange_rectangle from "../assets/orange_rectangle.svg";
 import yellow_rectangle from "../assets/yellow_rectangle.svg";
 
@@ -34,6 +34,8 @@ function LandingPage() {
                 size="lg"
                 icon={ArrowRight}
                 iconPosition="right"
+                textSize={"lg"}
+                bold={true}
               >
                 VIEW MENU
               </AppButton>
@@ -66,7 +68,7 @@ function LandingPage() {
         </div>
       </section>
 
-      
+
     </>
   );
 }

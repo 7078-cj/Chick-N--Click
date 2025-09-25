@@ -9,14 +9,14 @@ const useCaseVariants = {
   confirm: "bg-orange-500 text-white hover:bg-orange-600",
   link: "bg-yellow-400 text-white hover:bg-yellow-500",
   verify: "bg-yellow-400 text-white hover:bg-yellow-500",
-  menu: "bg-orange-500 text-white hover:bg-orange-600",
-  outline: " bg-orange-400  text-white hover:bg-amber-800",
+  menu: "bg-orange-400 text-white hover:bg-orange-600",
+  outline: "bg-orange-400 text-white hover:bg-amber-800",
 };
 
 const sizes = {
-  sm: "px-3 py-1.5 text-sm",
-  md: "px-5 py-2 text-base",
-  lg: "px-6 py-3 text-lg",
+  sm: "px-3 py-1.5",
+  md: "px-5 py-2",
+  lg: "px-6 py-3",
 };
 
 const roundness = {
@@ -28,6 +28,12 @@ const roundness = {
   full: "rounded-full",
 };
 
+const textSizes = {
+  lg: "text-lg",
+  md: "text-base",
+  sm: "text-sm",
+};
+
 export default function AppButton({
   children,
   useCase = "order",
@@ -36,19 +42,22 @@ export default function AppButton({
   iconPosition = "right",
   fullWidth = false,
   className = "",
-  roundedType = "full", // default rounded-full
+  roundedType = "full",
   bgColor,
   hoverColor,
+  textSize = "md",
+  bold = true,
   ...props
 }) {
-  // If user provides custom bgColor/hoverColor, override variant
+  
   const customColors =
     bgColor || hoverColor
       ? `${bgColor || ""} ${hoverColor || ""} text-white`
       : useCaseVariants[useCase] || useCaseVariants.order;
 
+  
   const baseClasses = `
-    flex items-center justify-center gap-2 font-semibold transition-all duration-200
+    flex items-center justify-center gap-2 transition-all duration-200
     ${customColors}
     ${sizes[size] || sizes.md}
     ${fullWidth ? "w-full" : ""}
@@ -56,10 +65,16 @@ export default function AppButton({
     ${className}
   `;
 
+  
+  const textClasses = `
+    ${textSizes[textSize] || textSizes.md}
+    ${bold ? "font-bold" : "font-normal"}
+  `;
+
   return (
     <button className={baseClasses} {...props}>
       {icon && iconPosition === "left" && React.createElement(icon, { size: 18 })}
-      {children}
+      <span className={textClasses}>{children}</span>
       {icon && iconPosition === "right" && React.createElement(icon, { size: 18 })}
     </button>
   );
