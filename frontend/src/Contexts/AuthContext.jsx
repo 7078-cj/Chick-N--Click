@@ -12,8 +12,10 @@ export function AuthProvider({children}) {
         JSON.parse(localStorage.getItem('token')) || null
     );
 
-    const [user, setUser] = useState();
-    const [fetchingUser, SetFetchingUser] = useState(false)
+    const [user, setUser] = useState(
+         JSON.parse(localStorage.getItem('user')) || null
+    );
+   
 
     const nav = useNavigate()
 
@@ -43,6 +45,7 @@ export function AuthProvider({children}) {
                 
 
                 localStorage.setItem('token', JSON.stringify(data.token));
+                localStorage.setItem('user', JSON.stringify(data.user));
                 
                 if (data.user.role == "admin"){
                     nav('/admin')
@@ -65,65 +68,12 @@ export function AuthProvider({children}) {
        
     }
 
-   const getUserDetails = async () => {
-        if (token) {
-            SetFetchingUser(true);
-            try {
-            const result = await fetch(url + "/api/user", {
-                headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (result.ok) {
-                const data = await result.json();
-                setUser(data);
-                SetFetchingUser(false);
-            } else {
-                console.error("user fetch failed");
-                setUser(null);
-                SetFetchingUser(false);
-
-               
-                if (!["/login", "/register"].includes(window.location.pathname)) {
-                nav("/login");
-                }
-            }
-            } catch (err) {
-            console.error("Error fetching user", err);
-            setUser(null);
-            SetFetchingUser(false);
-
-            if (!["/login", "/register"].includes(window.location.pathname)) {
-                nav("/login");
-            }
-            }
-        } else {
-            setUser(null);
-            SetFetchingUser(false);
-
-            if (!["/login", "/register"].includes(window.location.pathname)) {
-            nav("/login");
-            }
-        }
-        };
-
-    useEffect(()=>{
-        getUserDetails()
-    },[])
-
     var context = {
         loginUser:loginUser,
         logOut:logoutUser,
         user:user,
         token:token,
-        fetchingUser:fetchingUser
-       
-        
-
-
-
+        setUser:setUser
     }
     return (
       <AuthContext.Provider value={context}>

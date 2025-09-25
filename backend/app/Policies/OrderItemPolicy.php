@@ -8,11 +8,8 @@ use Illuminate\Auth\Access\Response;
 
 class OrderItemPolicy
 {
-       public function isAdmin(User $user): bool
+    public function isAdmin(User $user): bool
     {
-        if($user->role == "admin"){
-            return true;
-        }
-        return false;
+        return $user->role == "admin";
     }
 }

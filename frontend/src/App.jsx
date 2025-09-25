@@ -16,6 +16,7 @@ import Unauthorized from './Pages/Unauthorized'
 import Loading from './Pages/Loading'
 import Cart from './Pages/Cart'
 import CheckoutSuccess from './Pages/CheckoutSuccess'
+import AdminRoutes from './Contexts/AdminRoutes'
 
 function App() {
   
@@ -39,7 +40,9 @@ function App() {
               </Route>
 
               <Route element={<PrivateRoutes allowedRoles={["admin"]} />} >
-                <Route path="/admin" element={<Admin />} />
+                <Route element={<AdminRoutes/>}>
+                  <Route path="/admin" element={<Admin />} />
+                </Route>
               </Route>
 
               <Route path="/loading" element={<Loading />} />

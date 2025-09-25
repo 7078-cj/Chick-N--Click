@@ -13,10 +13,6 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class FoodController extends Controller implements HasMiddleware
 {
     use AuthorizesRequests;
-       public function __construct()
-    {
-        $this->authorizeResource(Food::class, 'food');
-    }
 
     public static function middleware()
     {
@@ -39,6 +35,7 @@ class FoodController extends Controller implements HasMiddleware
      */
     public function store(Request $request)
     {
+        $this->authorize('isAdmin', Food::class);
         $validated = $request->validate([
             'thumbnail'   => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif', 'max:5120'], 
             'food_name'   => ['required', 'string', 'max:255'],
@@ -84,6 +81,7 @@ class FoodController extends Controller implements HasMiddleware
      */
     public function update(Request $request, Food $food)
     {
+        $this->authorize('isAdmin', Food::class);
         $validated = $request->validate([
             'thumbnail'   => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif', 'max:5120'], 
             'food_name'   => ['required', 'string', 'max:255'],
@@ -129,6 +127,7 @@ class FoodController extends Controller implements HasMiddleware
      */
     public function destroy(Food $food)
     {
+         $this->authorize('isAdmin', Food::class);
         // Delete thumbnail if exists
         if ($food->thumbnail && Storage::disk('public')->exists($food->thumbnail)) {
             Storage::disk('public')->delete($food->thumbnail);
