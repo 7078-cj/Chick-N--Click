@@ -28,7 +28,11 @@ class FoodPolicy
      * Determine whether the user can create models.
      */
     public function create(User $user): bool
-    {
+    {  
+        if ($user->role == "admin"){
+            return true;
+        }
+
         return false;
     }
 
@@ -37,6 +41,10 @@ class FoodPolicy
      */
     public function update(User $user, Food $food): bool
     {
+
+        if ($user->role == "admin"){
+            return true;
+        }
         return false;
     }
 
@@ -45,6 +53,10 @@ class FoodPolicy
      */
     public function delete(User $user, Food $food): bool
     {
+
+        if ($user->role == "admin"){
+            return true;
+        }
         return false;
     }
 

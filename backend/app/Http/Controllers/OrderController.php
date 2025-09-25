@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreOrderRequest;
-use App\Http\Requests\UpdateOrderRequest;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -13,10 +11,11 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class OrderController extends Controller implements HasMiddleware
 {
-
+    use AuthorizesRequests;
     
       public static function middleware()
     {
@@ -125,7 +124,8 @@ class OrderController extends Controller implements HasMiddleware
      */
     public function updateOrderStatus(Request $request, $orderId)
     {
-        
+        $this->authorize('isAdmin', Order::class);
+
         $request->validate([
             'status' => 'required|in:pending,approved,declined,completed'
         ]);
@@ -150,6 +150,7 @@ class OrderController extends Controller implements HasMiddleware
 
     public function allOrders(Request $request)
     {
+        $this->authorize('isAdmin', Order::class);
         $user = $request->user();
 
         if ($user && $user->role === "admin") {
@@ -169,6 +170,7 @@ class OrderController extends Controller implements HasMiddleware
 
     public function deleteOrder(Order $order){
         
+        $this->authorize('isAdmin', Order::class);
         Http::post(config('services.websocket.http_url') ."/broadcast/food", [
             "event" => "delete",
             "order"  => $order

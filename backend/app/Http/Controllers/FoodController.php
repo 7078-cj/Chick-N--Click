@@ -8,9 +8,16 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class FoodController extends Controller implements HasMiddleware
 {
+    use AuthorizesRequests;
+       public function __construct()
+    {
+        $this->authorizeResource(Food::class, 'food');
+    }
+
     public static function middleware()
     {
         return [
