@@ -3,9 +3,11 @@ import { Container, Group, Anchor, Button, Burger, Drawer, Stack } from "@mantin
 import { ArrowRight, Edit3, MoreHorizontal, PhoneCall, ShoppingCart } from "lucide-react";
 import hocLogo from "../assets/hoc_logo.png";
 import AppButton from "./AppButton.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
   const [opened, setOpened] = useState(false);
+  const nav = useNavigate()
 
   return (
     <header className="bg-white shadow-sm">
@@ -42,9 +44,13 @@ export default function Header() {
             </Button>
 
 
-            <AppButton useCase="signup" bgColor={"bg-amber-400"} hoverColor={"hover:bg-amber-800"}>Sign Up</AppButton>
+            <AppButton useCase="signup" bgColor={"bg-amber-400"} hoverColor={"hover:bg-amber-800"} onClick={()=> nav('/register')}>
+              Sign Up
+              </AppButton>
 
-            <AppButton useCase="signin">Log In</AppButton>
+            <AppButton useCase="signin" onClick={()=> nav('/login')}>
+              Log In
+              </AppButton>
           </Group>
 
           
@@ -63,9 +69,7 @@ export default function Header() {
         title="Menu"
       >
         <Stack gap="md">
-          <Anchor href="#about" onClick={() => setOpened(false)}>About Us</Anchor>
-          <Anchor href="#deals" onClick={() => setOpened(false)}>Deals</Anchor>
-          <Anchor href="#find-us" onClick={() => setOpened(false)}>Find Us</Anchor>
+          
 
           <Button
             component="a"
@@ -78,18 +82,13 @@ export default function Header() {
             Call: +63 910 8765 432
           </Button>
 
-          <Button
-            radius="xl"
-            variant="gradient"
-            gradient={{ from: "yellow", to: "orange" }}
-          >
-            Sign Up
-          </Button>
-          
+          <AppButton useCase="signup" bgColor={"bg-amber-400"} hoverColor={"hover:bg-amber-800"} onClick={()=> nav('/register')}>
+              Sign Up
+              </AppButton>
 
-          <Button radius="xl" color="orange" variant="filled">
-            Log In
-          </Button>
+            <AppButton useCase="signin" onClick={()=> nav('/login')}>
+              Log In
+              </AppButton>
         </Stack>
       </Drawer>
     </header>

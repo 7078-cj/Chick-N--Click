@@ -28,9 +28,10 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/" element={<LandingPage />} />
                 
               <Route element={<PrivateRoutes allowedRoles={["user","admin"]} />} >
-                <Route path="/" element={<LandingPage />} />
+                
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout/success/:order_id" element={<CheckoutSuccess />} />
               </Route>
