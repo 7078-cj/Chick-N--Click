@@ -1,39 +1,49 @@
-import React from "react";
-import FoodList from "../Components/FoodList";
-import FoodForm from "../Components/FoodForm";
-import CartModal from "../Components/CartModal";
-import { Container, Title, Grid, Card } from "@mantine/core";
-import Order from "../Components/Order";
-import LeafletMap from "../Components/LeafletMap";
+import React, { useState } from "react";
+import Header from "../Components/Header";
+import Feature from "../Components/Feature";
+import AppButton from "../Components/AppButton";
+import Menu from "../Components/Menu";
+
 
 function Home() {
+  const [activeTab, setActiveTab] = useState("featured");
+
   return (
-    <Container size="xl" className="py-10">
-     
-      <Title order={1} align="center" mb="xl" className="text-3xl font-bold">
-        🍽️ Welcome to HOC
-      </Title>
+    <>
+      {/* Header */}
+      <Header variant="home" />
 
-      <Grid gutter="xl">
-        
-        <Grid.Col span={{ base: 12, md: 8 }}>
-          <Card shadow="sm" padding="lg" radius="md" withBorder className="mb-6">
-            <Title order={2} size="h3" mb="md">
-              Available Foods
-            </Title>
-            <FoodList />
-          </Card>
-        </Grid.Col>
+      {/* Tabs */}
+      <div className="w-full flex justify-start  mt-6 p-5">
+        <div className="flex  rounded-full gap-5 p-1">
+          <AppButton
+            useCase={activeTab === "featured" ? "tabActive" : "tabInactive"}
+            roundedType="full"
+            size="md"
+            bold={true}
+            onClick={() => setActiveTab("featured")}
+          >
+            FEATURED
+          </AppButton>
 
-       
-        <Grid.Col span={{ base: 12, md: 4 }}>
-          <CartModal />
-          <Order/>
-        </Grid.Col>
-      </Grid>
+          <AppButton
+            useCase={activeTab === "menu" ? "tabActive" : "tabInactive"}
+            roundedType="full"
+            size="md"
+            bold={true}
+            onClick={() => setActiveTab("menu")}
+          >
+            MENU
+          </AppButton>
+        </div>
+      </div>
 
-      <LeafletMap/>
-    </Container>
+      {/* Tab Content */}
+      <div className="mt-6">
+        {activeTab === "featured" && <Feature />}
+        {activeTab === "menu" && <Menu/>}
+      </div>
+    </>
   );
 }
 

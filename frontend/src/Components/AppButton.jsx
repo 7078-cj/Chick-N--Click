@@ -11,6 +11,9 @@ const useCaseVariants = {
   verify: "bg-yellow-400 text-white hover:bg-yellow-500",
   menu: "bg-orange-400 text-white hover:bg-orange-600",
   outline: "bg-orange-400 text-white hover:bg-amber-800",
+
+  tabActive: "bg-orange-500 text-white",
+  tabInactive: "bg-gray-100 text-orange-800",
 };
 
 const sizes = {

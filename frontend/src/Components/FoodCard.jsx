@@ -1,7 +1,9 @@
 import React, { useContext, useState } from "react";
-import { Card, Image, Text, Button, Modal, NumberInput, Badge } from "@mantine/core";
+import { Modal, NumberInput } from "@mantine/core";
+import { ShoppingCart } from "lucide-react";
 import FoodForm from "./FoodForm";
 import AuthContext from "../Contexts/AuthContext";
+import AppButton from "./AppButton";
 
 export default function FoodCard({ food, url, onDelete, onUpdate }) {
   const { token, user } = useContext(AuthContext);
@@ -44,68 +46,102 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
 
   return (
     <>
-      <Card shadow="sm" padding="lg" radius="md" withBorder className="w-[300px]">
-        <Card.Section>
-          <Image
+      <div
+        className={`w-[320px] rounded-2xl shadow-md border overflow-hidden transition 
+          ${
+            food.available
+              ? "bg-white border-gray-200"
+              : "bg-gray-200 border-gray-300 opacity-70"
+          }
+        `}
+      >
+        {/* Top Section with Thumbnail */}
+        <div className="relative h-[200px] w-full">
+          {/* Availability Badge */}
+          <span
+            className={`absolute top-3 left-0 text-white text-xs font-bold px-3 py-1 rounded-r-md shadow
+              ${food.available ? "bg-orange-400" : "bg-gray-500"}
+            `}
+          >
+            {food.available ? "AVAILABLE" : "UNAVAILABLE"}
+          </span>
+
+          {/* Cart Button (only for non-admins) */}
+          {!user?.role || user.role !== "admin" ? (
+            <AppButton
+              useCase="menu"
+              size="sm"
+              roundedType="full"
+              icon={ShoppingCart}
+              className="absolute top-3 right-3 w-10 h-10"
+              onClick={() => setCartOpened(true)}
+              disabled={!food.available}
+            />
+          ) : null}
+
+          {/* Full Thumbnail */}
+          <img
             src={
               food.thumbnail
                 ? `${url}/storage/${food.thumbnail}`
-                : "https://via.placeholder.com/300x200?text=No+Image"
+                : "https://via.placeholder.com/320x200?text=No+Image"
             }
-            height={200}
-            className="object-cover"
+            alt={food.food_name}
+            className="w-full h-full object-cover"
           />
-        </Card.Section>
 
-        <Text fw={700} size="lg" mt="md">
-          {food.food_name}
-        </Text>
-
-        <div className="flex justify-between mt-2">
-          <Text size="sm" c="dimmed">Price: ${food.price}</Text>
-          <Text size="sm" className={food.available ? "text-green-600" : "text-red-600"}>
-            {food.available ? "Available" : "Not Available"}
-          </Text>
+         
         </div>
 
-        {/* Categories */}
-        {food.categories?.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {food.categories.map((c) => (
-              <Badge key={c.id} color="teal" size="sm">{c.name}</Badge>
-            ))}
-          </div>
-        )}
+        {/* Bottom Section */}
+        <div className="p-4">
+          <div className="flex justify-between items-start">
+            <div className="flex flex-row items-start justify-between w-full">
+              <div>
+                  <h3 className="text-lg font-bold">{food.food_name}</h3>
+                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                    {food.description}
+                  </p>
+                  {/* Categories */}
+                  
+                  {food.categories && food.categories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {food.categories.map((cat) => (
+                        <span
+                          key={cat.id}
+                          className="text-xs bg-amber-100 text-gray-700 px-2 py-1 rounded-md"
+                        >
+                          {cat.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+              </div>
 
-        <Text size="sm" c="dimmed" mt="sm" lineClamp={3}>
-          {food.description}
-        </Text>
+              <span className="text-amber-500 font-bold">
+                P{food.price}
+              </span>
+              
+            </div>
+          </div>
 
-        {/* Actions */}
-        {user.role === "admin" ? (
-          <div className="flex justify-between mt-3">
-            <Button size="xs" color="blue" onClick={() => setOpened(true)} radius="xl">
-              Edit
-            </Button>
-            <Button size="xs" color="red" onClick={handleDelete} radius="xl">
-              Delete
-            </Button>
-          </div>
-        ) : (
-          <div className="mt-3">
-            <Button
-              size="sm"
-              color="teal"
-              radius="xl"
-              fullWidth
-              onClick={() => setCartOpened(true)}
-              disabled={!food.available}
-            >
-              Add to Cart
-            </Button>
-          </div>
-        )}
-      </Card>
+          {/* Admin Controls */}
+          {user?.role === "admin" && (
+            <div className="flex justify-between mt-4">
+              <AppButton
+                useCase="confirm"
+                size="sm"
+                onClick={() => setOpened(true)}
+              >
+                Edit
+              </AppButton>
+              <AppButton useCase="remove" size="sm" onClick={handleDelete}>
+                Delete
+              </AppButton>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Edit Modal */}
       <Modal opened={opened} onClose={() => setOpened(false)} title="Edit Food" size="lg">
@@ -113,11 +149,27 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
       </Modal>
 
       {/* Quantity Modal */}
-      <Modal opened={cartOpened} onClose={() => setCartOpened(false)} title={`Add ${food.food_name} to Cart`} centered>
-        <NumberInput label="Quantity" value={quantity} min={1} onChange={setQuantity} required />
-        <Button fullWidth mt="md" onClick={handleAddToCart}>
+      <Modal
+        opened={cartOpened}
+        onClose={() => setCartOpened(false)}
+        title={`Add ${food.food_name} to Cart`}
+        centered
+      >
+        <NumberInput
+          label="Quantity"
+          value={quantity}
+          min={1}
+          onChange={setQuantity}
+          required
+        />
+        <AppButton
+          useCase="checkout"
+          fullWidth
+          className="mt-4"
+          onClick={handleAddToCart}
+        >
           Confirm Add
-        </Button>
+        </AppButton>
       </Modal>
     </>
   );
