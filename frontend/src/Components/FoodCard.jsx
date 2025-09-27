@@ -106,7 +106,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCar
               >
                 Edit
               </AppButton>
-              <AppButton useCase="remove" size="sm" onClick={onDelete}>
+              <AppButton useCase="remove" size="sm" onClick={()=>onDelete(food)}>
                 Delete
               </AppButton>
             </div>
@@ -137,7 +137,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCar
           useCase="checkout"
           fullWidth
           className="mt-4"
-          onClick={handleAddToCart}
+          onClick={()=>handleAddToCart(food,quantity)}
         >
           Confirm Add
         </AppButton>

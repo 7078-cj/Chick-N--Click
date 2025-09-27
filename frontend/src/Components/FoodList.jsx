@@ -39,7 +39,7 @@ export default function FoodList() {
     );
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (food) => {
       if (!confirm("Are you sure you want to delete this food?")) return;
       try {
         await fetch(`${url}/api/foods/${food.id}`, {
@@ -53,7 +53,7 @@ export default function FoodList() {
       }
     };
   
-    const handleAddToCart = async () => {
+    const handleAddToCart = async (food,quantity) => {
       try {
         await fetch(`${url}/api/cart/add/${food.id}`, {
           method: "POST",
@@ -63,7 +63,7 @@ export default function FoodList() {
           },
           body: JSON.stringify({ quantity }),
         });
-        setCartOpened(false);
+        
       } catch (err) {
         console.error(err);
         alert("Failed to add to cart.");
