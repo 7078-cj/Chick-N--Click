@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Drawer, Stack } from "@mantine/core";
-import { Search, MoreHorizontal, ShoppingCart } from "lucide-react";
+import { Group, Button, Drawer, Stack } from "@mantine/core";
+import { Search, MoreHorizontal, ShoppingCart, PhoneCall} from "lucide-react";
 import hocLogo from "../assets/hoc_logo.png";
 import { useNavigate } from "react-router-dom";
 import CartDrawer from "./CartDrawer";
@@ -15,16 +15,17 @@ export default function Header({ variant = "default" }) {
     <header className="bg-white shadow-sm">
       <div className="w-full mx-auto flex items-center justify-between py-3 px-6">
         
-        {/* Logo */}
-        <img
-          src={hocLogo}
-          alt="Click N' Chick"
-          className="h-14 w-auto object-contain cursor-pointer"
-          onClick={() => nav("/")}
-        />
+        
 
         {variant === "home" ? (
           <>
+           {/* Logo */}
+              <img
+                src={hocLogo}
+                alt="Click N' Chick"
+                className="h-14 w-auto object-contain cursor-pointer"
+                onClick={() => nav("/")}
+              />
             {/* Search bar (centered) */}
             
 
@@ -60,14 +61,45 @@ export default function Header({ variant = "default" }) {
             </div>
           </>
         ) : (
+          
           // Default (non-home) header layout
-          <div className="flex items-center gap-4">
-            <button
-              className="px-4 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-medium transition"
-              onClick={() => setOpened(true)}
-            >
-              Menu
-            </button>
+          <div className="flex items-center justify-between w-full">
+            {/* Logo */}
+              <img
+                src={hocLogo}
+                alt="Click N' Chick"
+                className="h-14 w-auto object-contain cursor-pointer"
+                onClick={() => nav("/")}
+              />
+              
+              <Group gap="lg" visibleFrom="md" className="text-gray-800 font-medium">
+              
+                <a href="#about" className="hover:text-yellow-500 transition">About Us</a> 
+                <a href="#deals" className="hover:text-yellow-500 transition">Deals</a> 
+                <a href="#find-us" className="hover:text-yellow-500 transition">Find Us</a> 
+                
+              </Group>
+
+          
+          <Group gap="md" visibleFrom="sm" className="hidden md:flex">
+            <Button
+                component="a"
+                href="tel:+639108765432"
+                variant="outline"
+                color="brown"  
+                radius="xl"
+                leftSection={<PhoneCall size={16} color="black"/>}
+                className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                >
+              Call: +63 910 8765 432
+            </Button>
+
+
+            <AppButton useCase="signup" bgColor={"bg-amber-400"} hoverColor={"hover:bg-amber-800"}>Sign Up</AppButton>
+
+            <AppButton useCase="signin">Log In</AppButton>
+          </Group>
+
           </div>
         )}
       </div>

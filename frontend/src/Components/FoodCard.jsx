@@ -5,7 +5,7 @@ import FoodForm from "./FoodForm";
 import AuthContext from "../Contexts/AuthContext";
 import AppButton from "./AppButton";
 
-export default function FoodCard({ food, url, onDelete, onUpdate }) {
+export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCart }) {
   const { token, user } = useContext(AuthContext);
   const [opened, setOpened] = useState(false);
   const [cartOpened, setCartOpened] = useState(false);
@@ -13,36 +13,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
 
   if (!food) return null;
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this food?")) return;
-    try {
-      await fetch(`${url}/api/foods/${food.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (onDelete) onDelete(food.id);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete food.");
-    }
-  };
-
-  const handleAddToCart = async () => {
-    try {
-      await fetch(`${url}/api/cart/add/${food.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ quantity }),
-      });
-      setCartOpened(false);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to add to cart.");
-    }
-  };
+  
 
   return (
     <>
@@ -135,7 +106,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate }) {
               >
                 Edit
               </AppButton>
-              <AppButton useCase="remove" size="sm" onClick={handleDelete}>
+              <AppButton useCase="remove" size="sm" onClick={onDelete}>
                 Delete
               </AppButton>
             </div>
