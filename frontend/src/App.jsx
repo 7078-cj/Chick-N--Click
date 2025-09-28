@@ -13,6 +13,8 @@ import Cart from './Pages/Cart'
 import CheckoutSuccess from './Pages/CheckoutSuccess'
 import AdminRoutes from './Contexts/AdminRoutes'
 import LandingPage from './Pages/LandingPage'
+import { OrderProvider } from './Contexts/Orderprovider'
+import { CartProvider } from './Contexts/CartProvider'
 
 function App() {
   
@@ -23,7 +25,8 @@ function App() {
     <>
       
      
-      
+        <CartProvider>
+          <OrderProvider>
           <FoodProvider>
             <Routes>
               <Route path="/login" element={<Login />} />
@@ -31,7 +34,9 @@ function App() {
               <Route path="/" element={<LandingPage />} />
                 
               <Route element={<PrivateRoutes allowedRoles={["user","admin"]} />} >
-                <Route path="/home" element={<Home />} />
+
+                <Route path="/home" element={<Home /> } />
+                    
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout/success/:order_id" element={<CheckoutSuccess />} />
               </Route>
@@ -49,6 +54,8 @@ function App() {
                 
             </Routes>
           </FoodProvider>
+          </OrderProvider>
+          </CartProvider>
         
       
       

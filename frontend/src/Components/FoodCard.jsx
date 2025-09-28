@@ -13,6 +13,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCar
 
   if (!food) return null;
 
+  const close = () => setCartOpened(false);
   
 
   return (
@@ -137,7 +138,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCar
           useCase="checkout"
           fullWidth
           className="mt-4"
-          onClick={()=>handleAddToCart(food,quantity)}
+          onClick={()=>handleAddToCart(food,quantity,close)}
         >
           Confirm Add
         </AppButton>

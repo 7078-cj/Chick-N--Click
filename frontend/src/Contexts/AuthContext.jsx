@@ -50,7 +50,7 @@ export function AuthProvider({children}) {
                 if (data.user.role == "admin"){
                     nav('/admin')
                 }else{
-                    nav('/')
+                    nav('/home')
                 }
                 
             } else {

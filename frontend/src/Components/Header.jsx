@@ -3,8 +3,9 @@ import { Group, Button, Drawer, Stack } from "@mantine/core";
 import { Search, MoreHorizontal, ShoppingCart, PhoneCall} from "lucide-react";
 import hocLogo from "../assets/hoc_logo.png";
 import { useNavigate } from "react-router-dom";
-import CartDrawer from "./CartDrawer";
+import CartDrawer from "./CartComponent";
 import AppButton from "./AppButton";
+import Order from "./Order";
 
 export default function Header({ variant = "default" }) {
   const [opened, setOpened] = useState(false);
@@ -51,13 +52,7 @@ export default function Header({ variant = "default" }) {
                 icon={MoreHorizontal}
               />
 
-              <AppButton
-                useCase="checkout"
-                size="sm"
-                roundedType="full"
-                onClick={() => setCartOpen(true)}
-                icon={ShoppingCart}
-              />
+              <Order/>
             </div>
           </>
         ) : (
@@ -116,19 +111,17 @@ export default function Header({ variant = "default" }) {
           {variant === "home" && (
             <>
               <a href="#about" className="hover:text-yellow-500 transition">
-                About Us
+                Orders
               </a>
               <a href="#deals" className="hover:text-yellow-500 transition">
-                Deals
+                Settings
               </a>
-              <a href="#find-us" className="hover:text-yellow-500 transition">
-                Find Us
-              </a>
+              
             </>
           )}
         </Stack>
       </Drawer>
-      <CartDrawer opened={cartOpen} onClose={() => setCartOpen(false)} />
+     
     </header>
   );
 }

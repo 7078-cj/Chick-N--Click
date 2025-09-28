@@ -3,9 +3,11 @@ import FoodCard from "./FoodCard";
 import AuthContext from "../Contexts/AuthContext";
 import { FoodContext } from "../Contexts/FoodProvider";
 import { Tabs } from "@mantine/core";
+import { CartContext } from "../Contexts/CartProvider";
 
 export default function FoodList() {
   const { setFoods, foods, categories } = useContext(FoodContext);
+  const { fetchCart } = useContext(CartContext);
   const url = import.meta.env.VITE_API_URL;
   let { token } = useContext(AuthContext);
 
@@ -53,9 +55,9 @@ export default function FoodList() {
       }
     };
   
-    const handleAddToCart = async (food,quantity) => {
+    const handleAddToCart = async (food,quantity,close) => {
       try {
-        await fetch(`${url}/api/cart/add/${food.id}`, {
+        const res = await fetch(`${url}/api/cart/add/${food.id}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -63,6 +65,12 @@ export default function FoodList() {
           },
           body: JSON.stringify({ quantity }),
         });
+        if (res.ok){
+          
+          fetchCart()
+          close()
+        }
+        
         
       } catch (err) {
         console.error(err);
