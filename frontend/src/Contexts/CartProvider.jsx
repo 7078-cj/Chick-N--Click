@@ -32,8 +32,15 @@ export const CartProvider = ({ children }) => {
     };
 
     useEffect(() => {
-     fetchCart();
-    }, [token]);
+        if (token) {
+            fetchCart();
+        } else {
+            
+            setCart([]);
+            setTotal(0);
+        }
+        }, [token]);
+
 
     const updateCartItem = async (foodId, newQty) => {
         try {

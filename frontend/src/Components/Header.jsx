@@ -90,9 +90,9 @@ export default function Header({ variant = "default" }) {
             </Button>
 
 
-            <AppButton useCase="signup" bgColor={"bg-amber-400"} hoverColor={"hover:bg-amber-800"}>Sign Up</AppButton>
+            <AppButton useCase="signup" bgColor={"bg-amber-400"} hoverColor={"hover:bg-amber-800"} onClick={()=>nav('/register')}>Sign Up</AppButton>
 
-            <AppButton useCase="signin">Log In</AppButton>
+            <AppButton useCase="signin" onClick={()=>nav('/login')}>Log In</AppButton>
           </Group>
 
           </div>

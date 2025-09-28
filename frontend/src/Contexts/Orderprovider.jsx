@@ -53,11 +53,10 @@ export const OrderProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        
-        fetchOrders();
+
 
         // 🔥 Connect to FastAPI WebSocket
-        const ws = new WebSocket(`${wsUrl}/ws/order/${user.id}`);
+        const ws = new WebSocket(`${wsUrl}/ws/order/${user?.id}`);
 
         ws.onmessage = (event) => {
             try {
@@ -88,7 +87,18 @@ export const OrderProvider = ({ children }) => {
             ws.close();
         };
         
-    }, [user?.id,token]);
+    }, [user?.id]);
+
+    useEffect(() => {
+        if (token) {
+            fetchOrders();
+        } else {
+           
+            setOrders([]);
+
+        }
+        }, [token]);
+
     
         const context ={ 
             fetchOrders,

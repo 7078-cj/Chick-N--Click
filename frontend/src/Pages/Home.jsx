@@ -11,12 +11,12 @@ function Home() {
 
   return (
     <div className="w-full flex flex-row">
-      <div className={`${activeTab == "menu" ? 'w-[80%]' : 'w-full'}`}>
+      <div className={`${activeTab == "menu" ? 'w-[75%]' : 'w-full'}`}>
         {/* Header */}
         <Header variant="home" />
         
         {/* Tabs */}
-        <div className="w-full flex justify-start  mt-6 p-5">
+        <div className="w-full flex justify-start  mt-6 p-5 ">
           <div className="flex  rounded-full gap-5 p-1">
             <AppButton
               useCase={activeTab === "featured" ? "tabActive" : "tabInactive"}
@@ -41,14 +41,14 @@ function Home() {
         </div>
 
         {/* Tab Content */}
-        <div className="mt-6">
+        <div className="mt-6 ">
          
             {activeTab === "featured" && <Feature />}
             {activeTab === "menu" && <Menu/>}
 
         </div>
       </div>
-      {activeTab === "menu" && <div>
+      {activeTab === "menu" && <div className="p-5">
           <CartComponent/>
       </div>}
     </div>
