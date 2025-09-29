@@ -8,9 +8,9 @@ import AppButton from "./AppButton";
 import Order from "./Order";
 
 export default function Header({ variant = "default" }) {
-  const [opened, setOpened] = useState(false);
+
   const nav = useNavigate();
-  const [cartOpen, setCartOpen] = useState(false);
+  
 
   return (
     <header className="bg-white shadow-sm">
@@ -48,7 +48,8 @@ export default function Header({ variant = "default" }) {
                 useCase="menu"
                 size="sm"
                 roundedType="full"
-                onClick={() => setOpened(true)}
+                onClick={() => nav('/settings')}
+                iconOnly
                 icon={MoreHorizontal}
               />
 
@@ -99,28 +100,7 @@ export default function Header({ variant = "default" }) {
         )}
       </div>
 
-      {/* Drawer for menu */}
-      <Drawer
-        opened={opened}
-        onClose={() => setOpened(false)}
-        padding="md"
-        size="md"
-        title="Menu"
-      >
-        <Stack gap="md">
-          {variant === "home" && (
-            <>
-              <a href="#about" className="hover:text-yellow-500 transition">
-                Orders
-              </a>
-              <a href="#deals" className="hover:text-yellow-500 transition">
-                Settings
-              </a>
-              
-            </>
-          )}
-        </Stack>
-      </Drawer>
+      
      
     </header>
   );

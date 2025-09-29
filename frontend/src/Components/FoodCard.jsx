@@ -45,6 +45,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCar
               size="sm"
               roundedType="full"
               icon={ShoppingCart}
+              iconOnly
               className="absolute top-3 right-3 w-10 h-10"
               onClick={() => setCartOpened(true)}
               disabled={!food.available}

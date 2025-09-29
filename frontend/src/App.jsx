@@ -15,6 +15,7 @@ import AdminRoutes from './Contexts/AdminRoutes'
 import LandingPage from './Pages/LandingPage'
 import { OrderProvider } from './Contexts/Orderprovider'
 import { CartProvider } from './Contexts/CartProvider'
+import Settings from './Pages/Settings'
 
 function App() {
   
@@ -38,7 +39,10 @@ function App() {
                 <Route path="/home" element={<Home /> } />
                     
                 <Route path="/cart" element={<Cart />} />
+
                 <Route path="/checkout/success/:order_id" element={<CheckoutSuccess />} />
+
+                <Route path="/settings" element={<Settings />} />
               </Route>
 
               <Route element={<PrivateRoutes allowedRoles={["admin"]} />} >

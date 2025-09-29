@@ -1,1 +1,6 @@
 @import "tailwindcss";
+@tailwind utilities;
+
+.fontNiCHoi{
+    @apply font-serif;
+}

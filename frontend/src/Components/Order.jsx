@@ -15,6 +15,7 @@ function Order() {
             size="sm"
             roundedType="full"
             onClick={() => setOrdersOpen(true)}
+            iconOnly
             icon={ShoppingCart}
         />
 

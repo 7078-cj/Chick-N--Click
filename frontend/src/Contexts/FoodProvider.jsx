@@ -53,10 +53,6 @@ export const FoodProvider = ({ children }) => {
     const ws = new WebSocket(`${wsUrl}/ws/food/${user.id}`);
     wsRef.current = ws;
 
-    ws.onopen = () => {
-      console.log("✅ Connected to food WebSocket");
-    };
-
     ws.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data);

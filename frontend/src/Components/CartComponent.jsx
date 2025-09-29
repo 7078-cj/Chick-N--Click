@@ -58,7 +58,7 @@ export default function CartComponent() {
   };
 
   return (
-    <div className="p-6 flex flex-col h-full shadow-[6px_0_8px_-2px_rgba(0,0,0,0.2)]">
+    <div className="p-6 flex flex-col min-h-screen max-h-full w-full ">
       {loading ? (
         <div className="flex justify-center items-center h-full">
           <Loader />

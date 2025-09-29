@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import Header from "../Components/Header";
 import { ArrowRight } from "lucide-react";
 import AppButton from "../Components/AppButton";
@@ -16,11 +16,19 @@ import locationSection from "../assets/location_section.svg";
 import hocLogo from "../assets/hoc_logo.png";
 import fries from "../assets/fries.png";
 import { useNavigate } from "react-router-dom";
+import AuthContext from "../Contexts/AuthContext";
 
 
 function LandingPage() {
 
-  
+  const nav = useNavigate()
+  const { token, user } = useContext(AuthContext);
+
+  useEffect(()=>{
+    if(token && user){
+      user.role == "user" ? nav('/home') : nav('admin')
+    }
+  },[])
 
   return (
     <>
@@ -49,6 +57,7 @@ function LandingPage() {
                 iconPosition="right"
                 textSize={"lg"}
                 bold={true}
+                onClick={()=> nav('/home')}
               >
                 VIEW MENU
               </AppButton>

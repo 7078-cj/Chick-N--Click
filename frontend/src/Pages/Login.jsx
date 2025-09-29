@@ -14,7 +14,7 @@ function Login() {
       {/* Main content */}
       <div className="flex-1 flex justify-center items-center p-6">
         <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 ">Login</h2>
           <form onSubmit={loginUser} className="flex flex-col space-y-4">
             <label className="flex flex-col text-gray-700 font-medium">
               Email

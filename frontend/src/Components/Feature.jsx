@@ -1,10 +1,7 @@
 import React from 'react'
 
 import deal1 from "../assets/deal1.png";
-import orangeRectangle from "../assets/orange_rectangle.svg";
-import yellowRectangle from "../assets/yellow_rectangle.svg";
 
-import { Container, Grid, Card, Text } from "@mantine/core";
 
 import AppButton from "../Components/AppButton";
 

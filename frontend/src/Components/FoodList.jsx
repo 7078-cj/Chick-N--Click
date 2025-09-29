@@ -2,8 +2,9 @@ import React, { useContext, useEffect, useState } from "react";
 import FoodCard from "./FoodCard";
 import AuthContext from "../Contexts/AuthContext";
 import { FoodContext } from "../Contexts/FoodProvider";
-import { Tabs } from "@mantine/core";
+
 import { CartContext } from "../Contexts/CartProvider";
+import TabsComponent from "./TabsComponent";
 
 export default function FoodList() {
   const { setFoods, foods, categories } = useContext(FoodContext);
@@ -89,16 +90,7 @@ export default function FoodList() {
   return (
     <div className="w-full">
       {/* Tabs for category filter */}
-      <Tabs value={activeCategory} onChange={setActiveCategory} radius="md">
-        <Tabs.List>
-          <Tabs.Tab value="all">All</Tabs.Tab>
-          {categories.map((cat) => (
-            <Tabs.Tab key={cat.id} value={cat.id.toString()}>
-              {cat.name}
-            </Tabs.Tab>
-          ))}
-        </Tabs.List>
-      </Tabs>
+      <TabsComponent categories={categories} setActiveCategory={setActiveCategory} activeCategory={activeCategory}/>
 
       {/* Food list */}
       <div className="flex flex-wrap gap-6 justify-center mt-10">
