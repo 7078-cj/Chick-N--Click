@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 
@@ -13,9 +20,11 @@ function SetViewOnLocation({ position }) {
   return null;
 }
 
-function ClickHandler({ setLocation }) {
+function ClickHandler({ setLocation, editMode }) {
   useMapEvents({
     click: async (e) => {
+      if (!editMode) return; // ✅ only active in edit mode
+
       const { lat, lng } = e.latlng;
 
       try {
@@ -27,9 +36,13 @@ function ClickHandler({ setLocation }) {
         setLocation({
           lat,
           lng,
-          city: data.address.city || data.address.town || data.address.village || "",
+          city:
+            data.address.city ||
+            data.address.town ||
+            data.address.village ||
+            "",
           country: data.address.country || "",
-          full: data.display_name || "", // ✅ full description
+          full: data.display_name || "",
         });
       } catch {
         setLocation({ lat, lng, city: "", country: "", full: "" });
@@ -39,15 +52,10 @@ function ClickHandler({ setLocation }) {
   return null;
 }
 
-export default function UserLocationMap() {
-  const [location, setLocation] = useState({
-    lat: null,
-    lng: null,
-    city: "",
-    country: "",
-    full: "", // ✅ added
-  });
+export default function UserLocationMap({editMode, setLocation, location}) {
+  
   const [search, setSearch] = useState("");
+  
   const provider = new OpenStreetMapProvider();
 
   useEffect(() => {
@@ -66,9 +74,13 @@ export default function UserLocationMap() {
             setLocation({
               lat,
               lng,
-              city: data.address.city || data.address.town || data.address.village || "",
+              city:
+                data.address.city ||
+                data.address.town ||
+                data.address.village ||
+                "",
               country: data.address.country || "",
-              full: data.display_name || "", // ✅
+              full: data.display_name || "",
             });
           } catch {
             setLocation({ lat, lng, city: "", country: "", full: "" });
@@ -90,78 +102,83 @@ export default function UserLocationMap() {
       setLocation({
         lat,
         lng,
-        city: label.split(",")[0] || "", // take first part
-        country: label.split(",").pop() || "", // take last part
-        full: label, // ✅ store full label from geosearch
+        city: label.split(",")[0] || "",
+        country: label.split(",").pop() || "",
+        full: label,
       });
     }
   };
 
   return (
-    <div style={{ height: "100vh", width: "100%", position: "relative" }}>
-      {/* 🔍 Floating Search Bar */}
-      <form
-        onSubmit={handleSearch}
-        style={{
-          position: "absolute",
-          top: 20,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          background: "#fff",
-          borderRadius: "30px",
-          padding: "5px 10px",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-          width: "300px",
-        }}
-      >
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="🔍 Search location..."
+    <div style={{ height: "100%", width: "100%", position: "relative" }}>
+      {/* 🔄 Toggle Buttons */}
+    
+
+      {/* 🔍 Search Bar (only in edit mode) */}
+      {editMode && (
+        <form
+          onSubmit={handleSearch}
           style={{
-            border: "none",
-            outline: "none",
-            flex: 1,
-            fontSize: "14px",
-            padding: "8px",
+            position: "absolute",
+            top: 20,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            background: "#fff",
             borderRadius: "30px",
-          }}
-        />
-        {search && (
-          <button
-            type="button"
-            onClick={() => setSearch("")}
-            style={{
-              border: "none",
-              background: "transparent",
-              fontSize: "18px",
-              cursor: "pointer",
-              marginRight: "5px",
-            }}
-          >
-            ×
-          </button>
-        )}
-        <button
-          type="submit"
-          style={{
-            border: "none",
-            background: "#007bff",
-            color: "#fff",
-            borderRadius: "20px",
-            padding: "6px 15px",
-            cursor: "pointer",
-            fontSize: "14px",
-            transition: "0.3s",
+            padding: "5px 10px",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
+            width: "300px",
           }}
         >
-          Go
-        </button>
-      </form>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="🔍 Search location..."
+            style={{
+              border: "none",
+              outline: "none",
+              flex: 1,
+              fontSize: "14px",
+              padding: "8px",
+              borderRadius: "30px",
+            }}
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              style={{
+                border: "none",
+                background: "transparent",
+                fontSize: "18px",
+                cursor: "pointer",
+                marginRight: "5px",
+              }}
+            >
+              ×
+            </button>
+          )}
+          <button
+            type="submit"
+            style={{
+              border: "none",
+              background: "#007bff",
+              color: "#fff",
+              borderRadius: "20px",
+              padding: "6px 15px",
+              cursor: "pointer",
+              fontSize: "14px",
+              transition: "0.3s",
+            }}
+          >
+            Go
+          </button>
+        </form>
+      )}
 
       {/* 🌍 Map */}
       <MapContainer
@@ -179,13 +196,15 @@ export default function UserLocationMap() {
             <Popup>
               📍 <b>{location.city}</b> <br />
               {location.country} <br />
-              <small>{location.full}</small> {/* ✅ full description */}
+              <small>{location.full}</small>
             </Popup>
           </Marker>
         )}
 
-        <ClickHandler setLocation={setLocation} />
-        <SetViewOnLocation position={location.lat && [location.lat, location.lng]} />
+        <ClickHandler setLocation={setLocation} editMode={editMode} />
+        <SetViewOnLocation
+          position={location.lat && [location.lat, location.lng]}
+        />
       </MapContainer>
     </div>
   );
