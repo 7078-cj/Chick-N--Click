@@ -8,11 +8,11 @@ function Order() {
     const [ordersOpen, setOrdersOpen] = useState(false);
     
   return (
-    <div className="p-4">
+    <div className="">
       
       <AppButton
             useCase="checkout"
-            size="sm"
+            size="lg"
             roundedType="full"
             onClick={() => setOrdersOpen(true)}
             iconOnly

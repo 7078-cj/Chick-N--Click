@@ -3,7 +3,7 @@ import AppButton from "./AppButton"; // Make sure the path is correct
 
 export default function TabsComponent({ categories = [], setActiveCategory, activeCategory }) {
   return (
-    <div>
+    <div className="w-full">
       {/* Tabs List */}
       <div className="flex border-b border-gray-300 rounded-md overflow-hidden">
         {/* Scrollable tabs container */}

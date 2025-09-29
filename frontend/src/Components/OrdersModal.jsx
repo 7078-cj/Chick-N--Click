@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Modal, Loader, Text, Card, Image, Button } from "@mantine/core";
+import { Modal, Loader, Text, Card, Image, Button, Badge } from "@mantine/core";
 import { OrderContext } from "../Contexts/Orderprovider";
+import CartItemCard from "./CartItemCard";
 
 export default function OrdersModal({ opened, onClose }) {
   const { 
@@ -10,18 +11,42 @@ export default function OrdersModal({ opened, onClose }) {
         }=useContext(OrderContext)
 
         const url = import.meta.env.VITE_API_URL;
+
+  const statusColors = {
+    pending: "yellow",
+    approved: "blue",
+    declined: "red",
+    completed: "green",
+    cancelled: "gray",
+  };
   return (
-    <Modal opened={opened} onClose={onClose} title="Your Orders" size="lg">
+    <Modal opened={opened} onClose={onClose} title="Order List" size="lg">
       {loading ? (
         <Loader />
       ) : orders.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-4 w-full">
           {orders.map((order) => (
             <Card key={order.id} shadow="sm" padding="lg" radius="md" withBorder>
-              <div className="flex justify-between items-center">
-                <Text fw={600}>
-                  Order #{order.id} - {order.status}
-                </Text>
+              
+              <Text size="sm" c="dimmed">
+                Placed on {new Date(order.created_at).toLocaleString()}
+              </Text>
+
+              <div className="space-y-2 mt-2 w-full flex flex-col items-center justify-center">
+                {order.items.map((item) => (
+                  <CartItemCard item={item} url={url} isOrder orderId={order.id}/>
+                ))}
+              </div>
+
+
+              <div className=" flex flex-row w-full m-3">
+                <div className="w-full flex flex-row gap-5 items-center justify-start">
+                 
+                  <Badge color={statusColors[order.status]} size="xl" radius="md">
+                      {order.status.toUpperCase()}
+                  </Badge>
+                 
+
                 {order.status === "pending" && (
                   <Button
                     color="red"
@@ -31,47 +56,16 @@ export default function OrdersModal({ opened, onClose }) {
                     Cancel Order
                   </Button>
                 )}
-              </div>
-              <Text size="sm" c="dimmed">
-                Placed on {new Date(order.created_at).toLocaleString()}
-              </Text>
+                </div>
+                
 
-              <Text fw={500} mt="sm">
-                Items:
-              </Text>
-              <div className="space-y-2 mt-2 w-50">
-                {order.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-3 border p-2 rounded-md"
-                  >
-                    <Image
-                      src={
-                        item.food.thumbnail
-                          ? `${url}/storage/${item.food.thumbnail}`
-                          : "https://via.placeholder.com/100x100?text=No+Image"
-                      }
-                      height={80}
-                      width={80}
-                      fit="contain"
-                      className="rounded-md"
-                    />
-                    <div>
-                      <Text fw={500}>{item.food.food_name}</Text>
-                      <Text size="sm" c="dimmed">
-                        Qty: {item.quantity} × ${item.price}
-                      </Text>
-                      <Text fw={600}>
-                        Subtotal: ${item.quantity * item.price}
-                      </Text>
-                    </div>
-                  </div>
-                ))}
+                <span className="w-[30%]">
+                  Total: ${order.total_price}
+                </span>
               </div>
+              
 
-              <Text fw={700} mt="sm" className="text-right">
-                Total: ${order.total_price}
-              </Text>
+              
             </Card>
           ))}
         </div>
