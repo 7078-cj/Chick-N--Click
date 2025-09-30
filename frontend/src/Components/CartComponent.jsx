@@ -4,6 +4,7 @@ import { CartContext } from "../Contexts/CartProvider";
 import CartItemCard from "./CartItemCard";
 import AppButton from "./AppButton"; 
 import AuthContext from "../Contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function CartComponent() {
   const {
@@ -19,6 +20,7 @@ export default function CartComponent() {
   const [selectedItems, setSelectedItems] = useState([]); 
   const url = import.meta.env.VITE_API_URL;
   const { token } = useContext(AuthContext);
+  const nav = useNavigate()
 
   const toggleSelect = (foodId) => {
     setSelectedItems((prev) =>
@@ -71,9 +73,7 @@ export default function CartComponent() {
               CART <br />
               SUMMARY
             </h1>
-            <button className="p-2 rounded-lg bg-orange-200 hover:bg-orange-300">
-              ✎
-            </button>
+            
           </div>
 
           {/* Cart Items */}
@@ -125,8 +125,7 @@ export default function CartComponent() {
                 <AppButton
                   useCase="menu"
                   size="lg"
-                  onClick={placeOrder}
-                  disabled={placingOrder}
+                  onClick={()=>nav('/checkout')}
                   className="w-full"
                 >
                   {placingOrder ? "Placing Order..." : "Place Order"}
