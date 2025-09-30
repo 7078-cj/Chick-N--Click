@@ -23,7 +23,7 @@ function Admin() {
 
         {/* Panels */}
         {activeTab === "foods" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 min-h-screen">
             <div className="bg-white shadow-md rounded-md p-4">
               <h4 className="text-lg font-semibold mb-4">➕ Add / Edit Food</h4>
               <FoodForm />
@@ -47,7 +47,7 @@ function Admin() {
         )}
 
         {activeTab === "orders" && (
-          <div className="bg-white shadow-md rounded-md p-4 mt-4">
+          <div className="bg-white shadow-md rounded-md p-4 mt-4 min-h-screen">
             <h4 className="text-lg font-semibold mb-4">📦 Manage Orders</h4>
             <AdminOrders />
           </div>
