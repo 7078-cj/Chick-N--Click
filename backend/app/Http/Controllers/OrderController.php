@@ -27,7 +27,6 @@ class OrderController extends Controller implements HasMiddleware
     {
         $user = $request->user();
 
-       
         $cartItems = CartItem::with('food')->where('user_id', $user->id)->get();
 
         if ($cartItems->isEmpty()) {
@@ -36,17 +35,14 @@ class OrderController extends Controller implements HasMiddleware
 
         DB::beginTransaction();
         try {
-           
             $total = $cartItems->sum(fn($item) => $item->food->price * $item->quantity);
 
-            
             $order = Order::create([
                 'user_id' => $user->id,
                 'total_price' => $total,
                 'status' => 'pending',
             ]);
 
-            
             foreach ($cartItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -56,23 +52,28 @@ class OrderController extends Controller implements HasMiddleware
                 ]);
             }
 
-           
-            CartItem::where('user_id', $user->id)->delete();
+            // Try to create GCash checkout
+            $checkout = GcashCheckout::createCheckout($order);
 
+            // If checkout fails, it should throw before here
+            // So now it's safe to clear cart and commit
+            CartItem::where('user_id', $user->id)->delete();
             DB::commit();
 
-            Http::post(config('services.websocket.http_url') . "/broadcast/order",[
+           
+            Http::post(config('services.websocket.http_url') . "/broadcast/order", [
                 'event' => 'create',
-                'order' => $order->load('items.food','items.food.categories'),
+                'order' => $order->load('items.food', 'items.food.categories'),
             ]);
 
-           
-
-            return GcashCheckout::createCheckout($order);
+            return $checkout;
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Failed to place order', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Failed to place order',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 

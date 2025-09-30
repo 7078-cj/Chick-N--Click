@@ -16,6 +16,7 @@ import LandingPage from './Pages/LandingPage'
 import { OrderProvider } from './Contexts/Orderprovider'
 import { CartProvider } from './Contexts/CartProvider'
 import Settings from './Pages/Settings'
+import CheckoutPage from './Pages/CheckoutPage'
 
 function App() {
   
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/home" element={<Home /> } />
                     
                 <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
 
                 <Route path="/checkout/success/:order_id" element={<CheckoutSuccess />} />
 
