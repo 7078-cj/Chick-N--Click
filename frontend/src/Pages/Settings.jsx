@@ -38,6 +38,7 @@ export default function Settings() {
   return (
     <div className="flex flex-row  h-screen w-screen bg-gray-50">
       {/* Sidebar */}
+      
       <aside className="w-20 bg-white flex flex-col items-center justify-between py-6 border-r h-full">
         <img
                         src={hocLogo}
@@ -141,8 +142,7 @@ export default function Settings() {
               <div className="flex-1 bg-gray-50 rounded-xl p-4 relative h-full ">
                 <h3 className="font-semibold">📍 {formData.location}</h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  2016, Lorem ipsum dolor sit amet, consectetur elit. Sed do
-                  eiusmod tempor.
+                  {location.full}
                 </p>
                 {isEditing && (
                   <button

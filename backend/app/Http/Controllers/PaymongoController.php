@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Log;
 
 class PaymongoController extends Controller
 {
-   
-    // Verify endpoint (called by frontend when user lands on success page)
     public function verifyByOrder($orderId)
     {
         $session = PaymongoSession::where('order_id', $orderId)->latest()->first();
@@ -22,28 +20,42 @@ class PaymongoController extends Controller
         $client = new Client([
             'base_uri' => 'https://api.paymongo.com/v1/',
             'auth' => [env('PAYMONGO_SECRET'), ''],
-            'verify' => false 
+            'verify' => false // ⚠️ only for local dev, remove in production
         ]);
 
         try {
             $res = $client->get("checkout_sessions/{$session->checkout_id}");
             $body = json_decode((string)$res->getBody(), true);
 
-            // look for payments in the session (server-side only)
-            $payments = data_get($body, 'data.attributes.payments', []);
+            // checkout session attributes
+            $checkout = data_get($body, 'data.attributes', []);
+            $referenceNumber = data_get($checkout, 'reference_number');
+            $lineItems       = data_get($checkout, 'line_items', []);
+            $billing         = data_get($checkout, 'billing');
+            $shipping        = data_get($checkout, 'shipping');
+
+            // look for payments in the session
+            $payments = data_get($checkout, 'payments', []);
 
             $paid = false;
-            // payments may contain entries; check their status
+            $gcashRef = null;
+
             foreach ($payments as $p) {
                 $status = data_get($p, 'attributes.status') ?? data_get($p, 'status');
+
+                // Extract GCash reference if present
+                $methodType = data_get($p, 'attributes.source.attributes.type');
+                if ($methodType === 'gcash') {
+                    $gcashRef = data_get($p, 'attributes.source.attributes.details.reference_number');
+                }
+
                 if ($status === 'paid' || $status === 'succeeded') {
                     $paid = true;
-                    break;
                 }
             }
 
-            // fallback: check linked payment_intent status (if present)
-            $piStatus = data_get($body, 'data.attributes.payment_intent.attributes.status');
+            // fallback: check linked payment_intent
+            $piStatus = data_get($checkout, 'payment_intent.attributes.status');
             if (! $paid && $piStatus && in_array($piStatus, ['succeeded', 'paid'])) {
                 $paid = true;
             }
@@ -54,17 +66,31 @@ class PaymongoController extends Controller
                     $order->payment_status = 'paid';
                     $order->paid_at = now();
                     $order->save();
-                    // do fulfillment tasks here
                 }
 
-                return response()->json(['status' => 'paid']);
+                return response()->json([
+                    'status' => 'paid',
+                    'reference_number' => $referenceNumber, // PayMongo checkout reference
+                    'gcash_reference_number' => $gcashRef,  // Actual GCash ref
+                    'checkout_details' => [
+                        'line_items' => $lineItems,
+                        'billing' => $billing,
+                        'shipping' => $shipping,
+                    ],
+                ]);
             }
 
-            // If payment is still processing or not paid:
             return response()->json([
                 'status' => 'unpaid',
                 'payments' => $payments,
-                'payment_intent_status' => $piStatus ?? null
+                'payment_intent_status' => $piStatus ?? null,
+                'reference_number' => $referenceNumber,
+                'gcash_reference_number' => $gcashRef,
+                'checkout_details' => [
+                    'line_items' => $lineItems,
+                    'billing' => $billing,
+                    'shipping' => $shipping,
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Paymongo verify error: '.$e->getMessage());
