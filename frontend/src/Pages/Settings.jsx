@@ -1,16 +1,11 @@
 import { useState } from "react";
 import { User, Lock, LogOut } from "lucide-react";
 import UserLocationMap from "../Components/LeafletMap";
+import hocLogo from "../assets/hoc_logo.png";
 
 export default function Settings() {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    fname: "Margarette",
-    lname: "Calumpiano",
-    phone: "+6391021232412",
-    note: "Add note",
-    location: "Sampaloc, Apalit",
-  });
+  
   const [location, setLocation] = useState({
       lat: null,
       lng: null,
@@ -18,6 +13,16 @@ export default function Settings() {
       country: "",
       full: "",
     });
+
+    const [formData, setFormData] = useState({
+    fname: "Ceejay",
+    lname: "Santos",
+    phone: "+6391021232412",
+    note: "Add note",
+    location: location.full,
+    lat: location.lat,
+    lng: location.lng,
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,7 +39,12 @@ export default function Settings() {
     <div className="flex flex-row  h-screen w-screen bg-gray-50">
       {/* Sidebar */}
       <aside className="w-20 bg-white flex flex-col items-center justify-between py-6 border-r h-full">
-        <img src="/logo.png" alt="Logo" className="w-12 h-12 mb-12" />
+        <img
+                        src={hocLogo}
+                        alt="Click N' Chick"
+                        className="h-14 w-auto object-contain cursor-pointer"
+                        onClick={() => nav("/")}
+                      />
         <div className="flex flex-col gap-6 mt-6">
           <button className="p-3 rounded-full bg-orange-200 text-orange-600">
             <User size={22} />
