@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+
+  laravel:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laravel-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=sqlite
+    command: >
+      sh -c "
+        php artisan storage:link &&
+        php artisan migrate:fresh --force &&
+        php artisan serve --host=0.0.0.0 --port=8000
+      "
+
+  react:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react-app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+    command: npm run dev
+
+  fastapi:
+    build:
+      context: ./websockert
+      dockerfile: Dockerfile
+    container_name: fastapi-app
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./websockert:/app
+    command: python3 main.py
