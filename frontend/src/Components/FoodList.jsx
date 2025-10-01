@@ -93,7 +93,7 @@ export default function FoodList() {
       <TabsComponent categories={categories} setActiveCategory={setActiveCategory} activeCategory={activeCategory}/>
 
       {/* Food list */}
-      <div className="flex flex-wrap gap-6 justify-center mt-10">
+      <div className="flex flex-wrap gap-6 justify-center mt-10 ">
         {filteredFoods.length > 0 ? (
           filteredFoods.map((food) => (
             <FoodCard

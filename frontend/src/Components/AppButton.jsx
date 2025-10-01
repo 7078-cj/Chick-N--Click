@@ -3,7 +3,7 @@ import React from "react";
 const useCaseVariants = {
   signin: "bg-orange-400 text-white hover:bg-amber-800",
   signup: "bg-orange-400 text-white hover:bg-amber-800",
-  order: "bg-orange-400 text-white hover:bg-orange-500",
+  order: "bg-orange-400 text-white hover:bg-orange-500 p-10",
   checkout: "bg-yellow-500 text-white hover:bg-yellow-600",
   remove: "bg-red-500 text-white hover:bg-red-600",
   confirm: "bg-orange-500 text-white hover:bg-orange-600",
@@ -23,6 +23,7 @@ const sizes = {
   sm: "px-3 py-1.5",
   md: "px-5 py-2",
   lg: "px-6 py-3",
+  xlg: "px-10 py-10",
 };
 
 const roundness = {

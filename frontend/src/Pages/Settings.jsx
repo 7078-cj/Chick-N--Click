@@ -36,46 +36,46 @@ export default function Settings() {
   };
 
   return (
-    <div className="flex flex-row  h-screen w-screen bg-gray-50">
+    <div className="flex flex-row w-screen h-screen bg-gray-50">
       {/* Sidebar */}
       
-      <aside className="w-20 bg-white flex flex-col items-center justify-between py-6 border-r h-full">
+      <aside className="flex flex-col items-center justify-between w-20 h-full py-6 bg-white border-r">
         <img
                         src={hocLogo}
                         alt="Click N' Chick"
-                        className="h-14 w-auto object-contain cursor-pointer"
+                        className="object-contain w-auto cursor-pointer h-14"
                         onClick={() => nav("/")}
                       />
         <div className="flex flex-col gap-6 mt-6">
-          <button className="p-3 rounded-full bg-orange-200 text-orange-600">
+          <button className="p-3 text-orange-600 bg-orange-200 rounded-full">
             <User size={22} />
           </button>
-          <button className="p-3 rounded-full bg-yellow-200 text-yellow-600">
+          <button className="p-3 text-yellow-600 bg-yellow-200 rounded-full">
             <Lock size={22} />
           </button>
         </div>
 
         <div className="flex flex-col gap-6 mt-6">
           
-          <button className="p-3 rounded-full bg-yellow-100 text-yellow-500 mt-auto">
+          <button className="p-3 mt-auto text-yellow-500 bg-yellow-100 rounded-full">
             <LogOut size={22} />
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex flex-col justify-self-start items-start px-10 py-6 w-screen">
-        <h1 className="text-4xl font-extrabold text-orange-500 tracking-wide uppercase mb-8">
+      <main className="flex flex-col items-start w-screen px-10 py-6 justify-self-start">
+        <h1 className="mb-8 text-4xl font-medium tracking-wide text-orange-500 uppercase hoc_font">
           Settings
         </h1>
 
         {/* Account Information */}
         <div className="bg-white shadow-sm rounded-2xl p-6  w-[150vh]">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold">Account Information</h2>
             {!isEditing && (
               <button
-                className="text-orange-500 text-sm font-medium hover:underline"
+                className="text-sm font-medium text-orange-500 hover:underline"
                 onClick={() => setIsEditing(true)}
               >
                 Edit
@@ -86,29 +86,29 @@ export default function Settings() {
           {/* Form */}
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">FNAME</label>
+              <label className="block mb-1 text-xs text-gray-500">FNAME</label>
               <input
                 type="text"
                 name="fname"
                 value={formData.fname}
                 onChange={handleChange}
-                className="w-full rounded-full border px-4 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
                 readOnly={!isEditing}
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">LNAME</label>
+              <label className="block mb-1 text-xs text-gray-500">LNAME</label>
               <input
                 type="text"
                 name="lname"
                 value={formData.lname}
                 onChange={handleChange}
-                className="w-full rounded-full border px-4 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
                 readOnly={!isEditing}
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">
+              <label className="block mb-1 text-xs text-gray-500">
                 Phone Number
               </label>
               <input
@@ -116,18 +116,18 @@ export default function Settings() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full rounded-full border px-4 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
                 readOnly={!isEditing}
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Note</label>
+              <label className="block mb-1 text-xs text-gray-500">Note</label>
               <input
                 type="text"
                 name="note"
                 value={formData.note}
                 onChange={handleChange}
-                className="w-full rounded-full border px-4 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
                 readOnly={!isEditing}
               />
             </div>
@@ -135,18 +135,18 @@ export default function Settings() {
 
           {/* Location */}
           <div className="mb-6 w-full h-[30vh]">
-            <label className="block text-xs text-gray-500 mb-2">
+            <label className="block mb-2 text-xs text-gray-500">
               Your Location
             </label>
-            <div className="flex flex-row justify-center items-center gap-4 h-full">
-              <div className="flex-1 bg-gray-50 rounded-xl p-4 relative h-full ">
+            <div className="flex flex-row items-center justify-center h-full gap-4">
+              <div className="relative flex-1 h-full p-4 bg-gray-50 rounded-xl ">
                 <h3 className="font-semibold">📍 {formData.location}</h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="mt-1 text-sm text-gray-500">
                   {location.full}
                 </p>
                 {isEditing && (
                   <button
-                    className="absolute top-2 right-3 text-orange-500 text-sm font-medium hover:underline"
+                    className="absolute text-sm font-medium text-orange-500 top-2 right-3 hover:underline"
                     onClick={() =>
                       setFormData({ ...formData, location: "New Location" })
                     }
@@ -165,7 +165,7 @@ export default function Settings() {
           {isEditing && (
             <button
               onClick={handleSave}
-              className="px-6 py-2 bg-orange-500 text-white rounded-md font-semibold hover:bg-orange-600"
+              className="px-6 py-2 font-semibold text-white bg-orange-500 rounded-md hover:bg-orange-600"
             >
               Save
             </button>

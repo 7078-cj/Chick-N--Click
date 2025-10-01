@@ -24,11 +24,11 @@ function LandingPage() {
   const nav = useNavigate()
   const { token, user } = useContext(AuthContext);
 
-  useEffect(()=>{
-    if(token && user){
-      user.role == "user" ? nav('/home') : nav('admin')
-    }
-  },[])
+  // useEffect(()=>{
+  //   if(token && user){
+  //     user.role == "user" ? nav('/home') : nav('admin')
+  //   }
+  // },[])
 
   return (
     <>
@@ -36,14 +36,14 @@ function LandingPage() {
 
       
       <section className=" w-full bg-[#FFF9F2] overflow-hidden">
-        <div className=" mx-auto px-2 md:px-12 lg:px-20 flex flex-col justify-end w-full gap-5 md:flex-row items-center py-16">
+        <div className="flex flex-col items-center justify-end w-full gap-5 px-2 py-16 mx-auto md:px-12 lg:px-20 md:flex-row">
           {/* LEFT */}
           <div className="flex-1 text-center md:text-left">
-            <h1 className="text-[100px] font-extrabold leading-tight text-amber-700">
-              DA <span className="text-amber-400">BES</span> TASTING <br />
-              CHICKEN IN TOWN!
+            <h1 className="text-[100px] font-medium leading-tight text-amber-700 hoc_font">
+              BASTA <span className="text-amber-400">BES</span> DA <br />
+              BEST!
             </h1>
-            <p className="mt-6 text-gray-700 max-w-md mx-auto md:mx-0">
+            <p className="max-w-md mx-auto mt-6 text-gray-700 md:mx-0">
               Bes House of Chicken in Apalit, Pampanga serves flavorful, juicy
               chicken at budget-friendly prices. Perfect for casual meals with
               friends or family — where chicken is always the star!
@@ -65,7 +65,7 @@ function LandingPage() {
           </div>
 
           {/* RIGHT */}
-          <div className=" abosolute mt-10  flex justify-center">
+          <div className="flex justify-center mt-10 abosolute">
            
             <img
               src={heroProduct}
@@ -81,9 +81,9 @@ function LandingPage() {
         id="about"
         className="relative w-full bg-white py-16 px-6 md:px-12 lg:px-20 my-[50px]"
       >
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center md:items-stretch gap-8">
+        <div className="flex flex-col items-center max-w-6xl gap-8 mx-auto md:flex-row md:items-stretch">
           {/* LEFT IMAGE */}
-          <div className="flex-1 flex justify-center relative">
+          <div className="relative flex justify-center flex-1">
             <img
               src={roastedChicken}
               alt="Roasted Chicken"
@@ -94,10 +94,10 @@ function LandingPage() {
           {/* RIGHT CARD */}
           <div className="flex-1 relative -ml-[10%] -mt-[-5%]">
             <div className="bg-[#FFF9F2] rounded-r-3xl rounded-tl-3xl shadow-md p-8 md:p-10 w-[320px] h-[450px]">
-              <h2 className="text-2xl font-extrabold text-orange-600 uppercase mb-4">
+              <h2 className="mb-4 text-4xl font-medium text-orange-600 uppercase hoc_font">
                 About Us
               </h2>
-              <p className="text-gray-700 leading-relaxed text-sm md:text-base">
+              <p className="text-sm leading-relaxed text-gray-700 md:text-base">
                 BES House of Chicken is a 24-hour Filipino fast food chain
                 renowned for its signature fried chicken cooked with healthy
                 herbs and spices. Established in 2018, it was born from a
@@ -122,13 +122,13 @@ function LandingPage() {
 
       {/* DEALS SECTION */}
       <section id="deals" className="relative w-full bg-white py-16 px-6 md:px-12 lg:px-20 my-[100px]">
-        <div className="max-w-7xl mx-auto">
+        <div className="mx-auto max-w-7xl">
           {/* Title Row */}
-          <div className="flex flex-col md:flex-row justify-between items-start mb-10">
-            <h2 className="text-3xl font-extrabold text-orange-900 uppercase leading-snug max-w-lg">
+          <div className="flex flex-col items-start justify-between mb-10 md:flex-row">
+            <h2 className="max-w-lg text-4xl font-medium leading-snug text-orange-900 uppercase hoc_font">
               Bite Into Our Best <br /> Deals!
             </h2>
-            <p className="text-gray-700 max-w-xl mt-4 md:mt-0">
+            <p className="max-w-xl mt-4 text-gray-700 md:mt-0">
               Enjoy our newest chicken combos and sulit meals made for every
               craving — delicious, affordable, and perfect for sharing!
             </p>
@@ -141,7 +141,7 @@ function LandingPage() {
               <img
                 src={deal1}
                 alt="Sulit Deal"
-                className="rounded-2xl shadow-md w-full object-cover"
+                className="object-cover w-full shadow-md rounded-2xl"
               />
             </div>
 
@@ -150,12 +150,12 @@ function LandingPage() {
               <img
                 src={deal2}
                 alt="7th Anniv Sale"
-                className="rounded-2xl shadow-md w-full object-cover"
+                className="object-cover w-full shadow-md rounded-2xl"
               />
               <img
                 src={deal3}
                 alt="Dine & Bite"
-                className="rounded-2xl shadow-md w-full object-cover"
+                className="object-cover w-full shadow-md rounded-2xl"
               />
             </div>
 
@@ -180,15 +180,15 @@ function LandingPage() {
       >
         <div className="max-w-4xl mx-auto text-center">
           {/* Title */}
-          <h2 className="text-4xl font-extrabold text-orange-500 uppercase tracking-wider">
+          <h2 className="text-6xl font-semibold tracking-wider text-orange-500 uppercase hoc_font">
             Testimonial
           </h2>
-          <p className="mt-2 text-orange-600 italic font-medium">
+          <p className="mt-2 italic font-medium text-orange-600">
             - Ms. Sadsad and Family -
           </p>
 
           {/* Quote */}
-          <p className="mt-8 text-lg text-gray-800 leading-relaxed">
+          <p className="mt-8 text-lg leading-relaxed text-gray-800">
             “The BES tasting chicken at an affordable price! Its staffs are
             polite and accommodating. Not to mention also their gravy that's
             surely a blockbuster hit! It already became a tradition for us to
@@ -197,7 +197,7 @@ function LandingPage() {
           </p>
 
           {/* Orange speech bubble line */}
-           <div className="mt-10 flex justify-center">
+           <div className="flex justify-center mt-10">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 400 60"
@@ -231,11 +231,11 @@ function LandingPage() {
           />
 
           {/* Text (right) */}
-          <div className="text-right w-full m-10">
-            <h3 className="text-white font-semibold text-xl md:text-2xl leading-snug">
+          <div className="w-full m-10 text-right">
+            <h3 className="text-xl font-semibold leading-snug text-white md:text-2xl">
               We’d love to hear from you! Send your inquiries, feedback,
               <br className="hidden md:block" /> or suggestions to{" "}
-              <span className="text-lime-200 font-bold">
+              <span className="font-bold text-lime-200">
                 beshochelpdesk@gmail.com
               </span>
             </h3>
@@ -244,7 +244,7 @@ function LandingPage() {
 
         {/* Bottom info section */}
         <div className="bg-[#FFF9F2] px-6 md:px-16 py-14">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 gap-12 mx-auto max-w-7xl md:grid-cols-3">
             
             {/* Left: Logo and description */}
             <div className="flex flex-col items-start">
@@ -253,7 +253,7 @@ function LandingPage() {
                 alt="Click n' Chick"
                 className="object-fit w-[500px] h-[200px]"
               />
-              <p className="text-gray-700 text-sm leading-relaxed mb-6">
+              <p className="mb-6 text-sm leading-relaxed text-gray-700">
                 Craving the comforts of home? Worry no more — we’re passionate
                 about bringing that warm, home-cooked goodness straight to your
                 table. Experience the taste of home, only here at BES House of
@@ -263,18 +263,18 @@ function LandingPage() {
               {/* Social Icons */}
               <div className="flex space-x-4">
                 <a href="https://facebook.com" target="_blank" rel="noreferrer">
-                  <i className="fab fa-facebook text-2xl text-gray-700 hover:text-orange-500"></i>
+                  <i className="text-2xl text-gray-700 fab fa-facebook hover:text-orange-500"></i>
                 </a>
                 <a href="https://instagram.com" target="_blank" rel="noreferrer">
-                  <i className="fab fa-instagram text-2xl text-gray-700 hover:text-orange-500"></i>
+                  <i className="text-2xl text-gray-700 fab fa-instagram hover:text-orange-500"></i>
                 </a>
               </div>
             </div>
 
             {/* Middle: Branch info */}
             <div>
-              <h4 className="font-semibold text-lg mb-4">Apalit Branch</h4>
-              <ul className="text-gray-700 text-sm space-y-2">
+              <h4 className="mb-4 text-lg font-semibold">Apalit Branch</h4>
+              <ul className="space-y-2 text-sm text-gray-700">
                 <li>Sampaloc, Apalit, Pampanga</li>
                 <li>+63 966 381 6965</li>
                 <li>+63 931 010 1409</li>
@@ -286,8 +286,8 @@ function LandingPage() {
 
             {/* Right: Teams */}
             <div>
-              <h4 className="font-semibold text-lg mb-4">Teams</h4>
-              <ul className="text-gray-700 text-sm space-y-2">
+              <h4 className="mb-4 text-lg font-semibold">Teams</h4>
+              <ul className="space-y-2 text-sm text-gray-700">
                 <li>Bacani, Aaron Job</li>
                 <li>Constano, Numeriano Lubrino</li>
                 <li>Dungca, Allain Francois D.</li>

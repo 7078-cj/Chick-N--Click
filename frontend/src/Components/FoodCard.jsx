@@ -1,9 +1,10 @@
 import React, { useContext, useState } from "react";
 import { Modal, NumberInput } from "@mantine/core";
 import { ShoppingCart } from "lucide-react";
-import FoodForm from "./FoodForm";
+
 import AuthContext from "../Contexts/AuthContext";
 import AppButton from "./AppButton";
+import FoodForm from "./FoodForm";
 
 export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCart }) {
   const { token, user } = useContext(AuthContext);

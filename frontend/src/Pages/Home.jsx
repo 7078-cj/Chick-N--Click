@@ -10,14 +10,14 @@ function Home() {
   const [activeTab, setActiveTab] = useState("menu");
 
   return (
-    <div className="w-full flex flex-row h-full items-center justify-center">
+    <div className="flex flex-row items-center justify-center w-full h-full">
       <div className={`${activeTab == "menu" ? 'w-[75%]' : 'w-full'}`}>
         {/* Header */}
         <Header variant="home" />
         
         {/* Tabs */}
-        <div className="w-full flex justify-start  mt-6 p-5 ">
-          <div className="flex  rounded-full gap-5 p-1">
+        <div className="flex justify-start w-full p-5 mt-6 ">
+          <div className="flex gap-5 p-1 rounded-full">
             <AppButton
               useCase={activeTab === "featured" ? "tabActive" : "tabInactive"}
               roundedType="full"
@@ -41,7 +41,7 @@ function Home() {
         </div>
 
         {/* Tab Content */}
-        <div className="mt-6 h-full">
+        <div className="h-full mt-6">
          
             {activeTab === "featured" && <Feature />}
             {activeTab === "menu" && <Menu/>}

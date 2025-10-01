@@ -60,16 +60,16 @@ export default function CartComponent() {
   };
 
   return (
-    <div className="p-6 flex flex-col min-h-screen max-h-full w-full ">
+    <div className="flex flex-col w-full min-h-screen p-6">
       {loading ? (
-        <div className="flex justify-center items-center h-full">
+        <div className="flex items-center justify-center h-full">
           <Loader />
         </div>
       ) : (
         <>
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-extrabold text-orange-600 leading-tight">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-medium leading-tight text-orange-600 hoc_font">
               CART <br />
               SUMMARY
             </h1>
@@ -107,7 +107,7 @@ export default function CartComponent() {
           {/* Subtotal + Action Button */}
           {cart.length > 0 && (
             <div className="mt-8">
-              <div className="flex justify-between font-bold mb-4">
+              <div className="flex justify-between mb-4 font-bold">
                 <span>SUB TOTAL</span>
                 <span>₱{total}</span>
               </div>

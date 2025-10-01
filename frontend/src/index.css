@@ -1,6 +1,10 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
 @import "tailwindcss";
+
+
 @tailwind utilities;
 
-.fontNiCHoi{
-    @apply font-serif;
+.hoc_font {
+  font-family: 'Luckiest Guy', cursive;
 }

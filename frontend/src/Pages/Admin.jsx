@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import FoodList from "../Components/FoodList";
-import FoodForm from "../Components/FoodForm";
 import AdminOrders from "../Components/AdminOrders";
 import CategoryForm from "../Components/CategoryForm";
 import CategoryList from "../Components/CategoryList";
 import Sidebar from "../Components/Sidebar";
+import AddFood from "../Components/AddFood";
 
 function Admin() {
   const [activeTab, setActiveTab] = useState("orders");
@@ -23,14 +23,11 @@ function Admin() {
 
         {/* Panels */}
         {activeTab === "foods" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 min-h-screen">
-            <div className="bg-white shadow-md rounded-md p-4">
-              <h4 className="text-lg font-semibold mb-4">➕ Add / Edit Food</h4>
-              <FoodForm />
-            </div>
-            <div className="md:col-span-2 bg-white shadow-md rounded-md p-4">
-              <h4 className="text-lg font-semibold mb-4">📋 Food List</h4>
-              <FoodList />
+          <div className="flex flex-row mt-4 min-h-screen w-full">
+            <FoodList className="flex-1 overflow-auto" />
+            
+            <div className="flex flex-col sticky bottom-10">
+              <AddFood />
             </div>
           </div>
         )}
