@@ -29,11 +29,12 @@ export function AuthProvider({children}) {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                 },
                 body: JSON.stringify({
                     email: e.target.email.value,
                     password: e.target.password.value,
-                }),
+                }),credentials: 'include'
             });
 
             if (response.ok) {

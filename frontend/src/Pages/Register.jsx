@@ -15,13 +15,14 @@ function Register() {
       method: "POST",
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({
         name: e.target.name.value,
         email: e.target.email.value,
         password: e.target.password.value,
         password_confirmation: e.target.password_confirmation.value, // 👈 added
-      })
+      }),credentials: 'include'
     });
 
     let data = await response.json();

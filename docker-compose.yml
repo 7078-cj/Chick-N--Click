@@ -1,14 +1,13 @@
 version: "3.9"
 
 services:
-
   laravel:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: laravel-app
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     volumes:
       - ./backend:/var/www/html
     environment:
@@ -27,8 +26,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: react-app
-    ports:
-      - "5173:5173"
+    expose:
+      - "5173"
     volumes:
       - ./frontend:/app
     command: npm run dev
@@ -38,8 +37,8 @@ services:
       context: ./websockert
       dockerfile: Dockerfile
     container_name: fastapi-app
-    ports:
-      - "8001:8001"
+    expose:
+      - "8001"
     volumes:
       - ./websockert:/app
-    command: python3 main.py
+    
