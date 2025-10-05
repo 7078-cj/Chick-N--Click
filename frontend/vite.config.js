@@ -12,5 +12,6 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
     },
     plugins: [react(), tailwindcss()],
+     base: "/",
   }
 })
