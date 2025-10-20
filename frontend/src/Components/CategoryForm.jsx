@@ -32,21 +32,24 @@ export default function CategoryForm({ onSuccess }) {
   };
 
   return (
-    <Card shadow="sm" padding="lg" radius="md">
-      <form onSubmit={handleSubmit}>
+   
+      <form onSubmit={handleSubmit} className="flex flex-col justify-between h-full p-5">
         <Stack>
+          <span className="mb-4">Category Name</span>
           <TextInput
-            label="Category Name"
+            
             placeholder="Enter category name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
           />
-          <Button type="submit" color="blue">
-            Create Category
-          </Button>
+          
         </Stack>
+        <Button type="submit" color="yellow">
+        Create Category
+      </Button>
       </form>
-    </Card>
+      
+ 
   );
 }

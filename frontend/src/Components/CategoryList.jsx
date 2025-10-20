@@ -56,12 +56,12 @@ export default function CategoryList() {
   };
 
   return (
-    <Card shadow="sm" padding="lg" radius="md">
-      <Text fw={700} mb="md">📂 Categories</Text>
+    <div className="">
+      <h1 className="text-[50px] font-medium leading-tight text-amber-600 hoc_font m-4">Categories</h1>
       {categories.map((cat) => (
         <div
           key={cat.id}
-          className="flex justify-between items-center border-b py-2"
+          className="flex justify-between items-center bg-white p-4 rounded-2xl gap-4 mb-4 xl"
         >
           {editingId === cat.id ? (
             <Group className="w-full">
@@ -79,15 +79,15 @@ export default function CategoryList() {
             </Group>
           ) : (
             <>
-              <Text>{cat.name}</Text>
+              <span className="text-[25px] font-mono">{cat.name}</span>
               <Group>
-                <Button size="xs" variant="light" onClick={() => handleEdit(cat)}>
+                <Button size="xs"  color="yellow"  onClick={() => handleEdit(cat)}>
                   Edit
                 </Button>
                 <Button
                   size="xs"
-                  color="red"
-                  variant="light"
+                  color="brown"
+                  
                   onClick={() => handleDelete(cat.id)}
                 >
                   Delete
@@ -97,6 +97,6 @@ export default function CategoryList() {
           )}
         </div>
       ))}
-    </Card>
+    </div>
   );
 }

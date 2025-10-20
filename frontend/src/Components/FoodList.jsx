@@ -2,18 +2,28 @@ import React, { useContext, useEffect, useState } from "react";
 import FoodCard from "./FoodCard";
 import AuthContext from "../Contexts/AuthContext";
 import { FoodContext } from "../Contexts/FoodProvider";
-
 import { CartContext } from "../Contexts/CartProvider";
-import TabsComponent from "./TabsComponent";
+import { SegmentedControl } from "@mantine/core";
 
 export default function FoodList() {
   const { setFoods, foods, categories } = useContext(FoodContext);
   const { fetchCart } = useContext(CartContext);
+  const { token } = useContext(AuthContext);
   const url = import.meta.env.VITE_API_URL;
-  let { token } = useContext(AuthContext);
 
+  const [filteredFoods, setFilteredFoods] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
 
+  
+  const data = [
+    { label: "All", value: "all" },
+    ...categories.map((c) => ({
+      label: c.name,
+      value: c.id.toString(),
+    })),
+  ];
+
+  // Fetch foods
   const fetchFoods = async () => {
     try {
       const res = await fetch(`${url}/api/foods`, {
@@ -23,7 +33,7 @@ export default function FoodList() {
       const data = await res.json();
       setFoods(data);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch foods:", err);
     }
   };
 
@@ -31,69 +41,73 @@ export default function FoodList() {
     fetchFoods();
   }, []);
 
-  const onDelete = (id) => {
-    setFoods((prev) => prev.filter((f) => f.id !== id));
-  };
+  const onDelete = (id) => setFoods((prev) => prev.filter((f) => f.id !== id));
 
   const handleUpdate = (updatedFood) => {
     if (!updatedFood?.id) return;
-    setFoods((prev) =>
-      prev.map((f) => (f.id === updatedFood.id ? updatedFood : f))
-    );
+    setFoods((prev) => prev.map((f) => (f.id === updatedFood.id ? updatedFood : f)));
   };
 
   const handleDelete = async (food) => {
-      if (!confirm("Are you sure you want to delete this food?")) return;
-      try {
-        await fetch(`${url}/api/foods/${food.id}`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (onDelete) onDelete(food.id);
-      } catch (err) {
-        console.error(err);
-        alert("Failed to delete food.");
-      }
-    };
-  
-    const handleAddToCart = async (food,quantity,close) => {
-      try {
-        const res = await fetch(`${url}/api/cart/add/${food.id}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ quantity }),
-        });
-        if (res.ok){
-          
-          fetchCart()
-          close()
-        }
-        
-        
-      } catch (err) {
-        console.error(err);
-        alert("Failed to add to cart.");
-      }
-    };
+    if (!confirm("Are you sure you want to delete this food?")) return;
+    try {
+      await fetch(`${url}/api/foods/${food.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      onDelete(food.id);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete food.");
+    }
+  };
 
-  // 🔑 Filter foods by active category
-  const filteredFoods =
-    activeCategory === "all"
-      ? foods
-      : foods.filter((f) =>
-          f.categories?.some((c) => c.id.toString() === activeCategory)
-        );
+  const handleAddToCart = async (food, quantity, close) => {
+    try {
+      const res = await fetch(`${url}/api/cart/add/${food.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ quantity }),
+      });
+      if (res.ok) {
+        fetchCart();
+        close();
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add to cart.");
+    }
+  };
+
+  
+  const filterFoods = () => {
+    if (activeCategory === "all") return foods;
+    return foods.filter((f) =>
+      f.categories?.some((c) => c.id.toString() === activeCategory)
+    );
+  };
+
+  
+  useEffect(() => {
+    setFilteredFoods(filterFoods());
+  }, [foods, activeCategory]);
 
   return (
     <div className="w-full">
-      {/* Tabs for category filter */}
-      <TabsComponent categories={categories} setActiveCategory={setActiveCategory} activeCategory={activeCategory}/>
+      <SegmentedControl
+        value={activeCategory}
+        onChange={setActiveCategory}
+        fullWidth
+        radius="xl"
+        color="orange"
+        data={data}
+        transitionDuration={200}
+      />
 
-      {/* Food list */}
-      <div className="flex flex-wrap gap-6 justify-center mt-10 ">
+      <div className="flex flex-wrap gap-6 justify-center mt-10">
         {filteredFoods.length > 0 ? (
           filteredFoods.map((food) => (
             <FoodCard

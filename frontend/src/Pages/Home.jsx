@@ -10,7 +10,7 @@ function Home() {
   const [activeTab, setActiveTab] = useState("menu");
 
   return (
-    <div className="flex flex-row items-center justify-center w-full h-full">
+    <div className="flex flex-row items-start justify-start w-full h-full">
       <div className={`${activeTab == "menu" ? 'w-[75%]' : 'w-full'}`}>
         {/* Header */}
         <Header variant="home" />
@@ -48,7 +48,7 @@ function Home() {
 
         </div>
       </div>
-      {activeTab === "menu" && <div className="flex flex-col p-5 w-[25%] h-full items-center justify-center">
+      {activeTab === "menu" && <div className="flex flex-col p-5 w-[25%] h-full items-center justify-center sticky top-0">
           <CartComponent/>
       </div>}
     </div>

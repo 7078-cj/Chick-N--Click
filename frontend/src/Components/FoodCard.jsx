@@ -104,12 +104,12 @@ export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCar
             <div className="flex justify-between mt-4">
               <AppButton
                 useCase="confirm"
-                size="sm"
+                size="md"
                 onClick={() => setOpened(true)}
               >
                 Edit
               </AppButton>
-              <AppButton useCase="remove" size="sm" onClick={()=>onDelete(food)}>
+              <AppButton useCase="remove" size="md" onClick={()=>onDelete(food)}>
                 Delete
               </AppButton>
             </div>

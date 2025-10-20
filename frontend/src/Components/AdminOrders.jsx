@@ -10,17 +10,24 @@ import {
   SegmentedControl,
   TextInput,
   Select,
+  NumberInput,
+  Group,
+  Stack,
+  Divider,
+  ScrollArea,
+  Container,
+  Title,
 } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
 
 function AdminOrders() {
-  const { token,user } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const url = import.meta.env.VITE_API_URL;
-  const wsUrl = import.meta.env.VITE_WS_URL; // e.g. ws://127.0.0.1:8001
+  const wsUrl = import.meta.env.VITE_WS_URL;
 
   const wsRef = useRef(null);
 
@@ -79,7 +86,7 @@ function AdminOrders() {
     setOrders((prev) => {
       switch (event) {
         case "create":
-          return [order, ...prev]; // add new order at top
+          return [order, ...prev];
         case "cancelled":
           return prev.map((o) =>
             o.id === order.id ? { ...o, status: "cancelled" } : o
@@ -101,29 +108,19 @@ function AdminOrders() {
     const ws = new WebSocket(`${wsUrl}/ws/order/${user?.id}`);
     wsRef.current = ws;
 
-    ws.onopen = () => {
-      console.log("✅ Connected to order WebSocket");
-    };
-
+    ws.onopen = () => console.log("✅ Connected to order WebSocket");
     ws.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data);
-        if (msg.type === "order") {
-          handleOrderEvent(msg);
-        }
+        if (msg.type === "order") handleOrderEvent(msg);
       } catch (err) {
         console.error("WS error", err);
       }
     };
+    ws.onclose = () => console.log("❌ Order WebSocket closed");
 
-    ws.onclose = () => {
-      console.log("❌ Order WebSocket closed");
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, [token,user]);
+    return () => ws.close();
+  }, [token, user]);
 
   const statusColors = {
     pending: "yellow",
@@ -142,12 +139,28 @@ function AdminOrders() {
   });
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+    <>
+      <Stack gap="md">
+        {/* Header */}
+        <Group justify="space-between" align="center">
+          <h1 className="hoc_font text-amber-600 font-extrabold text-2xl">
+            Admin Orders
+          </h1>
+          <TextInput
+            icon={<IconSearch size={18} />}
+            placeholder="Search by Order ID or Customer..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            w="40%"
+          />
+        </Group>
+
         <SegmentedControl
           value={filter}
           onChange={setFilter}
+          fullWidth
+          radius="xl"
+          color="orange"
           data={[
             { label: "All", value: "all" },
             { label: "Pending", value: "pending" },
@@ -156,100 +169,127 @@ function AdminOrders() {
             { label: "Completed", value: "completed" },
             { label: "Cancelled", value: "cancelled" },
           ]}
+          transitionDuration={200}
         />
-        <TextInput
-          placeholder="Search by ID or customer..."
-          icon={<IconSearch size={16} />}
-          value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
-          className="w-full md:w-72"
-        />
-      </div>
-
-      {/* Orders */}
-      {loading ? (
-        <Loader />
-      ) : filteredOrders.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-          {filteredOrders.map((order) => (
-            <Card
-              key={order.id}
-              shadow="md"
-              padding="lg"
-              radius="md"
-              withBorder
-              className="hover:shadow-lg transition h-auto"
-            >
-              <div className="flex justify-between items-center mb-2">
-                <Text fw={600}>Order #{order.id}</Text>
-                <Badge color={statusColors[order.status]} size="lg">
-                  {order.status.toUpperCase()}
-                </Badge>
-              </div>
-
-              <Text size="sm" c="dimmed">
-                {new Date(order.created_at).toLocaleString()}
-              </Text>
-              <Text fw={500} mt="sm">
-                Customer: {order.user?.name || "Unknown"}
-              </Text>
-
-              <div className="mt-3 space-y-2">
-                {order.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between gap-2 border-b pb-1"
-                  >
-                    <Image
-                      src={
-                        item.food.thumbnail
-                          ? `${url}/storage/${item.food.thumbnail}`
-                          : "https://via.placeholder.com/40x40?text=No+Img"
-                      }
-                      fit="cover"
-                      radius="sm"
-                      className="h-20 w-20 object-cover"
-                    />
-
-                    <div className="flex-1 px-2">
-                      <Text size="sm" fw={500}>
-                        {item.food.food_name}
+        <div className="flex flex-row w-full  items-center gap-[20%] p-4 border-b border-slate-700">
+          <h1 className="hoc_font">Order Info</h1>
+          <h1  className="hoc_font">Status</h1>
+          <h1 className="hoc_font">Update Status</h1>
+          <h1 className="hoc_font">ETC</h1>
+          <h1 className="hoc_font">Total</h1>
+          
+        </div>
+        {/* Orders List */}
+        {loading ? (
+          <Loader color="orange" size="lg" variant="bars" />
+        ) : filteredOrders.length > 0 ? (
+          <ScrollArea h="90vh">
+            <Stack gap="lg">
+              {filteredOrders.map((order) => (
+                <Card
+                  key={order.id}
+                  withBorder
+                  radius="md"
+                  shadow="md"
+                  p="lg"
+                  style={{
+                    borderLeft: `5px solid var(--mantine-color-${statusColors[order.status]}-6)`,
+                  }}
+                >
+                  <Group justify="space-between" align="flex-start">
+                    <div>
+                      <Text fw={700} size="lg">
+                        Order #{order.id}
                       </Text>
-                      <Text size="xs" c="dimmed">
-                        Qty: {item.quantity}
+                      <Text size="sm" c="dimmed">
+                        {new Date(order.created_at).toLocaleString()}
+                      </Text>
+                      <Text fw={500}>
+                        Customer:{" "}
+                        <Text span c="orange.8">
+                          {order.user?.name || "Unknown"}
+                        </Text>
                       </Text>
                     </div>
-                    <Text size="sm">${item.quantity * item.price}</Text>
+
+                    <Badge
+                      color={statusColors[order.status]}
+                      variant="filled"
+                      size="lg"
+                    >
+                      {order.status.toUpperCase()}
+                    </Badge>
+                     {order.status === "cancelled" ? (
+                      <Button size="xs" color="gray" disabled>
+                        Cancelled
+                      </Button>
+                    ) : (
+                      <Select
+                        size="sm"
+                        placeholder="Update status"
+                        data={["pending", "approved", "declined", "completed"]}
+                        value={order.status}
+                        onChange={(value) => updateStatus(order.id, value)}
+                      />
+                    )}
+
+                    <NumberInput
+                     
+                      placeholder="Estimated completion time"
+                      min={0}
+                      w={150}
+                    />
+
+                    <Text fw={700} c="green.7">
+                      P{order.total_price.toFixed(2)}
+                    </Text>
+                  </Group>
+
+                  <div className="w-full h-10"></div>
+
+                  <Text fw={600} mb="xs">
+                    Order Details:
+                  </Text>
+                  <div className="flex flex-row gap-4">
+                    {order.items.map((item) => (
+                      <div className="w-[5%] h-[5%]"
+                      >
+                        <Group align="center" gap="md">
+                          <Image
+                            src={
+                              item.food.thumbnail
+                                ? `${url}/storage/${item.food.thumbnail}`
+                                : "https://via.placeholder.com/60x60?text=No+Img"
+                            }
+                            radius="md"
+                            fit="cover"
+                            width={20}
+                            height={20}
+                          />
+                          <div>
+                            <Text fw={500}>{item.food.food_name}</Text>
+                            <Text size="sm" c="dimmed">
+                              Qty: {item.quantity}
+                            </Text>
+                            <Text size="sm" fw={600} c="green.8">
+                              P{item.quantity * item.price}
+                            </Text>
+                          </div>
+                        </Group>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-
-              <Text fw={700} mt="sm" className="text-right text-green-700">
-                Total: ${order.total_price}
-              </Text>
-
-              <div className="flex justify-between mt-4 items-center">
-                {order.status === "cancelled" ? (
-                  <Button size="xs" color="gray" disabled>
-                    Cancelled
-                  </Button>
-                ) : (
-                  <Select
-                    size="xs"
-                    placeholder="Update status"
-                    data={["pending", "approved", "declined", "completed"]}
-                    value={order.status}
-                    onChange={(value) => updateStatus(order.id, value)}
-                  />
-                )}
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Text>No orders found.</Text>
-      )}
-    </div>
+                </Card>
+              ))}
+            </Stack>
+          </ScrollArea>
+        ) : (
+          <Text ta="center" c="dimmed" mt="lg">
+            No orders found.
+          </Text>
+        )}
+      </Stack>
+    </>
   );
 }
 
