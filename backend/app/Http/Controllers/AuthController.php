@@ -59,4 +59,31 @@ class AuthController extends Controller
             'message' => 'You are logged out'
         ];
     }
+
+    public function updateUser(Request $request)
+    {
+        $user = $request->user(); 
+
+        $validated = $request->validate([
+            
+           
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'phone_number' => 'nullable|string|max:20',
+            'location' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'note' => 'nullable|string|max:500',
+           
+        ]);
+
+       
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user' => $user,
+        ]);
+    }
 }

@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register',[AuthController::class, 'register']);
 Route::post('/login',[AuthController::class, 'login']);
 Route::get('/user',[AuthController::class, 'userDetails'])->middleware('auth:sanctum');
+Route::put('/user/update',[AuthController::class, 'updateUser'])->middleware('auth:sanctum');
 Route::post('/logout',[AuthController::class, 'logout'])->middleware('auth:sanctum');
+
 
 Route::get('/cart', [CartItemController::class, 'userCart']);
 Route::post('/cart/add/{foodId}', [CartItemController::class, 'addToCart']);

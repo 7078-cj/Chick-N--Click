@@ -10,6 +10,7 @@ import {
 import "leaflet/dist/leaflet.css";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 
+// 🔹 Helper component: change map center when user location updates
 function SetViewOnLocation({ position }) {
   const map = useMap();
   useEffect(() => {
@@ -20,11 +21,11 @@ function SetViewOnLocation({ position }) {
   return null;
 }
 
+// 🔹 Handles map clicks only in edit mode
 function ClickHandler({ setLocation, editMode }) {
   useMapEvents({
     click: async (e) => {
-      if (!editMode) return; // ✅ only active in edit mode
-
+      if (!editMode) return; // only active in edit mode
       const { lat, lng } = e.latlng;
 
       try {
@@ -52,13 +53,46 @@ function ClickHandler({ setLocation, editMode }) {
   return null;
 }
 
-export default function UserLocationMap({editMode, setLocation, location}) {
-  
+export default function UserLocationMap({ editMode, setLocation, location, user }) {
   const [search, setSearch] = useState("");
-  
   const provider = new OpenStreetMapProvider();
 
+  const [userLoc, setUserLoc] = useState({
+    lat: 14.5995,
+    lng: 120.9842,
+    city: "",
+    country: "",
+    full: "",
+  });
+
+  // Initialize location once
   useEffect(() => {
+    // Use prop location first
+    if (location?.lat && location?.lng) {
+      setUserLoc(location);
+      return;
+    }
+
+    // Use user lat/lng if available
+    if (user?.latitude && user?.longitude) {
+      setUserLoc({
+        lat: user.latitude,
+        lng: user.longitude,
+        city: user.location || "",
+        country: "",
+        full: user.location || "",
+      });
+      setLocation({
+        lat: user.latitude,
+        lng: user.longitude,
+        city: user.location || "",
+        country: "",
+        full: user.location || "",
+      });
+      return;
+    }
+
+    // Fallback: browser geolocation
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
@@ -71,7 +105,7 @@ export default function UserLocationMap({editMode, setLocation, location}) {
             );
             const data = await res.json();
 
-            setLocation({
+            const newLoc = {
               lat,
               lng,
               city:
@@ -81,40 +115,44 @@ export default function UserLocationMap({editMode, setLocation, location}) {
                 "",
               country: data.address.country || "",
               full: data.display_name || "",
-            });
+            };
+
+            setUserLoc(newLoc);
+            setLocation(newLoc);
           } catch {
+            setUserLoc({ lat, lng, city: "", country: "", full: "" });
             setLocation({ lat, lng, city: "", country: "", full: "" });
           }
         },
         (err) => console.error("Geolocation error:", err)
       );
     }
-  }, []);
+  }, [location, user, setLocation]);
 
+  // Handle search
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!search) return;
+    if (!search.trim()) return;
 
     const results = await provider.search({ query: search });
     if (results.length > 0) {
       const { x: lng, y: lat, label } = results[0];
 
-      setLocation({
+      const newLoc = {
         lat,
         lng,
         city: label.split(",")[0] || "",
         country: label.split(",").pop() || "",
         full: label,
-      });
+      };
+
+      setUserLoc(newLoc);
+      setLocation(newLoc);
     }
   };
 
   return (
     <div style={{ height: "100%", width: "100%", position: "relative" }}>
-      {/* 🔄 Toggle Buttons */}
-    
-
-      {/* 🔍 Search Bar (only in edit mode) */}
       {editMode && (
         <form
           onSubmit={handleSearch}
@@ -180,9 +218,8 @@ export default function UserLocationMap({editMode, setLocation, location}) {
         </form>
       )}
 
-      {/* 🌍 Map */}
       <MapContainer
-        center={[location.lat || 14.5995, location.lng || 120.9842]} // fallback: Manila
+        center={[userLoc.lat, userLoc.lng]}
         zoom={13}
         style={{ height: "100%", width: "100%" }}
       >
@@ -190,21 +227,17 @@ export default function UserLocationMap({editMode, setLocation, location}) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
         />
-
-        {location.lat && location.lng && (
-          <Marker position={[location.lat, location.lng]}>
+        {userLoc.lat && userLoc.lng && (
+          <Marker position={[userLoc.lat, userLoc.lng]}>
             <Popup>
-              📍 <b>{location.city}</b> <br />
-              {location.country} <br />
-              <small>{location.full}</small>
+              📍 <b>{userLoc.city}</b> <br />
+              {userLoc.country} <br />
+              <small>{userLoc.full}</small>
             </Popup>
           </Marker>
         )}
-
         <ClickHandler setLocation={setLocation} editMode={editMode} />
-        <SetViewOnLocation
-          position={location.lat && [location.lat, location.lng]}
-        />
+        <SetViewOnLocation position={[userLoc.lat, userLoc.lng]} />
       </MapContainer>
     </div>
   );

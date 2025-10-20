@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { User, Lock, LogOut } from "lucide-react";
 import UserLocationMap from "../Components/LeafletMap";
 import hocLogo from "../assets/hoc_logo.png";
+import AuthContext from "../Contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Settings() {
+  const url = import.meta.env.VITE_API_URL;
+  const navigate = useNavigate();
+  const { token } = useContext(AuthContext);
+
   const [isEditing, setIsEditing] = useState(false);
-  
+  const [user, setUser] = useState(null);
+
   const [location, setLocation] = useState({
       lat: null,
       lng: null,
@@ -14,38 +21,111 @@ export default function Settings() {
       full: "",
     });
 
-    const [formData, setFormData] = useState({
-    fname: "Ceejay",
-    lname: "Santos",
-    phone: "+6391021232412",
-    note: "Add note",
-    location: location.full,
-    lat: location.lat,
-    lng: location.lng,
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    phone_number: "",
+    note: "",
+    location: location.full || "",
+    latitude: location.lat || null,
+    longitude: location.lng || null,
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  useEffect(()=>{
+    console.log(location)
+    setFormData({
+      ...formData,
+        location: location.full || "",
+        latitude: location.lat || null,
+        longitude: location.lng || null,
+    })
+    console.log(formData)
+  },[location])
+
+  // 🔹 Fetch user info
+  const fetchUser = async () => {
+    try {
+      const res = await fetch(`${url}/api/user`, {
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
+
+      const data = await res.json();
+      console.log("Fetched user:", data);
+      setUser(data);
+
+      // Populate form with fetched data
+      setFormData({
+        first_name: data.first_name || "",
+        last_name: data.last_name || "",
+        phone_number: data.phone_number || "",
+        note: data.note || "",
+        location: data.location || "",
+        latitude: data.latitude || null,
+        longitude: data.longitude || null,
+      });
+
+      if (data.full) {
+        setLocation({
+          lat: data.lat,
+          lng: data.lng,
+          full: data.full,
+          
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+    }
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    console.log("Updated user info:", formData);
-    // 🔹 Here you’d call your API to update user info in backend
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  // 🔹 Handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // 🔹 Save handler (you can hook up your backend update here)
+  const handleSave = async () => {
+    try {
+      const res = await fetch(`${url}/api/user/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error("Failed to update user info");
+
+      const updated = await res.json();
+      console.log("✅ Updated user info:", updated);
+      setUser(updated);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Update failed:", err);
+    }
   };
 
   return (
     <div className="flex flex-row w-screen h-screen bg-gray-50">
       {/* Sidebar */}
-      
       <aside className="flex flex-col items-center justify-between w-20 h-full py-6 bg-white border-r">
         <img
-                        src={hocLogo}
-                        alt="Click N' Chick"
-                        className="object-contain w-auto cursor-pointer h-14"
-                        onClick={() => nav("/")}
-                      />
+          src={hocLogo}
+          alt="Click N' Chick"
+          className="object-contain w-auto cursor-pointer h-14"
+          onClick={() => navigate("/")}
+        />
         <div className="flex flex-col gap-6 mt-6">
           <button className="p-3 text-orange-600 bg-orange-200 rounded-full">
             <User size={22} />
@@ -54,9 +134,7 @@ export default function Settings() {
             <Lock size={22} />
           </button>
         </div>
-
         <div className="flex flex-col gap-6 mt-6">
-          
           <button className="p-3 mt-auto text-yellow-500 bg-yellow-100 rounded-full">
             <LogOut size={22} />
           </button>
@@ -69,8 +147,7 @@ export default function Settings() {
           Settings
         </h1>
 
-        {/* Account Information */}
-        <div className="bg-white shadow-sm rounded-2xl p-6  w-[150vh]">
+        <div className="bg-white shadow-sm rounded-2xl p-6 w-[150vh]">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold">Account Information</h2>
             {!isEditing && (
@@ -89,8 +166,8 @@ export default function Settings() {
               <label className="block mb-1 text-xs text-gray-500">FNAME</label>
               <input
                 type="text"
-                name="fname"
-                value={formData.fname}
+                name="first_name"
+                value={formData.first_name}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
                 readOnly={!isEditing}
@@ -100,8 +177,8 @@ export default function Settings() {
               <label className="block mb-1 text-xs text-gray-500">LNAME</label>
               <input
                 type="text"
-                name="lname"
-                value={formData.lname}
+                name="last_name"
+                value={formData.last_name}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
                 readOnly={!isEditing}
@@ -113,8 +190,8 @@ export default function Settings() {
               </label>
               <input
                 type="text"
-                name="phone"
-                value={formData.phone}
+                name="phone_number"
+                value={formData.phone_number}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
                 readOnly={!isEditing}
@@ -139,10 +216,10 @@ export default function Settings() {
               Your Location
             </label>
             <div className="flex flex-row items-center justify-center h-full gap-4">
-              <div className="relative flex-1 h-full p-4 bg-gray-50 rounded-xl ">
+              <div className="relative flex-1 h-full p-4 bg-gray-50 rounded-xl">
                 <h3 className="font-semibold">📍 {formData.location}</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  {location.full}
+                  {location.full || "Location not set"}
                 </p>
                 {isEditing && (
                   <button
@@ -156,7 +233,12 @@ export default function Settings() {
                 )}
               </div>
               <div className="w-[40vh] h-full bg-gray-200 rounded-xl flex items-center justify-center">
-                <UserLocationMap editMode={isEditing}  setLocation={setLocation} location={location}/>
+                <UserLocationMap
+                  editMode={isEditing}
+                  setLocation={setLocation}
+                  location={location}
+                  user={user}
+                />
               </div>
             </div>
           </div>
