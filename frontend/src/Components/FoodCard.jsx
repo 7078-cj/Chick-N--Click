@@ -5,6 +5,7 @@ import { ShoppingCart } from "lucide-react";
 import AuthContext from "../Contexts/AuthContext";
 import AppButton from "./AppButton";
 import FoodForm from "./FoodForm";
+import AddToCart from "./AddToCart";
 
 export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCart }) {
   const { token, user } = useContext(AuthContext);
@@ -122,29 +123,14 @@ export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCar
         <FoodForm food={food} onSuccess={onUpdate} onClose={() => setOpened(false)} />
       </Modal>
 
-      {/* Quantity Modal */}
-      <Modal
-        opened={cartOpened}
-        onClose={() => setCartOpened(false)}
-        title={`Add ${food.food_name} to Cart`}
-        centered
-      >
-        <NumberInput
-          label="Quantity"
-          value={quantity}
-          min={1}
-          onChange={setQuantity}
-          required
-        />
-        <AppButton
-          useCase="checkout"
-          fullWidth
-          className="mt-4"
-          onClick={()=>handleAddToCart(food,quantity,close)}
-        >
-          Confirm Add
-        </AppButton>
-      </Modal>
+      <AddToCart 
+      setCartOpened={setCartOpened} 
+      cartOpened={cartOpened} quantity={quantity} 
+      setQuantity={setQuantity} 
+      handleAddToCart={handleAddToCart} 
+      food={food} 
+      close={close}/>
+      
     </>
   );
 }

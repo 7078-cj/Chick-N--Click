@@ -1,11 +1,55 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { CartContext } from "../Contexts/CartProvider";
 import CartItemCard from "../Components/CartItemCard";
 import AppButton from "../Components/AppButton";
+import AuthContext from "../Contexts/AuthContext";
+import UserLocationMap from "../Components/LeafletMap";
 
 function CheckoutPage() {
   const { cart, placeOrder, placingOrder } = useContext(CartContext);
   const url = import.meta.env.VITE_API_URL;
+  const { token } = useContext(AuthContext);
+  const [user, setUser] = useState(null);
+  const [location, setLocation] = useState({
+        lat: null,
+        lng: null,
+        city: "",
+        country: "",
+        full: "",
+      });
+  const fetchUser = async () => {
+      try {
+        const res = await fetch(`${url}/api/user`, {
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
+  
+        const data = await res.json();
+        console.log("Fetched user:", data);
+        setUser(data);
+        console.log(user)
+  
+        if (data.full) {
+          setLocation({
+            lat: data.lat,
+            lng: data.lng,
+            full: data.full,
+            
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch user:", err);
+      }
+    };
+  
+    useEffect(() => {
+      fetchUser();
+    }, []);
 
   return (
     <div className="flex flex-row gap-6 p-6 bg-white h-screen w-full font-sans">
@@ -104,11 +148,12 @@ function CheckoutPage() {
       <div className="w-[60%] bg-white rounded-xl shadow-sm p-6 flex flex-col">
         {/* Map placeholder */}
         <div className="relative flex-1 bg-gray-100 rounded-lg">
-          <img
-            src="/map-placeholder.png"
-            alt="Pinned Location"
-            className="w-full h-full object-cover rounded-lg"
-          />
+          <UserLocationMap
+                            editMode={false}
+                            setLocation={setLocation}
+                            location={location}
+                            user={user}
+                          />
           
         </div>
 
@@ -117,14 +162,12 @@ function CheckoutPage() {
           <p className="font-bold text-gray-900">Your Pinned Location</p>
           <div className="flex items-center mt-2">
             <span className="text-orange-500 mr-2">📍</span>
-            <span className="font-medium">Sampaloc, Apalit</span>
-            <button className="ml-auto text-orange-500 text-xs">change</button>
+            <span className="font-medium">{location.full}</span>
+            
           </div>
-          <p className="text-gray-500 mt-1">
-            Lorem ipsum sit amet, consectetur elit. Sed do eiusmod tempor.
-          </p>
-          <p className="mt-4 font-bold">Ceejay Santos</p>
-          <p className="text-gray-700">+6391021232412</p>
+          
+          <p className="mt-4 font-bold">{user?.first_name} {user?.last_name}</p>
+          <p className="text-gray-700">{user?.phone_number}</p>
         </div>
       </div>
     </div>
