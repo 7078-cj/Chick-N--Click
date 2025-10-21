@@ -17,7 +17,10 @@ class Order extends Model
         'total_price',
         'paid_status',
         'paid_at',
-        'estimated_time_of_completion'
+        'estimated_time_of_completion',
+        'latitude',
+        'longitude',
+        'location',
     ];
 
     public function user()

@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string('status')->default('pending');
             $table->string('estimated_time_of_completion')->nullable();
             $table->string('payment_status')->nullable();
+            $table->string('longitude')->nullable();
+            $table->string('latitude')->nullable();
+            $table->string('location')->nullable();
             $table->string('paid_at')->nullable();
             $table->timestamps();
         });

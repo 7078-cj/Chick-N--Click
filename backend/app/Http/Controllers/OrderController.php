@@ -26,6 +26,12 @@ class OrderController extends Controller implements HasMiddleware
    public function placeOrder(Request $request)
     {
         $user = $request->user();
+        $validated = $request->validate([
+            'location' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+        ]);
+
 
         $cartItems = CartItem::with('food')->where('user_id', $user->id)->get();
 
@@ -41,6 +47,9 @@ class OrderController extends Controller implements HasMiddleware
                 'user_id' => $user->id,
                 'total_price' => $total,
                 'status' => 'pending',
+                'latitude'  => $validated['latitude'],
+                'longitude'  => $validated['longitude'],
+                'location'  => $validated['location'],
             ]);
 
             foreach ($cartItems as $item) {

@@ -103,7 +103,7 @@ function CheckoutPage() {
                     <AppButton
                                     useCase="menu"
                                     size="lg"
-                                    onClick={placeOrder}
+                                    onClick={() => placeOrder(location.lat,location.lng, location.full)}
                                     disabled={placingOrder}
                                     className="w-full"
                                     >

@@ -21,7 +21,7 @@ function Register() {
         name: e.target.name.value,
         email: e.target.email.value,
         password: e.target.password.value,
-        password_confirmation: e.target.password_confirmation.value, // 👈 added
+        password_confirmation: e.target.password_confirmation.value, 
       }),credentials: 'include'
     });
 
@@ -76,7 +76,7 @@ function Register() {
             Confirm Password
             <input
               type="password"
-              name="password_confirmation" // 👈 must match Laravel validation
+              name="password_confirmation" 
               className="mt-1 px-3 py-2 border-2 border-gray-300 rounded-md outline-none focus:border-green-500 text-gray-700"
               required
             />
