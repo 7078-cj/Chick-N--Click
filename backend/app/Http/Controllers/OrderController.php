@@ -149,6 +149,32 @@ class OrderController extends Controller implements HasMiddleware
         return response()->json(['message' => 'Order status updated', 'order' => $order], 200);
     }
 
+    public function updateOrderETC(Request $request, $orderId)
+    {
+        $this->authorize('isAdmin', Order::class);
+
+        $request->validate([
+            'etc' => 'required|numeric'
+        ]);
+
+        $order = Order::find($orderId);
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        $order->estimated_time_of_completion = $request->etc;
+        $order->save();
+
+        Http::post(config('services.websocket.http_url') ."/broadcast/order", [
+            'event' => 'update',
+            'user_id' => $order->user->id,
+            'order' => $order->load('items.food','items.food.categories'),
+        ]);
+
+        return response()->json(['message' => 'Order status updated', 'order' => $order], 200);
+    }
+
     public function allOrders(Request $request)
     {
         $this->authorize('isAdmin', Order::class);

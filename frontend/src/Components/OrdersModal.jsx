@@ -32,6 +32,10 @@ export default function OrdersModal({ opened, onClose }) {
                 Placed on {new Date(order.created_at).toLocaleString()}
               </Text>
 
+              <Badge size="sm" color="green" radius="md">
+                ETC {order.estimated_time_of_completion != 0 ? order.estimated_time_of_completion: ""} mins
+              </Badge>
+
               <div className="space-y-2 mt-2 w-full flex flex-col items-center justify-center">
                 {order.items.map((item) => (
                   <CartItemCard item={item} url={url} isOrder orderId={order.id}/>

@@ -16,7 +16,8 @@ class Order extends Model
         'status',      
         'total_price',
         'paid_status',
-        'paid_at'
+        'paid_at',
+        'estimated_time_of_completion'
     ];
 
     public function user()
