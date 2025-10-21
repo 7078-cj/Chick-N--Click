@@ -33,7 +33,7 @@ function AdminOrders() {
 
   const wsRef = useRef(null);
 
-  // Fetch all orders initially
+  
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -101,9 +101,12 @@ function AdminOrders() {
     });
   };
 
-  // WebSocket setup
-  useEffect(() => {
+  useEffect(()=>{
     fetchOrders();
+  },[])
+  
+  useEffect(() => {
+    
 
     if (!token) return;
 
