@@ -29,7 +29,7 @@ function CheckoutPage() {
         if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
   
         const data = await res.json();
-        console.log("Fetched user:", data);
+     
         setUser(data);
         
   

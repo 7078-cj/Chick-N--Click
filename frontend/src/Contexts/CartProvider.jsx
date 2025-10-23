@@ -122,7 +122,7 @@ export const CartProvider = ({ children }) => {
 
         
         const data = await res.json();
-        console.log(data)
+       
         
         
         

@@ -143,9 +143,7 @@ function AdminOrders() {
     return matchesFilter && matchesSearch;
   });
 
-  useEffect(()=>{
-    console.log(orders)
-  },[orders])
+
 
   return (
     <>

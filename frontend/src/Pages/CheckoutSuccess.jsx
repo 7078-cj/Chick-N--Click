@@ -14,7 +14,7 @@ export default function CheckoutSuccess() {
       try {
         const res = await fetch(`${url}/api/payments/verify/${order_id}`);
         const data = await res.json();
-        console.log(data)
+      
 
         if (data.status === "paid") {
           setStatus("success");

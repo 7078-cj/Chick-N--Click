@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 export default function Settings() {
   const url = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
-  const { token } = useContext(AuthContext);
+  const { token,logOut } = useContext(AuthContext);
 
   const [isEditing, setIsEditing] = useState(false);
   const [user, setUser] = useState(null);
@@ -32,14 +32,14 @@ export default function Settings() {
   });
 
   useEffect(()=>{
-    console.log(location)
+   
     setFormData({
       ...formData,
         location: location.full || "",
         latitude: location.lat || null,
         longitude: location.lng || null,
     })
-    console.log(formData)
+   
   },[location])
 
   // 🔹 Fetch user info
@@ -55,7 +55,7 @@ export default function Settings() {
       if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
 
       const data = await res.json();
-      console.log("Fetched user:", data);
+    
       setUser(data);
 
       // Populate form with fetched data
@@ -107,7 +107,7 @@ export default function Settings() {
       if (!res.ok) throw new Error("Failed to update user info");
 
       const updated = await res.json();
-      console.log("✅ Updated user info:", updated);
+     
       setUser(updated);
       setIsEditing(false);
     } catch (err) {
@@ -123,18 +123,16 @@ export default function Settings() {
           src={hocLogo}
           alt="Click N' Chick"
           className="object-contain w-auto cursor-pointer h-14"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/home")}
         />
         <div className="flex flex-col gap-6 mt-6">
           <button className="p-3 text-orange-600 bg-orange-200 rounded-full">
             <User size={22} />
           </button>
-          <button className="p-3 text-yellow-600 bg-yellow-200 rounded-full">
-            <Lock size={22} />
-          </button>
+     
         </div>
         <div className="flex flex-col gap-6 mt-6">
-          <button className="p-3 mt-auto text-yellow-500 bg-yellow-100 rounded-full">
+          <button className="p-3 mt-auto text-yellow-500 bg-yellow-100 rounded-full" onClick={logOut}>
             <LogOut size={22} />
           </button>
         </div>

@@ -123,7 +123,7 @@ export default function Cart() {
 
      
       const data = await res.json();
-      console.log(data)
+    
       
       
       
