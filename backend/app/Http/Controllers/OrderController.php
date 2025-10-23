@@ -26,12 +26,6 @@ class OrderController extends Controller implements HasMiddleware
    public function placeOrder(Request $request)
     {
         $user = $request->user();
-        $validated = $request->validate([
-            'location' => 'nullable|string|max:255',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-        ]);
-
 
         $cartItems = CartItem::with('food')->where('user_id', $user->id)->get();
 
@@ -44,35 +38,32 @@ class OrderController extends Controller implements HasMiddleware
             $total = $cartItems->sum(fn($item) => $item->food->price * $item->quantity);
 
             $order = Order::create([
-                'user_id' => $user->id,
+                'user_id'   => $user->id,
                 'total_price' => $total,
-                'status' => 'pending',
-                'latitude'  => $validated['latitude'],
-                'longitude'  => $validated['longitude'],
-                'location'  => $validated['location'],
+                'status'    => 'pending',
+                'latitude'  => $user->latitude,
+                'longitude' => $user->longitude,
+                'location'  => $user->location,
             ]);
 
             foreach ($cartItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'food_id' => $item->food_id,
+                    'food_id'  => $item->food_id,
                     'quantity' => $item->quantity,
-                    'price' => $item->food->price,
+                    'price'    => $item->food->price,
                 ]);
             }
 
-            // Try to create GCash checkout
-            $checkout = GcashCheckout::createCheckout($order);
-
-            // If checkout fails, it should throw before here
-            // So now it's safe to clear cart and commit
             CartItem::where('user_id', $user->id)->delete();
             DB::commit();
 
-           
+            // Now handle external services (outside transaction)
+            $checkout = GcashCheckout::createCheckout($order);
+
             Http::post(config('services.websocket.http_url') . "/broadcast/order", [
                 'event' => 'create',
-                'order' => $order->load('items.food', 'items.food.categories'),
+                'order' => $order->load('items.food', 'items.food.categories', 'user'),
             ]);
 
             return $checkout;
@@ -81,10 +72,11 @@ class OrderController extends Controller implements HasMiddleware
             DB::rollBack();
             return response()->json([
                 'message' => 'Failed to place order',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
+
 
     public function getUserOrder(Request $request)
     {

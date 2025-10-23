@@ -10,11 +10,19 @@ import {
   Badge,
 } from "@mantine/core";
 import AuthContext from "../Contexts/AuthContext";
+import UserLocationMap from "./LeafletMap";
 
 function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
   const url = import.meta.env.VITE_API_URL;
   const [etc, setEtc] = useState(order.estimated_time_of_completion || 0);
   const { token } = useContext(AuthContext);
+  const [location, setLocation] = useState({
+      lat: order.user.latitude,
+      lng: order.user.longitude,
+      city: "",
+      country: "",
+      full: order.user.location,
+    });
 
   const updateETC = async () => {
     try {
@@ -125,7 +133,9 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
                   <Text fw={600} mb="xs">
                     Order Details:
                   </Text>
+                  
                   <div className="flex flex-row gap-4">
+                    
                     {order.items.map((item) => (
                       <div className="w-[5%] h-[5%]"
                       >
@@ -153,6 +163,36 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
                         </Group>
                       </div>
                     ))}
+                  </div>
+                  <div className="w-full h-64 mt-4 rounded-lg overflow-hidden shadow-md flex flex-row justify-center items-center">
+                    <UserLocationMap
+                      editMode={false}
+                      setLocation={setLocation}
+                      location={{
+                        lat: parseFloat(order.user.latitude) || 14.5995,
+                        lng: parseFloat(order.user.longitude) || 120.9842,
+                        city: "",
+                        country: "",
+                        full: order.user.location || "No location provided",
+                      }}
+                      user={order.user}
+                    />
+                    <div className="w-[50%] flex flex-col justify-between items-center">
+
+                      <label className="block mb-2 text-xs text-gray-500">
+                        Order Location
+                      </label>
+                      <div className="flex flex-row items-center justify-center h-full gap-4">
+                          <div className="relative flex-1 h-full p-4 bg-gray-50 rounded-xl">
+                            <h3 className="font-semibold">📍 {order.location}</h3>
+                            <h3 className="font-semibold">📍Lat: {order.latitude}</h3>
+                            <h3 className="font-semibold">📍Lng: {order.longitude}</h3>
+                          
+                            
+                          </div>
+                        </div>
+
+                    </div>
                   </div>
                 </Card>
   );

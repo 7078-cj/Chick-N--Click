@@ -129,6 +129,16 @@ export default function UserLocationMap({ editMode, setLocation, location, user 
     }
   }, [location, user, setLocation]);
 
+  useEffect(()=>{
+    setLocation({
+        lat: user?.latitude,
+        lng: user?.longitude,
+        city: user?.location || "",
+        country: "",
+        full: user?.location || "",
+      });
+  },[user])
+
   // Handle search
   const handleSearch = async (e) => {
     e.preventDefault();

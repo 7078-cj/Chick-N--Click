@@ -104,7 +104,7 @@ export const CartProvider = ({ children }) => {
         removeCartItem(foodId);
     };
 
-    const placeOrder = async (latitude,longitude,location) => {
+    const placeOrder = async () => {
         if (cart.length === 0) {
         alert("Your cart is empty!");
         return;
@@ -118,11 +118,6 @@ export const CartProvider = ({ children }) => {
             Authorization: `Bearer ${token}`,
             },
             credentials: "include",
-            body:JSON.stringify({
-                latitude: latitude,
-                longitude: longitude,
-                location: location,
-            })
         });
 
         

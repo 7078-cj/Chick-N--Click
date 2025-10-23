@@ -20,7 +20,6 @@ function CheckoutPage() {
   const fetchUser = async () => {
       try {
         const res = await fetch(`${url}/api/user`, {
-          credentials: "include",
           headers: {
             Accept: "application/json",
             Authorization: `Bearer ${token}`,
@@ -32,13 +31,13 @@ function CheckoutPage() {
         const data = await res.json();
         console.log("Fetched user:", data);
         setUser(data);
-        console.log(user)
+        
   
-        if (data.full) {
+        if (data.location) {
           setLocation({
-            lat: data.lat,
-            lng: data.lng,
-            full: data.full,
+            lat: data.latitude,
+            lng: data.longitude,
+            full: data.location,
             
           });
         }
@@ -50,6 +49,7 @@ function CheckoutPage() {
     useEffect(() => {
       fetchUser();
     }, []);
+
 
   return (
     <div className="flex flex-row gap-6 p-6 bg-white h-screen w-full font-sans">
@@ -103,7 +103,7 @@ function CheckoutPage() {
                     <AppButton
                                     useCase="menu"
                                     size="lg"
-                                    onClick={() => placeOrder(location.lat,location.lng, location.full)}
+                                    onClick={() => placeOrder()}
                                     disabled={placingOrder}
                                     className="w-full"
                                     >
