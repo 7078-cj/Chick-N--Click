@@ -176,6 +176,15 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
 
             <div className="border-t border-dashed border-gray-300 pt-4 mt-2">
               <Text size="sm" className="flex justify-between">
+                <span>Orders Total</span>
+                <span className="font-medium">₱{order.total_price.toFixed(2) - 30}</span>
+              </Text>
+              <Text size="sm" className="flex justify-between">
+                <span>Paymongo Fee</span>
+                <span className="font-medium">₱{30}</span>
+              </Text>
+              <div className="border-t border-dashed border-gray-600 pt-4 mt-2"></div>
+              <Text size="sm" className="flex justify-between">
                 <span>Total</span>
                 <span className="font-medium">₱{order.total_price.toFixed(2)}</span>
               </Text>

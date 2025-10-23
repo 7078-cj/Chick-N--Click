@@ -35,7 +35,7 @@ class OrderController extends Controller implements HasMiddleware
 
         DB::beginTransaction();
         try {
-            $total = $cartItems->sum(fn($item) => $item->food->price * $item->quantity);
+            $total = $cartItems->sum(fn($item) =>($item->food->price * $item->quantity));
 
             $order = Order::create([
                 'user_id'   => $user->id,
@@ -60,6 +60,9 @@ class OrderController extends Controller implements HasMiddleware
 
             // Now handle external services (outside transaction)
             $checkout = GcashCheckout::createCheckout($order);
+
+            $order->total_price = $order->total_price + 30;
+            $order->save();
 
             Http::post(config('services.websocket.http_url') . "/broadcast/order", [
                 'event' => 'create',

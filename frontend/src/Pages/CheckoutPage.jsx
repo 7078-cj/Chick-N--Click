@@ -6,7 +6,7 @@ import AuthContext from "../Contexts/AuthContext";
 import UserLocationMap from "../Components/LeafletMap";
 
 function CheckoutPage() {
-  const { cart, placeOrder, placingOrder } = useContext(CartContext);
+  const { cart, placeOrder, placingOrder,total } = useContext(CartContext);
   const url = import.meta.env.VITE_API_URL;
   const { token } = useContext(AuthContext);
   const [user, setUser] = useState(null);
@@ -84,10 +84,10 @@ function CheckoutPage() {
             <div className="mt-6 text-sm w-full">
             <div className="flex justify-between">
                 <span>Sub Total</span>
-                <span>₱190</span>
+                <span>₱{total}</span>
             </div>
             <div className="flex justify-between mt-1">
-                <span>Delivery</span>
+                <span>Paymongo Fee</span>
                 <span>₱30</span>
             </div>
             </div>
@@ -96,7 +96,7 @@ function CheckoutPage() {
             {/* Total */}
                 <div className="mt-4 bg-yellow-100 rounded-lg p-4 flex justify-between items-center font-bold text-lg w-full">
                     <span>TOTAL</span>
-                    <span>₱220</span>
+                    <span>₱{total + 30}</span>
                 </div>
 
                 {/* Checkout button */}
