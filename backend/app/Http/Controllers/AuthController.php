@@ -75,25 +75,27 @@ class AuthController extends Controller
         $user = $request->user(); 
 
         $validated = $request->validate([
-            
-           
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
             'phone_number' => 'nullable|string|max:20',
             'location' => 'nullable|string|max:255',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'note' => 'nullable|string|max:500',
-           
         ]);
 
-       
+        if (empty($validated)) {
+            return response()->json([
+                'message' => 'No data provided to update.',
+                'user' => $user,
+            ], 400);
+        }
 
         $user->update($validated);
 
         return response()->json([
             'message' => 'Profile updated successfully',
-            'user' => $user,
+            'user' => $user->fresh(),
         ]);
     }
 }
