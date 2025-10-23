@@ -91,7 +91,7 @@ export default function CheckoutSuccess() {
               Thank you for your purchase. Your order #{order_id} has been confirmed.
             </Text>
             {renderDetails()}
-            <Button component={Link} to="/" color="green" size="md" radius="md">
+            <Button component={Link} to="/home" color="green" size="md" radius="md">
               Continue Shopping
             </Button>
           </Stack>

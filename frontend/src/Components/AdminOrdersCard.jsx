@@ -93,8 +93,17 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
             <Text fw={500}>
               Customer:{" "}
               <Text span c="orange.8">
-                {order.user?.name || "Unknown"}
+                {order.user?.first_name
+                  ? `${order.user.first_name} ${order.user.last_name}`
+                  : order.user?.name}
               </Text>
+              
+            </Text>
+            <Text fw={500}>
+               Location:{" "}
+              <Text span c="orange.8">
+                  {order.user?.location || "No location provided"}
+                </Text>
             </Text>
           </div>
 
