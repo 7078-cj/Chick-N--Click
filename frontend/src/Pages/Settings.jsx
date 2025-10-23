@@ -46,7 +46,6 @@ export default function Settings() {
   const fetchUser = async () => {
     try {
       const res = await fetch(`${url}/api/user`, {
-        credentials: "include",
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${token}`,
