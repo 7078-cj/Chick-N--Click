@@ -17,6 +17,8 @@ import { OrderProvider } from './Contexts/Orderprovider'
 import { CartProvider } from './Contexts/CartProvider'
 import Settings from './Pages/Settings'
 import CheckoutPage from './Pages/CheckoutPage'
+import { AddOnProvider } from './Contexts/AddOnContext'
+
 
 function App() {
   
@@ -29,37 +31,39 @@ function App() {
      
         <CartProvider>
           <OrderProvider>
-          <FoodProvider>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/" element={<LandingPage />} />
-                
-              <Route element={<PrivateRoutes allowedRoles={["user","admin"]} />} >
-
-                <Route path="/home" element={<Home /> } />
+            <FoodProvider>
+              <AddOnProvider>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/" element={<LandingPage />} />
                     
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route element={<PrivateRoutes allowedRoles={["user","admin"]} />} >
 
-                <Route path="/checkout/success/:order_id" element={<CheckoutSuccess />} />
+                    <Route path="/home" element={<Home /> } />
+                        
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
 
-                <Route path="/settings" element={<Settings />} />
-              </Route>
+                    <Route path="/checkout/success/:order_id" element={<CheckoutSuccess />} />
 
-              <Route element={<PrivateRoutes allowedRoles={["admin"]} />} >
-                <Route element={<AdminRoutes/>}>
-                  <Route path="/admin" element={<Admin />} />
-                </Route>
-              </Route>
+                    <Route path="/settings" element={<Settings />} />
+                  </Route>
 
-              <Route path="/loading" element={<Loading />} />
-              <Route path="/unauthorized" element={<Unauthorized />} />
+                  <Route element={<PrivateRoutes allowedRoles={["admin"]} />} >
+                    <Route element={<AdminRoutes/>}>
+                      <Route path="/admin" element={<Admin />} />
+                    </Route>
+                  </Route>
 
-              
-                
-            </Routes>
-          </FoodProvider>
+                  <Route path="/loading" element={<Loading />} />
+                  <Route path="/unauthorized" element={<Unauthorized />} />
+
+                  
+                    
+                </Routes>
+              </AddOnProvider>
+            </FoodProvider>
           </OrderProvider>
           </CartProvider>
         

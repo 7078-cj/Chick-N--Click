@@ -62,7 +62,7 @@ export default function FoodList() {
     }
   };
 
-  const handleAddToCart = async (food, quantity, close) => {
+  const handleAddToCart = async (food, quantity, close, sides, drinks) => {
     try {
       const res = await fetch(`${url}/api/cart/add/${food.id}`, {
         method: "POST",
@@ -70,7 +70,7 @@ export default function FoodList() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ quantity }),
+        body: JSON.stringify({ quantity, sides, drinks }),
       });
       if (res.ok) {
         fetchCart();
