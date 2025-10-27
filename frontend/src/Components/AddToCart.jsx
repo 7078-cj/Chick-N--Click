@@ -2,12 +2,16 @@ import { Modal, Select, Button } from '@mantine/core';
 import React, { useContext, useEffect, useState } from 'react';
 import AppButton from './AppButton';
 import { AddOnContext } from '../Contexts/AddOnContext';
+import AuthModal from './AuthModal';
+import AuthContext from '../Contexts/AuthContext';
 
 function AddToCart({ setCartOpened, cartOpened, quantity, setQuantity, handleAddToCart, food, close }) {
   const url = import.meta.env.VITE_API_URL;
   const { sides, drinks } = useContext(AddOnContext);
+  const { user } = useContext(AuthContext);
   const [orderSides, setOrderSides] = useState([]);
   const [orderDrinks, setOrderDrinks] = useState([]);
+  const [opened, setOpened] = useState(false);
 
   // 🟡 NEW: control Select values
   const [selectedSide, setSelectedSide] = useState(null);
@@ -50,17 +54,17 @@ function AddToCart({ setCartOpened, cartOpened, quantity, setQuantity, handleAdd
 
   // --- Confirm selection ---
   const handleConfirm = () => {
-    handleAddToCart(food, quantity, close, orderSides, orderDrinks);
+    if(!user){
+        setOpened(true)
+    }else{
+    handleAddToCart(food, quantity, close, orderSides, orderDrinks);}
   };
 
   const isSideOrDrink = food.categories?.some(cat =>
     ['Sides', 'Drinks'].includes(cat.name)
     );
 
-  useEffect(() => {
-    console.log("🧺 Sides:", orderSides);
-    console.log("🥤 Drinks:", orderDrinks);
-  }, [orderDrinks, orderSides]);
+  
 
   return (
     <Modal opened={cartOpened} onClose={() => setCartOpened(false)} centered size={"100%"}>
@@ -234,6 +238,7 @@ function AddToCart({ setCartOpened, cartOpened, quantity, setQuantity, handleAdd
         )}
         </div>
       </div>
+      <AuthModal opened={opened} onClose={() => setOpened(false)} />
     </Modal>
   );
 }

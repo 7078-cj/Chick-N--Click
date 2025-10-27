@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Group, Button, Drawer, Stack } from "@mantine/core";
 import { Search, MoreHorizontal, ShoppingCart, PhoneCall} from "lucide-react";
 import hocLogo from "../assets/hoc_logo.png";
@@ -6,13 +6,18 @@ import { useNavigate } from "react-router-dom";
 import CartDrawer from "./CartComponent";
 import AppButton from "./AppButton";
 import Order from "./Order";
+import AuthContext from "../Contexts/AuthContext";
+import AuthModal from "./AuthModal";
 
 export default function Header({ variant = "default" }) {
 
   const nav = useNavigate();
+  const [opened, setOpened] = useState(false);
+   const { user } = useContext(AuthContext);
   
 
   return (
+    <>
     <header className="bg-white shadow-sm">
       <div className="w-full mx-auto flex items-center justify-between py-3 px-6">
         
@@ -91,7 +96,7 @@ export default function Header({ variant = "default" }) {
             </Button>
 
 
-            <AppButton useCase="signup" bgColor={"bg-amber-400"} hoverColor={"hover:bg-amber-800"} onClick={()=>nav('/register')}>Sign Up</AppButton>
+            <AppButton useCase="signup" bgColor={"bg-amber-400"} hoverColor={"hover:bg-amber-800"} onClick={()=>user ? nav('/register') : setOpened(true)}>Sign Up</AppButton>
 
             <AppButton useCase="signin" onClick={()=>nav('/login')}>Log In</AppButton>
           </Group>
@@ -100,8 +105,10 @@ export default function Header({ variant = "default" }) {
         )}
       </div>
 
-      
+       <AuthModal opened={opened} onClose={() => setOpened(false)} />
      
     </header>
+   
+    </>
   );
 }

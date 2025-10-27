@@ -13,7 +13,7 @@ class CategoryController extends Controller implements HasMiddleware
     public static function middleware()
     {
         return [
-            new Middleware('auth:sanctum')
+            new Middleware('auth:sanctum',except: ['index', 'show'])
         ];
     }
 

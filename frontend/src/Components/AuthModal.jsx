@@ -14,7 +14,7 @@ function AuthModal({ opened, onClose }) {
     e.preventDefault();
     try {
       await loginUser(e); // assume loginUser throws on failure
-      nav('/');
+      nav('/home');
       onClose();
     } catch (err) {
       setError(err.message || 'Login failed. Check your credentials.');
