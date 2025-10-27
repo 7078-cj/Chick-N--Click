@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('price');
             $table->boolean('available')->default(true);
             $table->text('description');
+            $table->enum('size',['small','medium','large'])->nullable();
             $table->timestamps();
         });
     }

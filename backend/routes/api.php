@@ -34,6 +34,8 @@ Route::delete('/order/{id}/delete', [OrderController::class, 'deleteOrder']);
 
 Route::apiResource('foods', FoodController::class);
 Route::apiResource('category', CategoryController::class);
+Route::get('drinks', [FoodController::class, 'drinks']);
+Route::get('sides', [FoodController::class, 'sides']);
 
 Route::post('/payments/create-checkout', [PaymongoController::class, 'createCheckout']);
 Route::get('/payments/verify/{orderId}', [PaymongoController::class, 'verifyByOrder']);

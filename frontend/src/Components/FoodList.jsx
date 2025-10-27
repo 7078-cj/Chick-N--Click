@@ -13,7 +13,7 @@ export default function FoodList() {
 
   const [filteredFoods, setFilteredFoods] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
-
+  
   
   const data = [
     { label: "All", value: "all" },

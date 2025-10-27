@@ -27,6 +27,33 @@ class OrderController extends Controller implements HasMiddleware
     {
         $user = $request->user();
 
+         $request->validate([
+            'sides'  => 'array|nullable',
+            'drinks' => 'array|nullable',
+            ]);
+
+          
+            if (!empty($request->sides)) {
+                foreach ($request->sides as $side) {
+                    $user->Cart()->updateOrCreate(
+                        ['food_id' => $side],
+                        ['quantity' => $request->input('quantity', 1)]
+                    );
+                }
+            }
+
+           
+            if (!empty($request->drinks)) {
+                foreach ($request->drinks as $drink) {
+                    $user->Cart()->updateOrCreate(
+                        ['food_id' => $drink->id],
+                        ['quantity' => $request->input('quantity', 1),
+                                'size' => $drink->size],
+                            
+                    );
+                }
+            }
+
         $cartItems = CartItem::with('food')->where('user_id', $user->id)->get();
 
         if ($cartItems->isEmpty()) {

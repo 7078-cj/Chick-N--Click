@@ -143,4 +143,28 @@ class FoodController extends Controller implements HasMiddleware
 
         return response()->json(['message' => 'Food deleted successfully'], 200);
     }
+
+    public function drinks(Request $request)
+    {
+        
+        $drinks = Food::whereHas('categories', function ($query) {
+            $query->where('name', 'Drinks');
+        })
+        ->with('categories')
+        ->get();
+
+        return response()->json($drinks);
+    }
+
+    public function sides(Request $request)
+    {
+        
+        $sides = Food::whereHas('categories', function ($query) {
+            $query->where('name', 'Sides');
+        })
+        ->with('categories')
+        ->get();
+
+        return response()->json($sides);
+    }
 }
