@@ -23,42 +23,35 @@ export function AuthProvider({children}) {
 
    const loginUser = async (e) => {
         e.preventDefault();
+        const url = import.meta.env.VITE_API_URL;
 
         try {
-            const response = await fetch(url + '/api/login', {   // Laravel login route
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: e.target.email.value,
-                    password: e.target.password.value,
-                }),credentials: 'include'
-            });
+        const response = await fetch(url + '/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({
+            email: e.target.email.value,
+            password: e.target.password.value,
+            }),
+            credentials: 'include',
+        });
 
-            if (response.ok) {
-                const data = await response.json();
-               
-               
-                await setToken(data.token);
-                await setUser(data.user);
-                
+        const data = await response.json();
 
-                localStorage.setItem('token', JSON.stringify(data.token));
-                localStorage.setItem('user', JSON.stringify(data.user));
-                
-                if (data.user.role == "admin"){
-                    nav('/admin')
-                }else{
-                    nav('/home')
-                }
-                
-            } else {
-                console.error("Login failed");
-            }
-        } catch (error) {
-            console.error('Error during login:', error);
+        if (!response.ok) {
+            // throw error so Login component can catch it
+            throw new Error(data.message || 'Login failed. Check credentials.');
+        }
+
+        setToken(data.token);
+        setUser(data.user);
+
+        localStorage.setItem('token', JSON.stringify(data.token));
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        return data; // return for optional chaining in Login component
+        } catch (err) {
+        throw err; // propagate to Login component
         }
     };
     
