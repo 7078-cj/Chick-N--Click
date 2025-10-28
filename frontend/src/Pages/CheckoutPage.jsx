@@ -21,7 +21,7 @@ function CheckoutPage() {
 
   const handleChange = (e) => {
     setOrderType(e.target.value);
-    console.log("Selected Order Type:", e.target.value);
+    
   };
 
 
@@ -119,15 +119,15 @@ function CheckoutPage() {
                 </div>
 
                 {/* Checkout button */}
-                    <AppButton
-                                    useCase="menu"
-                                    size="lg"
-                                    onClick={() => placeOrder(orderType)}
-                                    disabled={placingOrder}
-                                    className="w-full"
-                                    >
-                                    {placingOrder ? "Placing Order..." : "Place Order"}
-                                    </AppButton>
+                 <AppButton
+                    useCase="menu"
+                    size="lg"
+                    onClick={() => placeOrder(orderType)}
+                    disabled={placingOrder || !orderType}
+                    className={`w-full ${!orderType ? "opacity-50 cursor-not-allowed" : ""}`} 
+                  >
+                    {placingOrder ? "Placing Order..." : "Place Order"}
+                  </AppButton>
                 </div>
             </div>
         </div>

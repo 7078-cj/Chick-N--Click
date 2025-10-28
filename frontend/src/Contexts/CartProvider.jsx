@@ -115,7 +115,8 @@ export const CartProvider = ({ children }) => {
         const res = await fetch(`${url}/api/order/place`, {
             method: "POST",
             headers: {
-            Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ type }),
             credentials: "include",

@@ -16,6 +16,7 @@ class Order extends Model
         'status',      
         'total_price',
         'paid_status',
+        'type',
         'paid_at',
         'estimated_time_of_completion',
         'latitude',
