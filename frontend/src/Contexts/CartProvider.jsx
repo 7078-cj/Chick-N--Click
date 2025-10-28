@@ -104,7 +104,7 @@ export const CartProvider = ({ children }) => {
         removeCartItem(foodId);
     };
 
-    const placeOrder = async () => {
+    const placeOrder = async (type) => {
         if (cart.length === 0) {
         alert("Your cart is empty!");
         return;
@@ -117,15 +117,12 @@ export const CartProvider = ({ children }) => {
             headers: {
             Authorization: `Bearer ${token}`,
             },
+            body: JSON.stringify({ type }),
             credentials: "include",
         });
 
-        
         const data = await res.json();
        
-        
-        
-        
         setCart([]); 
         setTotal(0);
 

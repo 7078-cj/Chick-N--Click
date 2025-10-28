@@ -17,6 +17,14 @@ function CheckoutPage() {
         country: "",
         full: "",
       });
+  const [orderType, setOrderType] = useState("");
+
+  const handleChange = (e) => {
+    setOrderType(e.target.value);
+    console.log("Selected Order Type:", e.target.value);
+  };
+
+
   const fetchUser = async () => {
       try {
         const res = await fetch(`${url}/api/user`, {
@@ -63,11 +71,22 @@ function CheckoutPage() {
 
         {/* Order type dropdown */}
         <div className="mt-6">
-          <select className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700">
-            <option>Choose your order type</option>
-            <option>Delivery</option>
-            <option>Pickup</option>
+          <select
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700"
+            value={orderType} 
+            onChange={handleChange} 
+          >
+            <option value="">Choose your order type</option>
+            <option value="delivery">Delivery</option>
+            <option value="pickup">Pickup</option>
           </select>
+
+         
+          {orderType && (
+            <p className="mt-2 text-gray-600">
+              You selected: <strong>{orderType}</strong>
+            </p>
+          )}
         </div>
 
         {/* GCash option */}
@@ -103,7 +122,7 @@ function CheckoutPage() {
                     <AppButton
                                     useCase="menu"
                                     size="lg"
-                                    onClick={() => placeOrder()}
+                                    onClick={() => placeOrder(orderType)}
                                     disabled={placingOrder}
                                     className="w-full"
                                     >
