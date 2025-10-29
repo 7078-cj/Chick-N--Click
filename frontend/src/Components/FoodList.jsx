@@ -107,10 +107,10 @@ export default function FoodList() {
   }, [searchFilteredFoods, activeCategory]);
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col gap-2">
       {/* Show active search indicator */}
       {searchQuery && (
-        <div className="mb-4 text-sm text-gray-600 bg-orange-50 px-4 py-2 rounded-lg">
+        <div className="mb-4 text-sm text-gray-600  px-4 py-2 rounded-lg">
           Searching for: <span className="font-semibold">"{searchQuery}"</span>
           <span className="ml-2 text-gray-500">
             ({displayFoods.length} result{displayFoods.length !== 1 ? 's' : ''})

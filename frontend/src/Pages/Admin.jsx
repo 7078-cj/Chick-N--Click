@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import FoodList from "../Components/FoodList";
 import AdminOrders from "../Components/AdminOrders";
 import CategoryForm from "../Components/CategoryForm";
 import CategoryList from "../Components/CategoryList";
 import Sidebar from "../Components/Sidebar";
 import AddFood from "../Components/AddFood";
+import { Search } from "lucide-react";
+import { FoodContext } from "../Contexts/FoodProvider";
 
 function Admin() {
   const [activeTab, setActiveTab] = useState("orders");
+   const { 
+      searchQuery, 
+      setSearchQuery,
+    } = useContext(FoodContext);
 
   return (
     <div className="flex flex-row w-full bg-gray-100 p-6 gap-5">
@@ -33,8 +39,33 @@ function Admin() {
 
                 <div className="text-wrap text-2xl w-[40%] p-4 text-gray-500">This page allows you to manage food items. You can add new dishes, review existing ones, and remove items as needed.</div>
                 
+                <div className="flex items-center w-full max-w-md  border border-orange-200 rounded-full px-4 py-2 gap-2">
+
+                  <Search size={16} className="text-gray-400 mr-2" />
+                  <input
+                    type="text"
+                    placeholder="Search food here..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-transparent focus:outline-none text-sm text-gray-600 placeholder-gray-400"
+                  />
+                 
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="ml-2 text-gray-400 hover:text-gray-600 text-xs"
+                    >
+                      ✕
+                    </button>
+                  )}
+
+                </div>
+
               </div>
-              <FoodList className="flex-1 overflow-auto" />
+              <div className="mt-1">
+                  <FoodList className="flex-1 overflow-auto " />
+              </div>
+              
             </div>
             
             <div className="flex flex-col sticky bottom-10">
