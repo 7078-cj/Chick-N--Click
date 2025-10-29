@@ -6,6 +6,8 @@ export const FoodContext = createContext();
 export const FoodProvider = ({ children }) => {
   const [foods, setFoods] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const { token, user } = useContext(AuthContext);
 
   const preUrl = import.meta.env.VITE_API_URL;  
@@ -13,6 +15,7 @@ export const FoodProvider = ({ children }) => {
 
   const wsRef = useRef(null);
   const hasLoadedRef = useRef(false); 
+
   // Load categories + foods once
   useEffect(() => {
     if (!token || hasLoadedRef.current) return;
@@ -91,8 +94,44 @@ export const FoodProvider = ({ children }) => {
     });
   };
 
+  // Search and filter logic
+  const filteredFoods = foods.filter((food) => {
+    // Search by food name or description
+    const matchesSearch = 
+      searchQuery === "" ||
+      food.food_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      food.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Filter by category
+    const matchesCategory = 
+      !selectedCategory ||
+      food.categories?.some((cat) => cat.id.toString() === selectedCategory) ||
+      food.category_id?.toString() === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  // Helper function to reset filters
+  const resetFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory(null);
+  };
+
   return (
-    <FoodContext.Provider value={{ foods, setFoods, categories, setCategories }}>
+    <FoodContext.Provider 
+      value={{ 
+        foods, 
+        setFoods, 
+        categories, 
+        setCategories,
+        searchQuery,
+        setSearchQuery,
+        selectedCategory,
+        setSelectedCategory,
+        filteredFoods,
+        resetFilters
+      }}
+    >
       {children}
     </FoodContext.Provider>
   );
