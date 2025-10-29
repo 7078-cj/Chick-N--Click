@@ -6,10 +6,12 @@ import AuthContext from "../Contexts/AuthContext";
 import AppButton from "./AppButton";
 import FoodForm from "./FoodForm";
 import AddToCart from "./AddToCart";
+import DeleteModal from "./DeleteModal";
 
 export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCart }) {
   const { token, user } = useContext(AuthContext);
   const [opened, setOpened] = useState(false);
+  const [openedDelete, setOpenedDelete] = useState(false);
   const [cartOpened, setCartOpened] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
@@ -110,7 +112,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCar
               >
                 Edit
               </AppButton>
-              <AppButton useCase="remove" size="md" onClick={()=>onDelete(food)}>
+              <AppButton useCase="remove" size="md" onClick={() => setOpenedDelete(true)}>
                 Delete
               </AppButton>
             </div>
@@ -122,6 +124,8 @@ export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCar
       <Modal opened={opened} onClose={() => setOpened(false)} title="Edit Food" size="lg">
         <FoodForm food={food} onSuccess={onUpdate} onClose={() => setOpened(false)} />
       </Modal>
+
+      <DeleteModal opened={openedDelete} onClose={() => setOpenedDelete(false)} onConfirm={()=>onDelete(food)} itemName={food.food_name}/>
 
       <AddToCart 
       setCartOpened={setCartOpened} 

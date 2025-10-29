@@ -144,6 +144,12 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
             ₱{order.total_price.toFixed(2)}
           </Text>
         </Group>
+        {order.type && (
+                <div className="mt-4 p-2 bg-white border rounded flex flex-row gap-2 w-fit">
+                  <Text size="sm" fw={500}>Type of Order:</Text>
+                  <Text size="sm">{order.type}</Text>
+                </div>
+              )}
 
         {/* 🔹 View Details Button */}
         <div className="mt-6 flex justify-end">
@@ -249,6 +255,14 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
                 <div className="mt-4 p-2 bg-white border rounded">
                   <Text size="sm" fw={500}>Note:</Text>
                   <Text size="sm">{order.note}</Text>
+                </div>
+              )}
+
+              {/* Order Type */}
+              {order.type && (
+                <div className="mt-4 p-2 bg-white border rounded">
+                  <Text size="sm" fw={500}>Type of Order:</Text>
+                  <Text size="sm">{order.type}</Text>
                 </div>
               )}
             </div>

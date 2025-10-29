@@ -2,10 +2,11 @@ import React, { useEffect, useState, useContext } from "react";
 import { Card, Text, Button, TextInput, Group } from "@mantine/core";
 import AuthContext from "../Contexts/AuthContext";
 import { FoodContext } from "../Contexts/FoodProvider";
+import DeleteModal from "./DeleteModal";
 
 export default function CategoryList() {
     const { token } = useContext(AuthContext);
- 
+    const [openedDelete, setOpenedDelete] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [editName, setEditName] = useState("");
     const preUrl = import.meta.env.VITE_API_URL;
@@ -88,15 +89,17 @@ export default function CategoryList() {
                   size="xs"
                   color="brown"
                   
-                  onClick={() => handleDelete(cat.id)}
+                  onClick={() => setOpenedDelete(true)}
                 >
                   Delete
                 </Button>
               </Group>
+               <DeleteModal opened={openedDelete} onClose={() => setOpenedDelete(false)} onConfirm={() => handleDelete(cat.id)} itemName={cat.name}/>
             </>
           )}
         </div>
       ))}
+     
     </div>
   );
 }
