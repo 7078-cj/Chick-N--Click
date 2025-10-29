@@ -1,193 +1,267 @@
 import React, { useState, useEffect, useContext } from "react";
 import {
-  Card,
-  Text,
   TextInput,
   NumberInput,
-  Checkbox,
   Textarea,
   Button,
-  FileInput,
-  Stack,
+  FileButton,
+  Select,
   Image,
-  MultiSelect,
+  Text,
+  Loader,
 } from "@mantine/core";
+import { UploadCloud, Image as ImageIcon } from "lucide-react";
+import { showNotification } from "@mantine/notifications";
+import { CheckCircle2, AlertCircle } from "lucide-react";
 import AuthContext from "../Contexts/AuthContext";
 import { FoodContext } from "../Contexts/FoodProvider";
 
-export default function FoodForm({ food = null, onSuccess, onClose }) {
-  const { setFoods,categories } = useContext(FoodContext);
+export default function FoodForm({ food = null, onSuccess }) {
+  const { categories } = useContext(FoodContext);
   const { token } = useContext(AuthContext);
-  
+  const preUrl = import.meta.env.VITE_API_URL;
+
   const [formData, setFormData] = useState({
     food_name: "",
     price: 0,
-    available: true,
+    category: "",
+    availability: "",
+    short_description: "",
     description: "",
     thumbnail: null,
-    categories: [],
   });
 
   const [preview, setPreview] = useState(null);
-  const preUrl = import.meta.env.VITE_API_URL;
+  const [loading, setLoading] = useState(false);
 
-  
-
-  // Load food if editing
+  // preload food for editing
   useEffect(() => {
     if (food) {
       setFormData({
         food_name: food.food_name || "",
         price: food.price || 0,
-        available: food.available ?? true,
+        category: food.category_id?.toString() || "",
+        availability: food.availability || "",
+        short_description: food.short_description || "",
         description: food.description || "",
         thumbnail: null,
-        categories: food.categories?.map((c) => c.id.toString()) || [],
       });
-
-      if (food.thumbnail) {
+      if (food.thumbnail)
         setPreview(
           food.thumbnail.startsWith("http")
             ? food.thumbnail
             : `${preUrl}/storage/${food.thumbnail}`
         );
-      }
     }
   }, [food]);
 
+  // handle file upload
+  const handleFileChange = (file) => {
+    if (file) {
+      setFormData({ ...formData, thumbnail: file });
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const data = new FormData();
-    if (formData.thumbnail) data.append("thumbnail", formData.thumbnail);
     data.append("food_name", formData.food_name);
     data.append("price", formData.price);
-    data.append("available", formData.available ? 1 : 0);
+    data.append("category", formData.category);
+    data.append("availability", formData.availability);
+    data.append("short_description", formData.short_description);
     data.append("description", formData.description);
-    formData.categories.forEach((catId) => data.append("categories[]", catId));
+    if (formData.thumbnail) data.append("thumbnail", formData.thumbnail);
+    if (food) data.append("_method", "PUT");
 
     const url = food
       ? `${preUrl}/api/foods/${food.id}`
       : `${preUrl}/api/foods`;
 
-    if (food) data.append("_method", "PUT");
-
     try {
       const res = await fetch(url, {
         method: "POST",
-        body: data,
         headers: { Authorization: `Bearer ${token}` },
+        body: data,
       });
 
-      if (!res.ok) throw new Error("Failed to save food");
-      const savedFood = await res.json();
+      const result = await res.json();
 
+      if (!res.ok)
+        throw new Error(result.message || "Failed to save food item.");
+
+      showNotification({
+        title: "Success",
+        message: `Food ${food ? "updated" : "added"} successfully.`,
+        color: "green",
+        icon: <CheckCircle2 />,
+      });
 
       if (onSuccess) onSuccess();
-      if (onClose) onClose();
-
-      if (!food) {
-        setFormData({
-          food_name: "",
-          price: 0,
-          available: true,
-          description: "",
-          thumbnail: null,
-          categories: [],
-        });
-        setPreview(null);
-      }
     } catch (err) {
-      console.error(err);
-      alert("Something went wrong.");
+      showNotification({
+        title: "Error",
+        message: err.message,
+        color: "red",
+        icon: <AlertCircle />,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-6">
-      <Card shadow="lg" padding="xl" radius="md" withBorder>
-        <Text size="xl" fw={700} align="center" mb="md">
-          {food ? "Update Food" : "Create Food"}
-        </Text>
+    <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-2xl shadow-md p-10 w-[400px] flex flex-col gap-5"
+      >
+        {/* Image upload */}
+        <div>
+          <Text fw={600} size="sm" mb={6}>
+            Import Image
+          </Text>
 
-        <form onSubmit={handleSubmit}>
-          <Stack gap="md">
-            {/* Thumbnail */}
-            <FileInput
-              label="Thumbnail"
-              placeholder="Choose an image"
-              accept="image/*"
-              onChange={(file) => {
-                setFormData((prev) => ({ ...prev, thumbnail: file }));
-                setPreview(file ? URL.createObjectURL(file) : null);
-              }}
-            />
-            {preview && (
-              <div className="w-[200px] h-[200px] mx-auto overflow-hidden rounded-lg border shadow">
-                <Image src={preview} height={200} className="object-cover" />
-              </div>
+          <div className="border-2 border-dashed border-orange-400 rounded-xl p-8 flex flex-col items-center justify-center text-gray-500 text-sm cursor-pointer hover:bg-orange-50 transition">
+            {preview ? (
+              <Image
+                src={preview}
+                height={150}
+                radius="md"
+                alt="preview"
+                className="object-cover"
+              />
+            ) : (
+              <>
+                <ImageIcon size={40} color="#f97316" />
+                <p className="mt-2 text-center">
+                  Browse and select an image…..
+                </p>
+              </>
             )}
 
-            <TextInput
-              label="Food Name"
-              placeholder="Enter food name"
-              required
-              value={formData.food_name}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, food_name: e.target.value }))
-              }
-            />
+            <div className="mt-4">
+              <FileButton onChange={handleFileChange} accept="image/*">
+                {(props) => (
+                  <Button {...props} color="orange" radius="xl" size="sm">
+                    Upload
+                  </Button>
+                )}
+              </FileButton>
+            </div>
+          </div>
+        </div>
 
-            <NumberInput
-              label="Price"
-              required
-              min={0}
-              value={formData.price}
-              onChange={(val) =>
-                setFormData((prev) => ({ ...prev, price: val ?? 0 }))
-              }
-            />
+        {/* Food Name */}
+        <TextInput
+          label="Food Name"
+          placeholder="Enter food name"
+          value={formData.food_name}
+          onChange={(e) =>
+            setFormData({ ...formData, food_name: e.target.value })
+          }
+          classNames={{
+            input:
+              "rounded-full bg-gray-50 focus:ring-2 focus:ring-orange-400 border",
+          }}
+          required
+        />
 
-            <Checkbox
-              label="Available"
-              checked={formData.available}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  available: e.target.checked,
-                }))
-              }
-            />
+        {/* Price */}
+        <NumberInput
+          label="Price"
+          placeholder="₱ 0"
+          value={formData.price}
+          min={0}
+          onChange={(val) => setFormData({ ...formData, price: val || 0 })}
+          classNames={{
+            input:
+              "rounded-full bg-gray-50 focus:ring-2 focus:ring-orange-400 border",
+          }}
+          required
+        />
 
-            <Textarea
-              label="Description"
-              required
-              value={formData.description}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-            />
+        {/* Categories */}
+        <Select
+          label="Categories"
+          placeholder="Select categories"
+          data={categories.map((c) => ({
+            value: c.id.toString(),
+            label: c.name,
+          }))}
+          value={formData.category}
+          onChange={(value) => setFormData({ ...formData, category: value })}
+          classNames={{
+            input:
+              "rounded-full bg-gray-50 focus:ring-2 focus:ring-orange-400 border",
+          }}
+          required
+        />
 
-            {/* Categories */}
-            <MultiSelect
-              data={categories}
-              label="Categories"
-              placeholder="Select categories"
-              value={formData.categories}
-              onChange={(value) =>
-                setFormData((prev) => ({ ...prev, categories: value }))
-              }
-            />
+        {/* Availability */}
+        <Select
+          label="Availability"
+          placeholder="Select availability"
+          data={[
+            { value: "Available", label: "Available" },
+            { value: "Unavailable", label: "Unavailable" },
+          ]}
+          value={formData.availability}
+          onChange={(value) =>
+            setFormData({ ...formData, availability: value })
+          }
+          classNames={{
+            input:
+              "rounded-full bg-gray-50 focus:ring-2 focus:ring-orange-400 border",
+          }}
+          required
+        />
 
-            <Button type="submit" fullWidth color="blue" radius="md">
-              {food ? "Update Food" : "Create Food"}
-            </Button>
-          </Stack>
-        </form>
-      </Card>
+        {/* Short Description */}
+        <TextInput
+          label="Short Description"
+          placeholder="Enter short description"
+          value={formData.short_description}
+          onChange={(e) =>
+            setFormData({ ...formData, short_description: e.target.value })
+          }
+          classNames={{
+            input:
+              "rounded-full bg-gray-50 focus:ring-2 focus:ring-orange-400 border",
+          }}
+          required
+        />
+
+        {/* Description */}
+        <Textarea
+          label="Description"
+          placeholder="Enter description"
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+          classNames={{
+            input:
+              "rounded-2xl bg-gray-50 focus:ring-2 focus:ring-orange-400 border",
+          }}
+          required
+        />
+
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          fullWidth
+          radius="xl"
+          color="orange"
+          size="md"
+          disabled={loading}
+        >
+          {loading ? <Loader color="white" size="sm" /> : "Edit Food"}
+        </Button>
+      </form>
     </div>
   );
 }

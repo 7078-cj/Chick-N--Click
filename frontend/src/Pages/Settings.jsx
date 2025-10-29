@@ -1,50 +1,57 @@
 import { useContext, useEffect, useState } from "react";
-import { User, Lock, LogOut } from "lucide-react";
+import { User, LogOut, AlertCircle, CheckCircle2 } from "lucide-react";
 import UserLocationMap from "../Components/LeafletMap";
 import hocLogo from "../assets/hoc_logo.png";
 import AuthContext from "../Contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { showNotification } from "@mantine/notifications";
 
 export default function Settings() {
   const url = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
-  const { token,logOut } = useContext(AuthContext);
+  const { token, logOut } = useContext(AuthContext);
 
   const [isEditing, setIsEditing] = useState(false);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   const [location, setLocation] = useState({
-      lat: null,
-      lng: null,
-      city: "",
-      country: "",
-      full: "",
-    });
+    lat: null,
+    lng: null,
+    city: "",
+    country: "",
+    full: "",
+  });
 
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
     phone_number: "",
     note: "",
-    location: location.full || "",
-    latitude: location.lat || null,
-    longitude: location.lng || null,
+    location: "",
+    latitude: null,
+    longitude: null,
   });
 
-  useEffect(()=>{
-   
-    setFormData({
-      ...formData,
-        location: location.full || "",
-        latitude: location.lat || null,
-        longitude: location.lng || null,
-    })
-   
-  },[location])
+  // Update form when location changes
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      location: location.full || "",
+      latitude: location.lat || null,
+      longitude: location.lng || null,
+    }));
+  }, [location]);
 
   // 🔹 Fetch user info
   const fetchUser = async () => {
+    setLoading(true);
+    setError(null);
     try {
+      if (!token) throw new Error("Authentication token missing");
+
       const res = await fetch(`${url}/api/user`, {
         headers: {
           Accept: "application/json",
@@ -52,13 +59,15 @@ export default function Settings() {
         },
       });
 
-      if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
+      if (!res.ok) {
+        if (res.status === 401) {
+          throw new Error("Unauthorized. Please log in again.");
+        }
+        throw new Error(`Failed to fetch user data (Status: ${res.status})`);
+      }
 
       const data = await res.json();
-    
       setUser(data);
-
-      // Populate form with fetched data
       setFormData({
         first_name: data.first_name || "",
         last_name: data.last_name || "",
@@ -69,16 +78,24 @@ export default function Settings() {
         longitude: data.longitude || null,
       });
 
-      if (data.full) {
+      if (data.lat && data.lng) {
         setLocation({
           lat: data.lat,
           lng: data.lng,
-          full: data.full,
-          
+          full: data.location || "",
         });
       }
     } catch (err) {
       console.error("Failed to fetch user:", err);
+      setError(err.message);
+      showNotification({
+        title: "Error",
+        message: err.message || "Failed to load user data.",
+        color: "red",
+        icon: <AlertCircle />,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,8 +109,9 @@ export default function Settings() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🔹 Save handler (you can hook up your backend update here)
+  // 🔹 Save handler
   const handleSave = async () => {
+    setSaving(true);
     try {
       const res = await fetch(`${url}/api/user/update`, {
         method: "PUT",
@@ -104,16 +122,56 @@ export default function Settings() {
         body: JSON.stringify(formData),
       });
 
-      if (!res.ok) throw new Error("Failed to update user info");
+      if (!res.ok) {
+        throw new Error(`Failed to update user info (Status: ${res.status})`);
+      }
 
       const updated = await res.json();
-     
       setUser(updated);
       setIsEditing(false);
+
+      showNotification({
+        title: "Success",
+        message: "Your profile has been updated successfully!",
+        color: "green",
+        icon: <CheckCircle2 />,
+      });
     } catch (err) {
       console.error("Update failed:", err);
+      showNotification({
+        title: "Update Failed",
+        message: err.message || "Unable to save your changes.",
+        color: "red",
+        icon: <AlertCircle />,
+      });
+    } finally {
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center w-screen h-screen text-gray-500">
+        Loading user data...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center w-screen h-screen text-center">
+        <p className="text-red-600 font-semibold mb-4">
+          ⚠️ {error}
+        </p>
+        <button
+          onClick={fetchUser}
+          className="px-6 py-2 font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-row w-screen h-screen bg-gray-50">
@@ -129,10 +187,12 @@ export default function Settings() {
           <button className="p-3 text-orange-600 bg-orange-200 rounded-full">
             <User size={22} />
           </button>
-     
         </div>
         <div className="flex flex-col gap-6 mt-6">
-          <button className="p-3 mt-auto text-yellow-500 bg-yellow-100 rounded-full" onClick={logOut}>
+          <button
+            className="p-3 mt-auto text-yellow-500 bg-yellow-100 rounded-full"
+            onClick={logOut}
+          >
             <LogOut size={22} />
           </button>
         </div>
@@ -160,37 +220,35 @@ export default function Settings() {
           {/* Form */}
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div>
-              <label className="block mb-1 text-xs text-gray-500">FNAME</label>
+              <label className="block mb-1 text-xs text-gray-500">First Name</label>
               <input
                 type="text"
                 name="first_name"
                 value={formData.first_name}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-orange-400"
                 readOnly={!isEditing}
               />
             </div>
             <div>
-              <label className="block mb-1 text-xs text-gray-500">LNAME</label>
+              <label className="block mb-1 text-xs text-gray-500">Last Name</label>
               <input
                 type="text"
                 name="last_name"
                 value={formData.last_name}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-orange-400"
                 readOnly={!isEditing}
               />
             </div>
             <div>
-              <label className="block mb-1 text-xs text-gray-500">
-                Phone Number
-              </label>
+              <label className="block mb-1 text-xs text-gray-500">Phone Number</label>
               <input
                 type="text"
                 name="phone_number"
                 value={formData.phone_number}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-orange-400"
                 readOnly={!isEditing}
               />
             </div>
@@ -201,7 +259,7 @@ export default function Settings() {
                 name="note"
                 value={formData.note}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-orange-400"
                 readOnly={!isEditing}
               />
             </div>
@@ -218,16 +276,6 @@ export default function Settings() {
                 <p className="mt-1 text-sm text-gray-500">
                   {location.full || "Location not set"}
                 </p>
-                {isEditing && (
-                  <button
-                    className="absolute text-sm font-medium text-orange-500 top-2 right-3 hover:underline"
-                    onClick={() =>
-                      setFormData({ ...formData, location: "New Location" })
-                    }
-                  >
-                    Edit
-                  </button>
-                )}
               </div>
               <div className="w-[40vh] h-full bg-gray-200 rounded-xl flex items-center justify-center">
                 <UserLocationMap
@@ -244,9 +292,14 @@ export default function Settings() {
           {isEditing && (
             <button
               onClick={handleSave}
-              className="px-6 py-2 font-semibold text-white bg-orange-500 rounded-md hover:bg-orange-600"
+              disabled={saving}
+              className={`px-6 py-2 font-semibold text-white rounded-md ${
+                saving
+                  ? "bg-orange-300 cursor-not-allowed"
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
             >
-              Save
+              {saving ? "Saving..." : "Save"}
             </button>
           )}
         </div>

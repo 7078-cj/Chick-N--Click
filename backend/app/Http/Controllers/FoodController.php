@@ -35,37 +35,50 @@ class FoodController extends Controller implements HasMiddleware
      */
     public function store(Request $request)
     {
-        $this->authorize('isAdmin', Food::class);
-        $validated = $request->validate([
-            'thumbnail'   => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif', 'max:5120'], 
-            'food_name'   => ['required', 'string', 'max:255'],
-            'price'       => ['required', 'numeric', 'min:0'], 
-            'available'   => ['required', 'boolean'], 
-            'description' => ['required', 'string', 'max:255'],
-            'categories'  => ['array', 'nullable'],   // array of category IDs
-        ]);
+        try {
+            $this->authorize('isAdmin', Food::class);
 
-        // Handle thumbnail upload
-        if ($request->hasFile('thumbnail')) {
-            $file = $request->file('thumbnail');
-            $filePath = $file->store('thumbnails', 'public');
-            $validated['thumbnail'] = $filePath;
+            $validated = $request->validate([
+                'thumbnail'   => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif', 'max:5120'],
+                'food_name'   => ['required', 'string', 'max:255'],
+                'price'       => ['required', 'numeric', 'min:0'],
+                'available'   => ['required', 'boolean'],
+                'description' => ['required', 'string', 'max:255'],
+                'categories'  => ['array', 'nullable'],
+            ]);
+
+            if ($request->hasFile('thumbnail')) {
+                $validated['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
+            }
+
+            $food = Food::create($validated);
+
+            if (!empty($validated['categories'])) {
+                $food->categories()->sync($validated['categories']);
+            }
+
+            Http::post(config('services.websocket.http_url') . "/broadcast/food", [
+                "event" => "created",
+                "food"  => $food->load('categories'),
+            ]);
+
+            return response()->json($food->load('categories'), 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'message' => 'Unauthorized: only admins can perform this action',
+            ], 403);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An unexpected error occurred.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Create food
-        $food = Food::create($validated);
-
-        // Sync categories if provided
-        if (!empty($validated['categories'])) {
-            $food->categories()->sync($validated['categories']);
-        }
-
-        Http::post(config('services.websocket.http_url') ."/broadcast/food", [
-            "event" => "created",
-            "food"  => $food->load('categories')
-        ]);
-
-        return $food->load('categories');
     }
 
     /**

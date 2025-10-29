@@ -49,7 +49,7 @@ export default function FoodList() {
   };
 
   const handleDelete = async (food) => {
-    if (!confirm("Are you sure you want to delete this food?")) return;
+   
     try {
       await fetch(`${url}/api/foods/${food.id}`, {
         method: "DELETE",

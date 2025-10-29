@@ -12,6 +12,7 @@
   "dependencies": {
     "@mantine/core": "^8.2.8",
     "@mantine/hooks": "^8.2.8",
+    "@mantine/notifications": "^8.3.5",
     "@tabler/icons-react": "^3.34.1",
     "@tailwindcss/vite": "^4.1.13",
     "leaflet": "^1.9.4",

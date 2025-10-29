@@ -70,32 +70,65 @@ class AuthController extends Controller
         ];
     }
 
-    public function updateUser(Request $request)
+   public function updateUser(Request $request)
     {
-        $user = $request->user(); 
+        try {
+            $user = $request->user();
 
-        $validated = $request->validate([
-            'first_name' => 'nullable|string|max:255',
-            'last_name' => 'nullable|string|max:255',
-            'phone_number' => 'nullable|string|max:20',
-            'location' => 'nullable|string|max:255',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
-            'note' => 'nullable|string|max:500',
-        ]);
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access. Please log in again.'
+                ], 401);
+            }
 
-        if (empty($validated)) {
+            $validated = $request->validate([
+                'first_name' => 'nullable|string|max:255',
+                'last_name' => 'nullable|string|max:255',
+                'phone_number' => 'nullable|string|max:20',
+                'location' => 'nullable|string|max:255',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
+                'note' => 'nullable|string|max:500',
+            ]);
+
+            if (empty(array_filter($validated, fn($v) => !is_null($v) && $v !== ''))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No data provided to update.',
+                    'user' => $user,
+                ], 400);
+            }
+
+            // Convert latitude/longitude to floats if provided
+            if (isset($validated['latitude'])) {
+                $validated['latitude'] = (float) $validated['latitude'];
+            }
+            if (isset($validated['longitude'])) {
+                $validated['longitude'] = (float) $validated['longitude'];
+            }
+
+            $user->update($validated);
+
             return response()->json([
-                'message' => 'No data provided to update.',
-                'user' => $user,
-            ], 400);
+                'success' => true,
+                'message' => 'Profile updated successfully.',
+                'user' => $user->fresh(),
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed.',
+                'errors' => $e->errors(),
+            ], 422);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected error occurred while updating the profile.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $user->update($validated);
-
-        return response()->json([
-            'message' => 'Profile updated successfully',
-            'user' => $user->fresh(),
-        ]);
     }
 }

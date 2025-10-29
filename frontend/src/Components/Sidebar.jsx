@@ -2,15 +2,15 @@ import { LayoutGrid, CreditCard, ShoppingCart, LogOut } from "lucide-react";
 
 export default function Sidebar({setActiveTab, activeTab}) {
 
-  const active = "bg-orange-500 text-white"
-  const inactive = "bg-yellow-300 text-orange-500"
+  const active = "bg-orange-400 text-white"
+  const inactive = "bg-yellow-200 text-orange-500"
   
   return (
-    <div className="fixed top-0 left-0 h-full w-20 bg-white shadow-lg flex flex-col items-center justify-center py-6">
+    <div className="fixed top-0 left-0 h-full w-20 bg-white shadow-lg flex flex-col items-center justify-between py-6">
       {/* Logo */}
       <div className="mb-12">
         <img
-          src="/logo.png" 
+          src="/hoc_logo.png" 
           alt="Logo"
           className="w-12 h-12 object-contain"
         />
@@ -33,11 +33,10 @@ export default function Sidebar({setActiveTab, activeTab}) {
         
       </div>
 
-      {/* Spacer pushes logout to bottom */}
-      <div className="flex-1"></div>
+      
 
       {/* Logout */}
-      <button className="w-12 h-12 mb-4 rounded-full flex items-center justify-center bg-yellow-300 text-orange-500 shadow-md hover:scale-110 transition">
+      <button className="w-12 h-12 mb-4 rounded-full flex items-center justify-center bg-yellow-200 text-orange-500 shadow-md hover:scale-110 transition">
         <LogOut size={20} />
       </button>
     </div>

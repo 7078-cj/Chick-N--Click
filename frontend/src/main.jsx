@@ -5,6 +5,7 @@ import App from './App.jsx'
 import '@mantine/core/styles.css';
 
 import { MantineProvider } from '@mantine/core';
+import { Notifications } from "@mantine/notifications";
 import { BrowserRouter } from 'react-router-dom';
 import AuthContext, { AuthProvider } from './Contexts/AuthContext.jsx';
 
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')).render(
     <MantineProvider>
       <BrowserRouter>
         <AuthProvider>
+          <Notifications position="top-right" />
           <App />
         </AuthProvider>
       </BrowserRouter>
