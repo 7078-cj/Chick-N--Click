@@ -14,7 +14,7 @@ createRoot(document.getElementById('root')).render(
     <MantineProvider>
       <BrowserRouter>
         <AuthProvider>
-          <Notifications position="top-right" />
+          <Notifications position="top-right"  />
           <App />
         </AuthProvider>
       </BrowserRouter>

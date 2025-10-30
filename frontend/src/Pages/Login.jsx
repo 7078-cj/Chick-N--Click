@@ -41,10 +41,10 @@ function Login() {
           <img src={logo} alt="Click n' Chick" className="h-20 mb-6" />
 
           {/* Headings */}
-          <h1 className="text-[#B54719] font-extrabold text-4xl mb-0 leading-none hoc_font">
+          <h1 className="text-[#B54719] font-extrabold text-[90px] mb-0 leading-none hoc_font">
             GOOD DAY,
           </h1>
-          <h2 className="text-[#FF9119] font-extrabold text-5xl mb-6 leading-none hoc_font">
+          <h2 className="text-[#FF9119] font-extrabold text-[75px] mb-6 leading-none hoc_font">
             BES-TIES!
           </h2>
 
@@ -95,9 +95,7 @@ function Login() {
                   Sign Up
                 </a>
               </span>
-              <a href="/forgot" className="hover:underline">
-                Forgot Password?
-              </a>
+             
             </div>
 
             <button

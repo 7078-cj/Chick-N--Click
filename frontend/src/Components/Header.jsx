@@ -103,7 +103,7 @@ export default function Header({ variant = "default" }) {
                   useCase="signup" 
                   bgColor={"bg-amber-400"} 
                   hoverColor={"hover:bg-amber-800"} 
-                  onClick={() => user ? nav('/register') : setOpened(true)}
+                  onClick={() => nav('/register')}
                 >
                   Sign Up
                 </AppButton>
