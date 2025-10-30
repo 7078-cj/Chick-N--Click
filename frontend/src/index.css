@@ -1,4 +1,4 @@
-
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
 @import "tailwindcss";
 
@@ -8,3 +8,6 @@
 .hoc_font {
   font-family: 'Luckiest Guy', cursive;
 }
+
+
+body { font-family: 'Fredoka', sans-serif; }

@@ -1,33 +1,63 @@
-import React, { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Notification } from '@mantine/core';
-import AuthContext from '../Contexts/AuthContext';
+import React, { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Notification, Loader } from "@mantine/core";
+import AuthContext from "../Contexts/AuthContext";
+import loginImage from "../assets/login_image.svg";
+import logo from "../assets/hoc_logo.png";
 
 function Login() {
   const { loginUser } = useContext(AuthContext);
   const nav = useNavigate();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // 👈 NEW STATE
 
   const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true); // start loading
     try {
-      const data = await loginUser(e); // will throw if login fails
-      // redirect after successful login
-      if (data.user.role === 'admin') nav('/admin');
-      else nav('/home');
+      const data = await loginUser(e);
+      if (data.user.role === "admin") nav("/admin");
+      else nav("/home");
     } catch (err) {
       setError(err.message);
-      setTimeout(() => setError(''), 4000); // auto-hide
+      setTimeout(() => setError(""), 4000);
+    } finally {
+      setLoading(false); // stop loading regardless
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <div className="flex-1 flex justify-center items-center p-6">
-        <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8 relative">
+    <div className="flex min-h-screen font-sans bg-[#FFF9F1]">
+      {/* Left side - Login Form */}
+      <div className="flex flex-col justify-center items-start flex-1 px-20 relative">
+        {/* Background circular accents */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-[-100px] left-[-100px] w-[700px] h-[700px] rounded-full bg-[#FFF2DC]" />
+          <div className="absolute top-[100px] left-[-150px] w-[900px] h-[900px] rounded-full bg-[#FFF9E8]" />
+        </div>
+
+        <div className="relative z-10 max-w-md w-full">
+          {/* Logo */}
+          <img src={logo} alt="Click n' Chick" className="h-20 mb-6" />
+
+          {/* Headings */}
+          <h1 className="text-[#B54719] font-extrabold text-4xl mb-0 leading-none hoc_font">
+            GOOD DAY,
+          </h1>
+          <h2 className="text-[#FF9119] font-extrabold text-5xl mb-6 leading-none hoc_font">
+            BES-TIES!
+          </h2>
+
+          {/* Subtext */}
+          <p className="text-gray-600 text-sm mb-8">
+            Welcome to Click n' Chicks — where your food clicks with your
+            cravings!
+          </p>
+
           {error && (
             <Notification
               color="red"
-              onClose={() => setError('')}
+              onClose={() => setError("")}
               title="Login Error"
               className="mb-4"
               disallowClose={false}
@@ -36,46 +66,68 @@ function Login() {
             </Notification>
           )}
 
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-            Login
-          </h2>
-
+          {/* Login Form */}
           <form onSubmit={handleLogin} className="flex flex-col space-y-4">
-            <label className="flex flex-col text-gray-700 font-medium">
-              Email
-              <input
-                type="text"
-                name="email"
-                className="mt-1 px-3 py-2 border-2 border-gray-300 rounded-md outline-none focus:border-green-500 text-gray-700"
-                required
-              />
-            </label>
+            <input
+              type="text"
+              name="email"
+              placeholder="Username or Email"
+              className="w-full px-4 py-3 rounded-full border border-gray-300 focus:border-[#FF9119] outline-none text-gray-700 placeholder-gray-400"
+              required
+              disabled={loading}
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className="w-full px-4 py-3 rounded-full border border-gray-300 focus:border-[#FF9119] outline-none text-gray-700 placeholder-gray-400"
+              required
+              disabled={loading}
+            />
 
-            <label className="flex flex-col text-gray-700 font-medium">
-              Password
-              <input
-                type="password"
-                name="password"
-                className="mt-1 px-3 py-2 border-2 border-gray-300 rounded-md outline-none focus:border-green-500 text-gray-700"
-                required
-              />
-            </label>
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>
+                Don’t have an account?{" "}
+                <a
+                  href="/register"
+                  className="text-[#FF9119] font-semibold hover:underline"
+                >
+                  Sign Up
+                </a>
+              </span>
+              <a href="/forgot" className="hover:underline">
+                Forgot Password?
+              </a>
+            </div>
 
             <button
               type="submit"
-              className="w-full py-2 bg-green-500 hover:bg-green-600 active:bg-green-700 rounded-md text-white font-semibold transition"
+              disabled={loading}
+              className={`mt-4 w-28 py-2 rounded-full text-white font-semibold transition flex justify-center items-center ${
+                loading
+                  ? "bg-[#FFD364] cursor-not-allowed"
+                  : "bg-[#FFB600] hover:bg-[#ffae00]"
+              }`}
             >
-              Login
+              {loading ? (
+                <>
+                  <Loader size="xs" color="white" className="mr-2" /> Loading...
+                </>
+              ) : (
+                "SIGN IN"
+              )}
             </button>
           </form>
-
-          <p className="mt-4 text-center text-gray-600 text-sm">
-            Don't have an account?{' '}
-            <a href="/register" className="text-cyan-500 hover:underline">
-              Register
-            </a>
-          </p>
         </div>
+      </div>
+
+      {/* Right Side Image */}
+      <div className="hidden md:flex justify-center items-center relative p-4">
+        <img
+          src={loginImage}
+          alt="Login visual"
+          className="object-cover h-full w-full rounded-l-3xl"
+        />
       </div>
     </div>
   );
