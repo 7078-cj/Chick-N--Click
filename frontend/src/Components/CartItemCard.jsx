@@ -45,6 +45,8 @@ export default function CartItemCard({
     }
   };
 
+  console.log(item)
+
   return (
     <div className="relative flex flex-row items-center w-full">
      
@@ -80,9 +82,15 @@ export default function CartItemCard({
         {/* Info */}
         <div className="flex-1 px-3">
           <h3 className="font-bold text-black">{item.food_name || item.food.food_name}</h3>
-          {isOrder ? <p className="text-[#ff6600] font-semibold">₱{item.quantity * item.price}</p>:
-          <p className="text-[#ff6600] font-semibold">₱{item.price || item.food.price}</p>
-          }
+          {isOrder ? (
+              <p className="text-[#ff6600] font-semibold">
+                ₱{item.quantity * (item.price ?? item.food?.price ?? 0)}
+              </p>
+            ) : (
+              <p className="text-[#ff6600] font-semibold">
+                ₱{item.price ?? item.food?.price ?? 0}
+              </p>
+            )}
           
         </div>
 
