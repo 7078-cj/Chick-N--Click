@@ -33,7 +33,7 @@ function Register() {
         email: e.target.email.value,
         password: e.target.password.value,
         password_confirmation: e.target.password_confirmation.value,
-        phone_number: e.target.phone_number.value,
+        phone_number: `+63${e.target.phone_number.value}`,
         latitude: location.lat,
         longitude: location.lng,
         location: location.full || "",
