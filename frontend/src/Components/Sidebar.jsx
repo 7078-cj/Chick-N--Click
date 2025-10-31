@@ -1,7 +1,9 @@
 import { LayoutGrid, CreditCard, ShoppingCart, LogOut } from "lucide-react";
+import { useContext } from "react";
+import AuthContext from "../Contexts/AuthContext";
 
 export default function Sidebar({setActiveTab, activeTab}) {
-
+  const {  logOut } = useContext(AuthContext);
   const active = "bg-orange-400 text-white"
   const inactive = "bg-yellow-200 text-orange-500"
   
@@ -36,7 +38,8 @@ export default function Sidebar({setActiveTab, activeTab}) {
       
 
       {/* Logout */}
-      <button className="w-12 h-12 mb-4 rounded-full flex items-center justify-center bg-yellow-200 text-orange-500 shadow-md hover:scale-110 transition">
+      <button className="w-12 h-12 mb-4 rounded-full flex items-center justify-center bg-yellow-200 text-orange-500 shadow-md hover:scale-110 transition"
+              onClick={logOut}>
         <LogOut size={20} />
       </button>
     </div>
