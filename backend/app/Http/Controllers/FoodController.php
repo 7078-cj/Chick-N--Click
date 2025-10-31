@@ -26,8 +26,18 @@ class FoodController extends Controller implements HasMiddleware
      */
     public function index()
     {
-       
-        return Food::with('categories')->get();
+        // Get all foods with categories, ordered by category name then food name
+        $foods = Food::with(['categories' => function($query) {
+            $query->orderBy('name', 'asc');
+        }])
+        ->get()
+        ->sortBy(function($food) {
+            // Use first category's name as primary sort key
+            return $food->categories->first()?->name ?? '';
+        })
+        ->values();
+
+        return response()->json($foods);
     }
 
     /**

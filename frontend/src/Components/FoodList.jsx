@@ -13,6 +13,7 @@ export default function FoodList() {
     searchQuery,
     filteredFoods: searchFilteredFoods 
   } = useContext(FoodContext);
+
   const { fetchCart } = useContext(CartContext);
   const { token } = useContext(AuthContext);
   const url = import.meta.env.VITE_API_URL;
@@ -88,10 +89,8 @@ export default function FoodList() {
 
   // Combined filter: search + category
   const applyFilters = () => {
-    // Start with search-filtered foods from context
     let result = searchFilteredFoods;
 
-    // Then apply category filter if not "all"
     if (activeCategory !== "all") {
       result = result.filter((f) =>
         f.categories?.some((c) => c.id.toString() === activeCategory)
@@ -101,19 +100,36 @@ export default function FoodList() {
     return result;
   };
 
-  // Update displayed foods when search query or category changes
   useEffect(() => {
     setDisplayFoods(applyFilters());
   }, [searchFilteredFoods, activeCategory]);
 
+  // Group foods by category for "All" tab, sorted alphabetically, Addons last
+  const groupByCategory = (foodsList) => {
+    const groups = {};
+    foodsList.forEach((food) => {
+      food.categories?.forEach((cat) => {
+        if (!groups[cat.id]) groups[cat.id] = { category: cat, foods: [] };
+        groups[cat.id].foods.push(food);
+      });
+    });
+
+    let sortedGroups = Object.values(groups).sort((a, b) => {
+      if (a.category.name === "Addons") return 1;
+      if (b.category.name === "Addons") return -1;
+      return a.category.name.localeCompare(b.category.name);
+    });
+
+    return sortedGroups;
+  };
+
   return (
-    <div className="w-full flex flex-col gap-2">
-      {/* Show active search indicator */}
+    <div className="w-full flex flex-col gap-2 px-4 md:px-8">
       {searchQuery && (
-        <div className="mb-4 text-sm text-gray-600  px-4 py-2 rounded-lg">
+        <div className="mb-4 text-sm text-gray-600 px-4 py-2 rounded-lg bg-gray-100">
           Searching for: <span className="font-semibold">"{searchQuery}"</span>
           <span className="ml-2 text-gray-500">
-            ({displayFoods.length} result{displayFoods.length !== 1 ? 's' : ''})
+            ({displayFoods.length} result{displayFoods.length !== 1 ? "s" : ""})
           </span>
         </div>
       )}
@@ -128,23 +144,53 @@ export default function FoodList() {
         transitionDuration={200}
       />
 
-      <div className="flex flex-wrap gap-6 justify-center mt-10">
+      <div className="flex flex-col gap-8 mt-10">
         {displayFoods.length > 0 ? (
-          displayFoods.map((food) => (
-            <FoodCard
-              key={food.id}
-              food={food}
-              url={url}
-              onDelete={handleDelete}
-              onUpdate={handleUpdate}
-              handleAddToCart={handleAddToCart}
-            />
-          ))
+          activeCategory === "all" ? (
+            groupByCategory(displayFoods).map((group) => (
+              <div key={group.category.id} className="flex flex-col gap-4">
+                <h2 className="text-xl font-bold text-orange-600 border-b border-orange-200 pb-2 mb-4">
+                  {group.category.name}
+                </h2>
+                <div className="flex flex-wrap gap-6 justify-center md:justify-start">
+                  {group.foods.map((food) => (
+                    <div
+                      key={food.id}
+                      className="transition-transform hover:-translate-y-1 hover:shadow-lg"
+                    >
+                      <FoodCard
+                        food={food}
+                        url={url}
+                        onDelete={handleDelete}
+                        onUpdate={handleUpdate}
+                        handleAddToCart={handleAddToCart}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="flex flex-wrap gap-6 justify-center md:justify-start">
+              {displayFoods.map((food) => (
+                <FoodCard
+                  key={food.id}
+                  food={food}
+                  url={url}
+                  onDelete={handleDelete}
+                  onUpdate={handleUpdate}
+                  handleAddToCart={handleAddToCart}
+                />
+              ))}
+            </div>
+          )
         ) : (
           <div className="text-center mt-6">
             <p className="text-gray-500">
-              {searchQuery 
-                ? `No foods found matching "${searchQuery}"${activeCategory !== "all" ? " in this category" : ""}`
+              {searchQuery
+                ? `No foods found matching "${searchQuery}"${
+                    activeCategory !== "all" ? " in this category" : ""
+                  }`
                 : "No foods found for this category."}
             </p>
           </div>

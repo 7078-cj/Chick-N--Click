@@ -67,8 +67,11 @@ export default function Cart() {
 
       
       const data = await res.json();
+      
       setCart(data.cart || []);
       setTotal(data.total || 0);
+      
+      
     } catch (err) {
       console.error(err);
     }
@@ -102,6 +105,7 @@ export default function Cart() {
         .reduce((sum, i) => sum + i.subtotal, 0)
     );
     removeCartItem(foodId);
+    
   };
 
 

@@ -74,10 +74,8 @@ export default function FoodFormModal({ opened, onClose, food = null, onSuccess 
     data.append("food_name", formData.food_name);
     data.append("price", formData.price);
 
-    
     formData.categories.forEach((cat) => data.append("categories[]", cat));
 
-    
     const isAvailable = formData.availability === "Available";
     data.append("available", isAvailable ? "1" : "0");
 
@@ -103,7 +101,23 @@ export default function FoodFormModal({ opened, onClose, food = null, onSuccess 
         throw new Error(result.message || "Failed to save food item");
       }
 
+     
       if (onSuccess) onSuccess();
+
+     
+      if (!food) {
+        setFormData({
+          food_name: "",
+          price: 0,
+          categories: [],
+          availability: "",
+          description: "",
+          thumbnail: null,
+        });
+        setPreview(null);
+      }
+
+      // Close modal
       onClose();
     } catch (err) {
       console.error(err);

@@ -199,13 +199,6 @@ function AddToCart({ setCartOpened, cartOpened, quantity, setQuantity, handleAdd
                     <div key={index} className="flex justify-between items-center bg-white p-2 rounded shadow-sm">
                     <span>{drink.name}</span>
                     <div className="flex items-center gap-2">
-                        <Select
-                        value={drink.size}
-                        onChange={(value) => updateSize(index, value, "drink")}
-                        data={["small", "medium", "large"]}
-                        size="xs"
-                        w={90}
-                        />
                         <Button
                         size="xs"
                         color="red"

@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('food_id')->constrained()->onDelete('cascade');
             $table->integer('quantity')->default(1);
+            $table->unsignedBigInteger('parent_cart_item_id')->nullable(); // points to cart_items.id
+            $table->foreign('parent_cart_item_id')->references('id')->on('cart_items')->onDelete('cascade');
             $table->timestamps();
         });
     }

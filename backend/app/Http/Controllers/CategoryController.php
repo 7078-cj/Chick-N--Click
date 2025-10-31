@@ -20,9 +20,20 @@ class CategoryController extends Controller implements HasMiddleware
     /**
      * Display a listing of the resource.
      */
-    public function index()
+   public function index()
     {
-        return response()->json(Category::all());
+        // Get all categories except 'Addons' sorted alphabetically
+        $categories = Category::where('name', '!=', 'Addons')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        // Get 'Addons' category if it exists
+        $addons = Category::where('name', 'Addons')->get();
+
+        // Merge them, with Addons at the end
+        $sortedCategories = $categories->concat($addons);
+
+        return response()->json($sortedCategories);
     }
 
     /**

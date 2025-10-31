@@ -22,7 +22,7 @@ Route::post('/logout',[AuthController::class, 'logout'])->middleware('auth:sanct
 
 Route::get('/cart', [CartItemController::class, 'userCart']);
 Route::post('/cart/add/{foodId}', [CartItemController::class, 'addToCart']);
-Route::delete('/cart/remove/{foodId}', [CartItemController::class, 'removeToCart']);
+Route::delete('/cart/remove/{orderId}', [CartItemController::class, 'removeToCart']);
 
 Route::post('/order/place', [OrderController::class, 'placeOrder']);
 Route::get('/orders', [OrderController::class, 'getUserOrder']);

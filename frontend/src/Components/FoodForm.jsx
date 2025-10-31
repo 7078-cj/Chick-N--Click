@@ -72,7 +72,6 @@ export default function FoodForm({ food = null, onSuccess }) {
     data.append("price", formData.price);
     data.append("category", formData.category);
     data.append("availability", formData.availability);
-    data.append("short_description", formData.short_description);
     data.append("description", formData.description);
     if (formData.thumbnail) data.append("thumbnail", formData.thumbnail);
     if (food) data.append("_method", "PUT");
@@ -220,21 +219,7 @@ export default function FoodForm({ food = null, onSuccess }) {
           required
         />
 
-        {/* Short Description */}
-        <TextInput
-          label="Short Description"
-          placeholder="Enter short description"
-          value={formData.short_description}
-          onChange={(e) =>
-            setFormData({ ...formData, short_description: e.target.value })
-          }
-          classNames={{
-            input:
-              "rounded-full bg-gray-50 focus:ring-2 focus:ring-orange-400 border",
-          }}
-          required
-        />
-
+      
         {/* Description */}
         <Textarea
           label="Description"

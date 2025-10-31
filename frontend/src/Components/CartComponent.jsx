@@ -15,6 +15,7 @@ export default function CartComponent() {
     handleUpdate,
     handleRemove,
     placeOrder,
+    fetchCart
   } = useContext(CartContext);
 
   const [selectedItems, setSelectedItems] = useState([]); 
@@ -57,6 +58,7 @@ export default function CartComponent() {
       
     }
     setSelectedItems([]); 
+    fetchCart();
   };
 
   return (

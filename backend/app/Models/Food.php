@@ -16,7 +16,8 @@ class Food extends Model
         'food_name',
         'price',
         'available',
-        'description'
+        'description',
+        'parent_food_id', 
     ];
 
     public function cartItems()
@@ -28,4 +29,5 @@ class Food extends Model
         return $this->belongsToMany(Category::class, 'category_food');
     }
 
+   
 }

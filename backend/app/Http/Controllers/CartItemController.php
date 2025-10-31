@@ -17,54 +17,47 @@ class CartItemController extends Controller  implements HasMiddleware
             new Middleware('auth:sanctum')
         ];
     }
-   public function addToCart(Request $request, $foodId)
+    public function addToCart(Request $request, $foodId)
     {
         $user = $request->user();
 
         $validated = $request->validate([
             'quantity' => 'integer|min:1',
-            'sides'  => 'array|nullable',
-            'drinks' => 'array|nullable',
-            'sides.*.id' => 'integer|exists:food,id',
+            'sides'    => 'array|nullable',
+            'drinks'   => 'array|nullable',
+            'sides.*.id'  => 'integer|exists:food,id',
             'sides.*.size' => 'string|nullable',
-            'drinks.*.id' => 'integer|exists:food,id',
+            'drinks.*.id'  => 'integer|exists:food,id',
             'drinks.*.size' => 'string|nullable',
         ]);
 
-        // --- Add the main food item ---
+        // --- Add or update the main food item ---
         $cartItem = $user->Cart()->updateOrCreate(
-            ['food_id' => $foodId],
+            ['food_id' => $foodId, 'parent_cart_item_id' => null], // main items have no parent
             ['quantity' => $validated['quantity'] ?? 1]
         );
 
         // --- Handle Sides ---
         if (!empty($validated['sides'])) {
             foreach ($validated['sides'] as $side) {
-                $user->Cart()->updateOrCreate(
+                $user->Cart()->Create(
                     [
                         'food_id' => $side['id'],
-                        'type' => 'side', 
-                    ],
-                    [
-                        'quantity' => 1,
-                        'parent_food_id' => $foodId, 
+                        'parent_cart_item_id' => $cartItem->id, // tie to main cart item
+                         'quantity' => 1,
                     ]
                 );
             }
         }
 
-      
+        // --- Handle Drinks ---
         if (!empty($validated['drinks'])) {
             foreach ($validated['drinks'] as $drink) {
-                $user->Cart()->updateOrCreate(
+                $user->Cart()->Create(
                     [
                         'food_id' => $drink['id'],
-                        'type' => 'drink',
-                    ],
-                    [
+                        'parent_cart_item_id' => $cartItem->id, // tie to main cart item
                         'quantity' => 1,
-                        'size' => $drink['size'] ?? 'medium',
-                        'parent_food_id' => $foodId,
                     ]
                 );
             }
@@ -75,16 +68,18 @@ class CartItemController extends Controller  implements HasMiddleware
             'cart_item' => $cartItem->load('food')
         ]);
     }
-
-    public function userCart(Request $request)
+   public function userCart(Request $request)
     {
         $user = $request->user();
 
-        // Eager load food relation
-        $cartItems =  $user->Cart()->with('food')->get();
+        // Eager load food relation with categories
+        $cartItems = $user->Cart()->with('food', 'food.categories')->get();
 
         $cartData = $cartItems->map(function ($item) {
             $food = $item->food;
+
+            // Check if the food has Addons category
+            $isAddon = $food && $food->categories->contains('name', 'Addons');
 
             return [
                 'id' => $item->id,
@@ -96,6 +91,7 @@ class CartItemController extends Controller  implements HasMiddleware
                 'thumbnail' => $food && $food->thumbnail 
                     ? asset('storage/' . $food->thumbnail) 
                     : 'https://via.placeholder.com/150x100?text=No+Image',
+                'is_addon' => $isAddon, // <-- new field for frontend
             ];
         });
 
@@ -106,13 +102,15 @@ class CartItemController extends Controller  implements HasMiddleware
             'total' => $total,
         ]);
     }
-
-   public function removeToCart(Request $request, $foodId)
+    public function removeToCart(Request $request, $foodId)
     {
         $user = $request->user();
 
-       
-        $cartItem = $user->Cart()->where('food_id', $foodId)->first();
+        // Find the main cart item (no parent)
+        $cartItem = $user->Cart()
+            ->where('food_id', $foodId)
+            ->whereNull('parent_cart_item_id')
+            ->first();
 
         if (!$cartItem) {
             return response()->json([
@@ -120,10 +118,14 @@ class CartItemController extends Controller  implements HasMiddleware
             ], 404);
         }
 
+        // Delete all addons tied to this cart item
+        $cartItem->addons()->delete();
+
+        // Delete the main cart item
         $cartItem->delete();
 
         return response()->json([
-            'message' => 'Food removed from cart!'
+            'message' => 'Food and its add-ons removed from cart!'
         ]);
     }
 }
