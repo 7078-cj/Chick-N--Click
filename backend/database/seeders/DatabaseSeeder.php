@@ -28,6 +28,9 @@ class DatabaseSeeder extends Seeder
         Category::create([
             'name'=>'Sides'
         ]);
+        Category::create([
+            'name'=>'Addons'
+        ]);
 
     }
 }

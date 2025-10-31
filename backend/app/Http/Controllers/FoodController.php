@@ -159,22 +159,21 @@ class FoodController extends Controller implements HasMiddleware
 
     public function drinks(Request $request)
     {
-        
-        $drinks = Food::whereHas('categories', function ($query) {
-            $query->where('name', 'Drinks');
-        })
-        ->with('categories')
-        ->get();
+        $drinksAndAddons = Food::whereHas('categories', function ($query) {
+                $query->whereIn('name', ['Drinks', 'Addons']);
+            }, '=', 2) 
+            ->with('categories')
+            ->get();
 
-        return response()->json($drinks);
+        return response()->json($drinksAndAddons);
     }
 
     public function sides(Request $request)
     {
         
         $sides = Food::whereHas('categories', function ($query) {
-            $query->where('name', 'Sides');
-        })
+                $query->whereIn('name', ['Sides', 'Addons']);
+            }, '=', 2) 
         ->with('categories')
         ->get();
 

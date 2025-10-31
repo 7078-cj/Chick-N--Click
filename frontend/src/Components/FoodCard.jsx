@@ -42,18 +42,19 @@ export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCar
             {food.available ? "AVAILABLE" : "UNAVAILABLE"}
           </span>
 
-          {/* Cart Button (only for non-admins) */}
-          {!user?.role || user.role !== "admin" ? (
-            <AppButton
-              useCase="menu"
-              size="sm"
-              roundedType="full"
-              icon={ShoppingCart}
-              iconOnly
-              className="absolute top-3 right-3 w-10 h-10"
-              onClick={() => setCartOpened(true)}
-              disabled={!food.available}
-            />
+          {/* Cart Button (only for non-admins and not Addons) */}
+          {(!user?.role || user.role !== "admin") && 
+            !food.categories?.some(cat => cat.name === "Addons") ? (
+              <AppButton
+                useCase="menu"
+                size="sm"
+                roundedType="full"
+                icon={ShoppingCart}
+                iconOnly
+                className="absolute top-3 right-3 w-10 h-10"
+                onClick={() => setCartOpened(true)}
+                disabled={!food.available}
+              />
           ) : null}
 
           {/* Full Thumbnail */}
