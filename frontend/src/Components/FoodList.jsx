@@ -104,25 +104,36 @@ export default function FoodList() {
     setDisplayFoods(applyFilters());
   }, [searchFilteredFoods, activeCategory]);
 
-  // Group foods by category for "All" tab, sorted alphabetically, Addons last
   const groupByCategory = (foodsList) => {
-    const groups = {};
-    foodsList.forEach((food) => {
-      food.categories?.forEach((cat) => {
-        if (!groups[cat.id]) groups[cat.id] = { category: cat, foods: [] };
-        groups[cat.id].foods.push(food);
+      const groups = {};
+
+      foodsList.forEach((food) => {
+        if (food.categories?.length) {
+          food.categories.forEach((cat) => {
+            if (!groups[cat.id]) {
+              groups[cat.id] = { category: cat, foods: [] };
+            }
+            groups[cat.id].foods.push(food);
+          });
+        } else {
+         
+          if (!groups["no-category"]) {
+            groups["no-category"] = { category: { id: "no-category", name: "Uncategorized" }, foods: [] };
+          }
+          groups["no-category"].foods.push(food);
+        }
       });
-    });
 
-    let sortedGroups = Object.values(groups).sort((a, b) => {
-      if (a.category.name === "Addons") return 1;
-      if (b.category.name === "Addons") return -1;
-      return a.category.name.localeCompare(b.category.name);
-    });
+      const sortedGroups = Object.values(groups).sort((a, b) => {
+        if (a.category.name === "Addons") return 1;
+        if (b.category.name === "Addons") return -1;
+        return a.category.name.localeCompare(b.category.name);
+      });
 
-    return sortedGroups;
-  };
+      return sortedGroups;
+    };
 
+    
   return (
     <div className="w-full flex flex-col gap-2 px-4 md:px-8">
       {searchQuery && (

@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import AuthContext from "./AuthContext";
+import { FoodContext } from "./FoodProvider";
 
 
 export const AddOnContext = createContext();
 
 export const AddOnProvider = ({ children }) => {
+    const { foods} = useContext(FoodContext);
     const [sides, setSides] = useState([]);
     const [drinks, setDrinks] = useState([]);
     const { token } = useContext(AuthContext);
@@ -53,7 +55,7 @@ export const AddOnProvider = ({ children }) => {
        useEffect(() => {
            fetchDrinks();
            fetchSides();
-       }, []);
+       }, [foods]);
     
     const context ={   
         sides:sides,
