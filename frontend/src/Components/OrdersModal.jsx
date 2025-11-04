@@ -1,16 +1,24 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Modal, Loader, Text, Card, Image, Button, Badge } from "@mantine/core";
+import React, { useContext } from "react";
+import {
+  Modal,
+  Loader,
+  Text,
+  Card,
+  Image,
+  Button,
+  Badge,
+  Group,
+  Divider,
+  Stack,
+  Title,
+} from "@mantine/core";
+import { IconClock, IconShoppingBag, IconX } from "@tabler/icons-react";
 import { OrderContext } from "../Contexts/Orderprovider";
 import CartItemCard from "./CartItemCard";
 
 export default function OrdersModal({ opened, onClose }) {
-  const { 
-          cancelOrder,
-          orders,
-          loading,
-        }=useContext(OrderContext)
-
-        const url = import.meta.env.VITE_API_URL;
+  const { cancelOrder, orders, loading } = useContext(OrderContext);
+  const url = import.meta.env.VITE_API_URL;
 
   const statusColors = {
     pending: "yellow",
@@ -19,62 +27,121 @@ export default function OrdersModal({ opened, onClose }) {
     completed: "green",
     cancelled: "gray",
   };
+
   return (
-    <Modal opened={opened} onClose={onClose} title="Order List" size="lg">
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title={<Title order={3} >Your Orders</Title>}
+      size="lg"
+      overlayProps={{
+        backgroundOpacity: 0.55,
+        blur: 3,
+      }}
+      centered
+      
+    >
       {loading ? (
-        <Loader />
+        <div className="flex justify-center items-center py-10">
+          <Loader color="blue" size="lg" />
+        </div>
       ) : orders.length > 0 ? (
-        <div className="space-y-4 w-full">
+        <Stack spacing="md" className="w-full">
           {orders.map((order) => (
-            <Card key={order.id} shadow="sm" padding="lg" radius="md" withBorder>
-              
+            <Card
+              key={order.id}
+              shadow="md"
+              padding="lg"
+              radius="md"
+              withBorder
+              className="hover:shadow-lg transition-all duration-200"
+            >
+              {/* Order header */}
+              <Group position="apart" mb="xs">
+                <Text fw={600} size="lg">
+                  Order #{order.id}
+                </Text>
+                <Badge
+                  color={statusColors[order.status]}
+                  size="lg"
+                  radius="md"
+                  variant="filled"
+                >
+                  {order.status.toUpperCase()}
+                </Badge>
+              </Group>
+
               <Text size="sm" c="dimmed">
                 Placed on {new Date(order.created_at).toLocaleString()}
               </Text>
 
-              <Badge size="sm" color="green" radius="md">
-                ETC {order.estimated_time_of_completion != 0 ? order.estimated_time_of_completion: ""} mins
-              </Badge>
-
-              <div className="space-y-2 mt-2 w-full flex flex-col items-center justify-center">
-                {order.items.map((item) => (
-                  <CartItemCard item={item} url={url} isOrder orderId={order.id}/>
-                ))}
-              </div>
-
-
-              <div className=" flex flex-row w-full m-3">
-                <div className="w-full flex flex-row gap-5 items-center justify-start">
-                 
-                  <Badge color={statusColors[order.status]} size="xl" radius="md">
-                      {order.status.toUpperCase()}
-                  </Badge>
-                 
-
-                {order.status === "pending" && (
-                  <Button
-                    color="red"
-                    size="xs"
-                    onClick={() => cancelOrder(order.id)}
+              {/* Estimated time */}
+              {order.estimated_time_of_completion > 0 && (
+                <Group mt="xs">
+                  <Badge
+                    size="lg"
+                    color="teal"
+                    leftSection={<IconClock size={16} />}
+                    radius="lg"
                   >
-                    Cancel Order
-                  </Button>
-                )}
-                </div>
-                
+                    {order.estimated_time_of_completion} min ETA
+                  </Badge>
+                </Group>
+              )}
 
-                <span className="w-[30%]">
+              <Divider my="sm" />
+
+              {/* Order type */}
+              {order.type && (
+                <Group align="center" spacing="xs">
+                  <IconShoppingBag size={18} />
+                  <Text fw={500}>Order Type:</Text>
+                  <Text>{order.type}</Text>
+                </Group>
+              )}
+
+              {/* Items */}
+              <Stack spacing="xs" mt="md">
+                {order.items.map((item, index) => (
+                  <CartItemCard
+                    key={index}
+                    item={item}
+                    url={url}
+                    isOrder
+                    orderId={order.id}
+                  />
+                ))}
+              </Stack>
+
+              <Divider my="sm" />
+
+              {/* Footer Section */}
+              <Group position="apart" align="center" mt="sm">
+                <Text fw={600} size="md">
                   Total: ${order.total_price}
-                </span>
-              </div>
-              
+                </Text>
 
-              
+                <Group spacing="xs">
+                  {order.status === "pending" && (
+                    <Button
+                      color="red"
+                      size="xs"
+                      variant="light"
+                      leftSection={<IconX size={14} />}
+                      onClick={() => cancelOrder(order.id)}
+                    >
+                      Cancel Order
+                    </Button>
+                  )}
+                </Group>
+              </Group>
             </Card>
           ))}
-        </div>
+        </Stack>
       ) : (
-        <Text>No orders found.</Text>
+        <Text align="center" c="dimmed">
+          No orders found.
+        </Text>
       )}
     </Modal>
   );
