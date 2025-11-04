@@ -191,8 +191,7 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
         <div className="w-full flex flex-row items-end justify-end">
             <Button
                 mt={6}
-                variant="gradient"
-                gradient={{ from: "orange", to: "red" }}
+                color={statusColors[order.status]}
                 size="md"
                 onClick={() => setOpened(true)}
                 className=""
