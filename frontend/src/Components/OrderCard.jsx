@@ -91,7 +91,7 @@ function OrderCard({ order, statusColors, url, cancelOrder }) {
       {/* ===== Footer Section ===== */}
       <Group justify="space-between" align="center" mt="sm">
         <Text fw={600} size="md">
-          Total: ₱{order.total_price?.toFixed(2) || "0.00"}
+          Total: ₱{order.total_price || "0.00"}
         </Text>
 
         
