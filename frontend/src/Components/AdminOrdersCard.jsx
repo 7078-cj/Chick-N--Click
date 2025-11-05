@@ -183,7 +183,7 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
           {/* 5️⃣ TOTAL + DETAILS BUTTON */}
           <div className="flex flex-col items-end">
             <Text fw={700} c="green.7" size="lg">
-              ₱{order.total_price.toFixed(2)}
+              ₱{order.total_price}
             </Text>
             
           </div>
