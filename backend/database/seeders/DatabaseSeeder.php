@@ -15,20 +15,20 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Create admin account
-        User::create([
+        User::updateOrCreate([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
             'role' => 'admin',
             'password' => Hash::make('nikolo12'), // make sure to hash the password
         ]);
 
-        Category::create([
+        Category::updateOrCreate([
             'name'=>'Drinks'
         ]);
-        Category::create([
+        Category::updateOrCreate([
             'name'=>'Sides'
         ]);
-        Category::create([
+        Category::updateOrCreate([
             'name'=>'Addons'
         ]);
 
