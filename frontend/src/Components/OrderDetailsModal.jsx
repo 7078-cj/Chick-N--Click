@@ -139,7 +139,7 @@ function OrderDetailsModal({ opened, order, setOpened }) {
                     <Image
                       src={
                         item.food?.thumbnail
-                          ? `${url}/storage/${item.food.thumbnail}`
+                          ? `${item.food.thumbnail}`
                           : "https://via.placeholder.com/60x60?text=No+Img"
                       }
                       radius="md"

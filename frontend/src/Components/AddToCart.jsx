@@ -129,7 +129,7 @@ function AddToCart({ setCartOpened, cartOpened, quantity, setQuantity, handleAdd
         {/* IMAGE SECTION */}
         <div className="w-[40%] flex flex-col justify-center items-center">
           <img
-            src={food.thumbnail ? `${url}/storage/${food.thumbnail}` : "https://via.placeholder.com/320x200?text=No+Image"}
+            src={food.thumbnail ? `${food.thumbnail}` : "https://via.placeholder.com/320x200?text=No+Image"}
             alt={food.food_name}
             className="w-full h-full object-cover rounded-2xl"
           />

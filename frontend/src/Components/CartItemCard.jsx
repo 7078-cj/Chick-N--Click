@@ -68,7 +68,7 @@ export default function CartItemCard({
         {/* Image */}
         <div className="flex-shrink-0 w-[100px] h-20 overflow-hidden rounded-3xl bg-yellow-400 flex items-center justify-center">
           <img
-            src={item.thumbnail || `${url}/storage/${item.food?.thumbnail}`}
+            src={item.thumbnail || `${item.food?.thumbnail}`}
             alt={item.food_name}
             className="w-full h-full object-cover"
           />

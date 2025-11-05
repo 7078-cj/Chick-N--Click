@@ -50,7 +50,7 @@ export default function FoodForm({ food = null, onSuccess }) {
         setPreview(
           food.thumbnail.startsWith("http")
             ? food.thumbnail
-            : `${preUrl}/storage/${food.thumbnail}`
+            : `${food.thumbnail}`
         );
     }
   }, [food]);

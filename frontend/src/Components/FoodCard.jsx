@@ -62,7 +62,7 @@ export default function FoodCard({ food, url, onDelete, onUpdate, handleAddToCar
           <img
             src={
               food.thumbnail
-                ? `${url}/storage/${food.thumbnail}`
+                ? `${food.thumbnail}`
                 : "https://via.placeholder.com/320x200?text=No+Image"
             }
             alt={food.food_name}
