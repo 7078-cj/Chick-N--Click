@@ -88,9 +88,7 @@ class CartItemController extends Controller  implements HasMiddleware
                 'price' => $food->price ?? 0,
                 'quantity' => $item->quantity,
                 'subtotal' => ($food->price ?? 0) * $item->quantity,
-                'thumbnail' => $food && $food->thumbnail 
-                    ? asset('storage/' . $food->thumbnail) 
-                    : 'https://via.placeholder.com/150x100?text=No+Image',
+                'thumbnail' =>$food->thumbnail,
                 'is_addon' => $isAddon, // <-- new field for frontend
             ];
         });
