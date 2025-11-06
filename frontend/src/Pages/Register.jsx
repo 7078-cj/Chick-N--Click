@@ -23,6 +23,16 @@ function Register() {
     setError("");
     setLoading(true);
 
+    const phone = e.target.phone_number.value.trim();
+
+    // ✅ Phone validation: only digits and must be exactly 10 digits
+    if (!/^\d{10}$/.test(phone)) {
+      setError("Please enter a valid 10-digit phone number (digits only).");
+      setLoading(false);
+      setTimeout(() => setError(""), 4000);
+      return;
+    }
+
     const url = import.meta.env.VITE_API_URL;
 
     try {
@@ -33,7 +43,7 @@ function Register() {
         email: e.target.email.value,
         password: e.target.password.value,
         password_confirmation: e.target.password_confirmation.value,
-        phone_number: `+63${e.target.phone_number.value}`,
+        phone_number: `+63${phone}`,
         latitude: location.lat,
         longitude: location.lng,
         location: location.full || "",
@@ -133,7 +143,7 @@ function Register() {
             <input
               type="text"
               name="name"
-              placeholder="Username or Email"
+              placeholder="Username"
               className="px-4 py-2 border border-gray-300 rounded-full text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none"
               required
             />
@@ -170,6 +180,12 @@ function Register() {
                 name="phone_number"
                 placeholder="Enter your phone number"
                 className="flex-1 outline-none text-gray-700 placeholder-gray-400"
+                maxLength={10}
+                pattern="\d{10}"
+                onInput={(e) => {
+                  // Prevent non-digit input
+                  e.target.value = e.target.value.replace(/\D/g, "");
+                }}
                 required
               />
             </div>

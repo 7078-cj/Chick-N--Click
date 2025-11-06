@@ -45,6 +45,15 @@ function AuthModal({ opened, onClose }) {
     setLoading(true);
     const url = import.meta.env.VITE_API_URL;
 
+    // ✅ Phone number validation
+    const phone = e.target.phone_number.value.trim();
+    if (!/^\d{10}$/.test(phone)) {
+      setError("Please enter a valid 10-digit phone number (digits only).");
+      setLoading(false);
+      setTimeout(() => setError(""), 4000);
+      return;
+    }
+
     try {
       const body = {
         first_name: e.target.first_name.value,
@@ -53,7 +62,7 @@ function AuthModal({ opened, onClose }) {
         email: e.target.email.value,
         password: e.target.password.value,
         password_confirmation: e.target.password_confirmation.value,
-        phone_number: e.target.phone_number.value,
+        phone_number: `+63${phone}`,
         latitude: location.lat,
         longitude: location.lng,
         location: location.full || "",
@@ -233,7 +242,7 @@ function AuthModal({ opened, onClose }) {
             <input
               type="text"
               name="name"
-              placeholder="Username or Email"
+              placeholder="Username"
               className="px-4 py-2 border border-gray-300 rounded-full text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none"
               required
             />
@@ -262,7 +271,7 @@ function AuthModal({ opened, onClose }) {
               required
             />
 
-            {/* Phone Number */}
+            {/* 📞 Phone Number */}
             <div className="flex items-center border border-gray-300 rounded-full px-4 py-2 focus-within:border-[#FF9119]">
               <span className="text-gray-500 mr-2 select-none">+63</span>
               <input
@@ -270,11 +279,16 @@ function AuthModal({ opened, onClose }) {
                 name="phone_number"
                 placeholder="Enter your phone number"
                 className="flex-1 outline-none text-gray-700 placeholder-gray-400"
+                maxLength={10}
+                pattern="\d{10}"
+                onInput={(e) => {
+                  e.target.value = e.target.value.replace(/\D/g, "");
+                }}
                 required
               />
             </div>
 
-            {/* Map Picker */}
+            {/* 🗺️ Map Picker */}
             <div className="mt-3">
               <p className="text-xs text-gray-500 mb-2 ml-2">Select your location</p>
               <div className="w-full h-[180px] rounded-xl overflow-hidden border border-gray-200 shadow-inner">
