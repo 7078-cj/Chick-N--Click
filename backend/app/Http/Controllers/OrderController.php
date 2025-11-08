@@ -190,12 +190,18 @@ class OrderController extends Controller implements HasMiddleware
         $user = $request->user();
 
         if ($user && $user->role === "admin") {
-            $all_orders = Order::with(['items.food', 'user','items.food.categories'])
+            $perPage = $request->get('per_page', 10); // default 10 per page
+
+            $all_orders = Order::with(['items.food', 'user', 'items.food.categories'])
                 ->orderBy('created_at', 'desc')
-                ->get();
+                ->paginate($perPage);
 
             return response()->json([
-                'orders' => $all_orders
+                'orders' => $all_orders->items(),
+                'current_page' => $all_orders->currentPage(),
+                'last_page' => $all_orders->lastPage(),
+                'total' => $all_orders->total(),
+                'per_page' => $all_orders->perPage(),
             ], 200);
         }
 

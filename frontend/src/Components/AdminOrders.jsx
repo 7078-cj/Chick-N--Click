@@ -8,8 +8,10 @@ import {
   Group,
   Stack,
   ScrollArea,
+  Pagination,
+  Notification,
 } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
+import { IconSearch, IconBell } from "@tabler/icons-react";
 import AdminOrdersCard from "./AdminOrdersCard";
 
 function AdminOrders() {
@@ -18,24 +20,43 @@ function AdminOrders() {
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+
+  // 🔹 Pagination states
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const perPage = 10;
+
+  // 🔹 WebSocket reference
+  const wsRef = useRef(null);
+
+  // 🔹 Banner for new orders when user is not on first page
+  const [newOrderBanner, setNewOrderBanner] = useState(false);
+
   const url = import.meta.env.VITE_API_URL;
   const wsUrl = import.meta.env.VITE_WS_URL;
 
-  const wsRef = useRef(null);
-
-  const fetchOrders = async () => {
+  // ------------------------------
+  // Fetch paginated orders
+  // ------------------------------
+  const fetchOrders = async (pageNumber = 1) => {
     try {
       setLoading(true);
-      const res = await fetch(`${url}/api/orders/all`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${url}/api/orders/all?page=${pageNumber}&per_page=${perPage}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to fetch orders");
       const data = await res.json();
+
       setOrders(data.orders || []);
+      setPage(data.current_page || 1);
+      setTotalPages(data.last_page || 1);
     } catch (err) {
       console.error(err);
     } finally {
@@ -43,6 +64,9 @@ function AdminOrders() {
     }
   };
 
+  // ------------------------------
+  // Update order status manually
+  // ------------------------------
   const updateStatus = async (orderId, status) => {
     try {
       const res = await fetch(`${url}/api/order/${orderId}/status`, {
@@ -68,17 +92,29 @@ function AdminOrders() {
     }
   };
 
+  // ------------------------------
+  // WebSocket message handler
+  // ------------------------------
   const handleOrderEvent = (msg) => {
     const { event, order } = msg;
 
     setOrders((prev) => {
       switch (event) {
         case "create":
-          return [order, ...prev];
+          if (page === 1) {
+            // If on first page, prepend immediately
+            return [order, ...prev];
+          } else {
+            // If not on first page, show banner instead
+            setNewOrderBanner(true);
+            return prev;
+          }
         case "cancelled":
           return prev.map((o) =>
             o.id === order.id ? { ...o, status: "cancelled" } : o
           );
+        case "update":
+          return prev.map((o) => (o.id === order.id ? { ...order } : o));
         case "delete":
           return prev.filter((o) => o.id !== order.id);
         default:
@@ -87,10 +123,9 @@ function AdminOrders() {
     });
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
+  // ------------------------------
+  // WebSocket connection
+  // ------------------------------
   useEffect(() => {
     if (!token) return;
 
@@ -109,16 +144,18 @@ function AdminOrders() {
     ws.onclose = () => console.log("❌ Order WebSocket closed");
 
     return () => ws.close();
-  }, [token, user]);
+  }, [token, user, page]);
 
-  const statusColors = {
-    pending: "yellow",
-    approved: "blue",
-    declined: "red",
-    completed: "green",
-    cancelled: "gray",
-  };
+  // ------------------------------
+  // Initial fetch
+  // ------------------------------
+  useEffect(() => {
+    fetchOrders(page);
+  }, [page]);
 
+  // ------------------------------
+  // Filtering logic
+  // ------------------------------
   const filteredOrders = orders.filter((order) => {
     const matchesFilter = filter === "all" || order.status === filter;
     const matchesSearch =
@@ -131,6 +168,17 @@ function AdminOrders() {
           .includes(search.toLowerCase()));
     return matchesFilter && matchesSearch;
   });
+
+  // ------------------------------
+  // Color map for statuses
+  // ------------------------------
+  const statusColors = {
+    pending: "yellow",
+    approved: "blue",
+    declined: "red",
+    completed: "green",
+    cancelled: "gray",
+  };
 
   return (
     <Stack gap="md">
@@ -166,7 +214,20 @@ function AdminOrders() {
         transitionDuration={200}
       />
 
-      {/* 🔹 Column Header (Perfectly aligned grid) */}
+      {/* 🔹 New Order Banner */}
+      {newOrderBanner && (
+        <Notification
+          icon={<IconBell size={20} />}
+          color="green"
+          onClose={() => setNewOrderBanner(false)}
+          withBorder
+          radius="md"
+        >
+          <b>New order received!</b> — refresh or go to page 1 to view it.
+        </Notification>
+      )}
+
+      {/* 🔹 Column Header */}
       <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] items-center border-b border-slate-700 px-4 py-3">
         <Text fw={700} size="sm" className="hoc_font">
           Order Info
@@ -189,19 +250,32 @@ function AdminOrders() {
       {loading ? (
         <Loader color="orange" size="lg" variant="bars" />
       ) : filteredOrders.length > 0 ? (
-        <ScrollArea h="90vh">
-          <Stack gap="sm" mt="sm">
-            {filteredOrders.map((order) => (
-              <AdminOrdersCard
-                key={order.id}
-                order={order}
-                statusColors={statusColors}
-                updateStatus={updateStatus}
-                setOrders={setOrders}
-              />
-            ))}
-          </Stack>
-        </ScrollArea>
+        <>
+          <ScrollArea h="80vh">
+            <Stack gap="sm" mt="sm">
+              {filteredOrders.map((order) => (
+                <AdminOrdersCard
+                  key={order.id}
+                  order={order}
+                  statusColors={statusColors}
+                  updateStatus={updateStatus}
+                  setOrders={setOrders}
+                />
+              ))}
+            </Stack>
+          </ScrollArea>
+
+          {/* 🔹 Pagination Controls */}
+          <Group justify="center" mt="md">
+            <Pagination
+              total={totalPages}
+              value={page}
+              onChange={(p) => setPage(p)}
+              color="orange"
+              radius="xl"
+            />
+          </Group>
+        </>
       ) : (
         <Text ta="center" c="dimmed" mt="lg">
           No orders found.
