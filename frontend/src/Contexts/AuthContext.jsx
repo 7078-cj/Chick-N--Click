@@ -42,14 +42,20 @@ export function AuthProvider({children}) {
             // throw error so Login component can catch it
             throw new Error(data.message || 'Login failed. Check credentials.');
         }
+        
+        if(data.token != undefined){
+            setToken(data.token);
+            setUser(data.user);
 
-        setToken(data.token);
-        setUser(data.user);
+            localStorage.setItem('token', JSON.stringify(data.token));
+            localStorage.setItem('user', JSON.stringify(data.user));
 
-        localStorage.setItem('token', JSON.stringify(data.token));
-        localStorage.setItem('user', JSON.stringify(data.user));
+            return data;
+        }else{
+            throw new Error(data.message || 'Login failed. Check credentials.');
+        }
 
-        return data; // return for optional chaining in Login component
+         // return for optional chaining in Login component
         } catch (err) {
         throw err; // propagate to Login component
         }
