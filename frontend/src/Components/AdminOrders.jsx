@@ -123,7 +123,12 @@ function AdminOrders() {
     const matchesFilter = filter === "all" || order.status === filter;
     const matchesSearch =
       order.id.toString().includes(search.toLowerCase()) ||
-      order.user?.name?.toLowerCase().includes(search.toLowerCase());
+      order.user?.first_name?.toLowerCase().includes(search.toLowerCase()) ||
+      order.user?.last_name?.toLowerCase().includes(search.toLowerCase()) ||
+      (order.user &&
+        `${order.user.first_name} ${order.user.last_name}`
+          .toLowerCase()
+          .includes(search.toLowerCase()));
     return matchesFilter && matchesSearch;
   });
 
