@@ -1,8 +1,8 @@
 import React, { useContext, useState } from "react";
-import { Loader } from "@mantine/core";
+import { Loader, Text } from "@mantine/core";
 import { CartContext } from "../Contexts/CartProvider";
 import CartItemCard from "./CartItemCard";
-import AppButton from "./AppButton"; 
+import AppButton from "./AppButton";
 import AuthContext from "../Contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -15,13 +15,13 @@ export default function CartComponent() {
     handleUpdate,
     handleRemove,
     placeOrder,
-    fetchCart
+    fetchCart,
   } = useContext(CartContext);
 
-  const [selectedItems, setSelectedItems] = useState([]); 
+  const [selectedItems, setSelectedItems] = useState([]);
   const url = import.meta.env.VITE_API_URL;
-  const { token } = useContext(AuthContext);
-  const nav = useNavigate()
+  const { token, user } = useContext(AuthContext);
+  const nav = useNavigate();
 
   const toggleSelect = (foodId) => {
     setSelectedItems((prev) =>
@@ -32,8 +32,6 @@ export default function CartComponent() {
   };
 
   const handleRemoveToCart = async (foodID) => {
-     
-
     try {
       const res = await fetch(`${url}/api/cart/remove/${foodID}`, {
         method: "DELETE",
@@ -44,22 +42,39 @@ export default function CartComponent() {
       });
 
       await res.json();
-      handleRemove(foodID)
+      handleRemove(foodID);
     } catch (err) {
       console.error(err);
       alert("Error removing item.");
     }
   };
 
-
   const removeSelected = async () => {
     for (const foodId of selectedItems) {
       await handleRemoveToCart(foodId);
-      
     }
-    setSelectedItems([]); 
+    setSelectedItems([]);
     fetchCart();
   };
+
+  // 🟠 If user is not logged in
+  if (!user || !token) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <Text size="xl" fw={700} c="dimmed">
+          You are not logged in.
+        </Text>
+        <AppButton
+          useCase="menu"
+          size="lg"
+          className="mt-4"
+          onClick={() => nav("/login")}
+        >
+          Go to Login
+        </AppButton>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full min-h-screen p-6">
@@ -75,7 +90,6 @@ export default function CartComponent() {
               CART <br />
               SUMMARY
             </h1>
-            
           </div>
 
           {/* Cart Items */}
@@ -89,7 +103,7 @@ export default function CartComponent() {
                       ? "ring-2 ring-orange-500 rounded-xl"
                       : ""
                   }`}
-                  onClick={() => toggleSelect(item.food_id)} 
+                  onClick={() => toggleSelect(item.food_id)}
                 >
                   <CartItemCard
                     item={item}
@@ -118,7 +132,7 @@ export default function CartComponent() {
                 <AppButton
                   useCase="remove"
                   size="lg"
-                  onClick={() =>removeSelected()}
+                  onClick={removeSelected}
                   className="w-full"
                 >
                   Remove Selected ({selectedItems.length})
@@ -127,7 +141,7 @@ export default function CartComponent() {
                 <AppButton
                   useCase="menu"
                   size="lg"
-                  onClick={()=>nav('/checkout')}
+                  onClick={() => nav("/checkout")}
                   className="w-full"
                 >
                   {placingOrder ? "Placing Order..." : "Place Order"}
