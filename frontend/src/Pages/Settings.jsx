@@ -26,6 +26,7 @@ export default function Settings() {
   });
 
   const [formData, setFormData] = useState({
+    name: "",
     first_name: "",
     last_name: "",
     phone_number: "",
@@ -69,6 +70,7 @@ export default function Settings() {
       const data = await res.json();
       setUser(data);
       setFormData({
+        name: data.name || "",
         first_name: data.first_name || "",
         last_name: data.last_name || "",
         phone_number: data.phone_number || "",
@@ -219,6 +221,17 @@ export default function Settings() {
 
           {/* Form */}
           <div className="grid grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block mb-1 text-xs text-gray-500">Username</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-full bg-gray-50 focus:ring-2 focus:ring-orange-400"
+                readOnly={!isEditing}
+              />
+            </div>
             <div>
               <label className="block mb-1 text-xs text-gray-500">First Name</label>
               <input

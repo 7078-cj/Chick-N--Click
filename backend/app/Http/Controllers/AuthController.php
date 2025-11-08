@@ -83,6 +83,7 @@ class AuthController extends Controller
             }
 
             $validated = $request->validate([
+                'name' => 'required|max:255',
                 'first_name' => 'nullable|string|max:255',
                 'last_name' => 'nullable|string|max:255',
                 'phone_number' => 'nullable|string|max:20',
