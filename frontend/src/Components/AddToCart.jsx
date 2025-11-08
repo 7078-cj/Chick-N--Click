@@ -1,4 +1,4 @@
-import { Modal, Select, Button } from '@mantine/core';
+import { Modal, Select, Button, Loader } from '@mantine/core';
 import React, { useContext, useEffect, useState } from 'react';
 import AppButton from './AppButton';
 import { AddOnContext } from '../Contexts/AddOnContext';
@@ -9,9 +9,11 @@ function AddToCart({ setCartOpened, cartOpened, quantity, setQuantity, handleAdd
   const url = import.meta.env.VITE_API_URL;
   const { sides, drinks } = useContext(AddOnContext);
   const { user } = useContext(AuthContext);
+
   const [orderSides, setOrderSides] = useState([]);
   const [orderDrinks, setOrderDrinks] = useState([]);
   const [opened, setOpened] = useState(false);
+  const [loading, setLoading] = useState(false); // 🟡 NEW loading state
 
   // 🟡 NEW: control Select values
   const [selectedSide, setSelectedSide] = useState(null);
@@ -27,12 +29,11 @@ function AddToCart({ setCartOpened, cartOpened, quantity, setQuantity, handleAdd
       return;
     }
 
-    if (type == "side"){
-        setList([...list, { id: item.id, name: item.food_name}]);
-    }else{
-        setList([...list, { id: item.id, name: item.food_name, size: "medium" }]);
+    if (type === "side") {
+      setList([...list, { id: item.id, name: item.food_name }]);
+    } else {
+      setList([...list, { id: item.id, name: item.food_name, size: "medium" }]);
     }
-    
   };
 
   // --- Remove an item by index ---
@@ -43,28 +44,27 @@ function AddToCart({ setCartOpened, cartOpened, quantity, setQuantity, handleAdd
     setList(updated);
   };
 
-  // --- Update size for a specific item ---
-  const updateSize = (index, size, type) => {
-    if (!size) return;
-    const [list, setList] = type === "side" ? [orderSides, setOrderSides] : [orderDrinks, setOrderDrinks];
-    const updated = [...list];
-    updated[index].size = size;
-    setList(updated);
-  };
-
   // --- Confirm selection ---
-  const handleConfirm = () => {
-    if(!user){
-        setOpened(true)
-    }else{
-    handleAddToCart(food, quantity, close, orderSides, orderDrinks);}
+  const handleConfirm = async () => {
+    if (!user) {
+      setOpened(true);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await handleAddToCart(food, quantity, close, orderSides, orderDrinks);
+      setCartOpened(false);
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isSideOrDrink = food.categories?.some(cat =>
     ['Sides', 'Drinks'].includes(cat.name)
-    );
-
-  
+  );
 
   return (
     <Modal opened={cartOpened} onClose={() => setCartOpened(false)} centered size={"100%"}>
@@ -119,10 +119,11 @@ function AddToCart({ setCartOpened, cartOpened, quantity, setQuantity, handleAdd
           <AppButton
             useCase="checkout"
             fullWidth
-            className="mt-6"
+            className="mt-6 flex justify-center items-center"
             onClick={handleConfirm}
+            disabled={loading}
           >
-            Confirm Add
+            {loading ? <Loader size="sm" color="white" /> : "Confirm Add"}
           </AppButton>
         </div>
 
@@ -137,100 +138,80 @@ function AddToCart({ setCartOpened, cartOpened, quantity, setQuantity, handleAdd
 
         {/* SIDEBAR SECTION */}
         <div className="w-[30%] h-full bg-gray-50 p-4 overflow-y-auto border-l border-gray-300">
-        <h1 className='w-full text-right hoc_font text-5xl pr-[30px] text-amber-500 font-extrabold '>
+          <h1 className='w-full text-right hoc_font text-5xl pr-[30px] text-amber-500 font-extrabold '>
             P{food.price}
-        </h1>
+          </h1>
 
-        {/* Only show add-ons if NOT a side or drink */}
-        {!isSideOrDrink && (
+          {!isSideOrDrink && (
             <>
-            <h2 className="text-2xl font-bold text-amber-600 mb-4">Add-ons</h2>
+              <h2 className="text-2xl font-bold text-amber-600 mb-4">Add-ons</h2>
 
-            {/* SIDES */}
-            <div>
+              {/* SIDES */}
+              <div>
                 <h3 className="text-lg font-semibold text-amber-700 mb-2">
-                Sides ({orderSides.length}/{quantity})
+                  Sides ({orderSides.length}/{quantity})
                 </h3>
 
                 <div className="flex flex-col gap-2">
-                {orderSides.map((side, index) => (
+                  {orderSides.map((side, index) => (
                     <div key={index} className="flex justify-between items-center bg-white p-2 rounded shadow-sm">
-                    <span>{side.name}</span>
-                    <div className="flex items-center gap-2">
-                        <Button
-                        size="xs"
-                        color="red"
-                        variant="light"
-                        onClick={() => removeItem(index, "side")}
-                        >
-                        ×
-                        </Button>
+                      <span>{side.name}</span>
+                      <Button size="xs" color="red" variant="light" onClick={() => removeItem(index, "side")}>×</Button>
                     </div>
-                    </div>
-                ))}
+                  ))}
                 </div>
 
-                {/* FIXED SELECT */}
                 <Select
-                placeholder="Add side..."
-                value={selectedSide}
-                data={sides.map(s => ({ value: String(s.id), label: s.food_name }))}
-                onChange={(id) => {
+                  placeholder="Add side..."
+                  value={selectedSide}
+                  data={sides.map(s => ({ value: String(s.id), label: s.food_name }))}
+                  onChange={(id) => {
                     const item = sides.find(s => String(s.id) === id);
                     if (item) {
-                    addItem(item, "side");
-                    setSelectedSide(null); // ✅ deselect after adding
+                      addItem(item, "side");
+                      setSelectedSide(null);
                     }
-                }}
-                mt="sm"
+                  }}
+                  mt="sm"
                 />
-            </div>
+              </div>
 
-            <hr className="my-4 border-amber-300" />
+              <hr className="my-4 border-amber-300" />
 
-            {/* DRINKS */}
-            <div>
+              {/* DRINKS */}
+              <div>
                 <h3 className="text-lg font-semibold text-amber-700 mb-2">
-                Drinks ({orderDrinks.length}/{quantity})
+                  Drinks ({orderDrinks.length}/{quantity})
                 </h3>
 
                 <div className="flex flex-col gap-2">
-                {orderDrinks.map((drink, index) => (
+                  {orderDrinks.map((drink, index) => (
                     <div key={index} className="flex justify-between items-center bg-white p-2 rounded shadow-sm">
-                    <span>{drink.name}</span>
-                    <div className="flex items-center gap-2">
-                        <Button
-                        size="xs"
-                        color="red"
-                        variant="light"
-                        onClick={() => removeItem(index, "drink")}
-                        >
-                        ×
-                        </Button>
+                      <span>{drink.name}</span>
+                      <Button size="xs" color="red" variant="light" onClick={() => removeItem(index, "drink")}>×</Button>
                     </div>
-                    </div>
-                ))}
+                  ))}
                 </div>
 
-                {/* FIXED SELECT */}
                 <Select
-                placeholder="Add drink..."
-                value={selectedDrink}
-                data={drinks.map(d => ({ value: String(d.id), label: d.food_name }))}
-                onChange={(id) => {
+                  placeholder="Add drink..."
+                  value={selectedDrink}
+                  data={drinks.map(d => ({ value: String(d.id), label: d.food_name }))}
+                  onChange={(id) => {
                     const item = drinks.find(d => String(d.id) === id);
                     if (item) {
-                    addItem(item, "drink");
-                    setSelectedDrink(null); // ✅ deselect after adding
+                      addItem(item, "drink");
+                      setSelectedDrink(null);
                     }
-                }}
-                mt="sm"
+                  }}
+                  mt="sm"
                 />
-            </div>
+              </div>
             </>
-        )}
+          )}
         </div>
       </div>
+
       <AuthModal opened={opened} onClose={() => setOpened(false)} />
     </Modal>
   );
