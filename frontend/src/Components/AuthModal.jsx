@@ -13,7 +13,11 @@ function AuthModal({ opened, onClose }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🌍 For location selection in registration
+  //  Show/Hide Password states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  //  For location selection in registration
   const [location, setLocation] = useState({
     lat: null,
     lng: null,
@@ -22,7 +26,7 @@ function AuthModal({ opened, onClose }) {
     full: "",
   });
 
-  // --- 🔑 Login Handler ---
+  // ---  Login Handler ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -38,14 +42,13 @@ function AuthModal({ opened, onClose }) {
     }
   };
 
-  // --- 🧩 Register Handler ---
+  // ---  Register Handler ---
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     const url = import.meta.env.VITE_API_URL;
 
-    // ✅ Phone number validation
     const phone = e.target.phone_number.value.trim();
     if (!/^\d{10}$/.test(phone)) {
       setError("Please enter a valid 10-digit phone number (digits only).");
@@ -168,7 +171,7 @@ function AuthModal({ opened, onClose }) {
 
         {/* FORMS */}
         {isLogin ? (
-          // 🔸 LOGIN FORM
+          // LOGIN FORM
           <form onSubmit={handleLogin} className="flex flex-col space-y-3">
             <input
               type="text"
@@ -177,13 +180,25 @@ function AuthModal({ opened, onClose }) {
               className="w-full px-4 py-2 rounded-full border border-gray-300 text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none"
               required
             />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              className="w-full px-4 py-2 rounded-full border border-gray-300 text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none"
-              required
-            />
+
+            {/* Password with Show/Hide */}
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                className="w-full px-4 py-2 rounded-full border border-gray-300 text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none pr-12"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-[#FF9119] text-sm focus:outline-none"
+                tabIndex={-1}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
 
             <div className="flex justify-between text-xs text-gray-500">
               <span>
@@ -220,7 +235,7 @@ function AuthModal({ opened, onClose }) {
             </button>
           </form>
         ) : (
-          // 🔸 REGISTER FORM
+          // REGISTER FORM
           <form onSubmit={handleRegister} className="flex flex-col space-y-3">
             <div className="flex gap-2">
               <input
@@ -255,23 +270,45 @@ function AuthModal({ opened, onClose }) {
               required
             />
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              className="px-4 py-2 border border-gray-300 rounded-full text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none"
-              required
-            />
+            {/* Password with Toggle */}
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                className="w-full px-4 py-2 border border-gray-300 rounded-full text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none pr-12"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-[#FF9119] text-sm focus:outline-none"
+                tabIndex={-1}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
 
-            <input
-              type="password"
-              name="password_confirmation"
-              placeholder="Confirm Password"
-              className="px-4 py-2 border border-gray-300 rounded-full text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none"
-              required
-            />
+            {/* Confirm Password with Toggle */}
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="password_confirmation"
+                placeholder="Confirm Password"
+                className="w-full px-4 py-2 border border-gray-300 rounded-full text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none pr-12"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-[#FF9119] text-sm focus:outline-none"
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? "Hide" : "Show"}
+              </button>
+            </div>
 
-            {/* 📞 Phone Number */}
+            {/* Phone Number */}
             <div className="flex items-center border border-gray-300 rounded-full px-4 py-2 focus-within:border-[#FF9119]">
               <span className="text-gray-500 mr-2 select-none">+63</span>
               <input
@@ -288,7 +325,7 @@ function AuthModal({ opened, onClose }) {
               />
             </div>
 
-            {/* 🗺️ Map Picker */}
+            {/*  Map Picker */}
             <div className="mt-3">
               <p className="text-xs text-gray-500 mb-2 ml-2">Select your location</p>
               <div className="w-full h-[180px] rounded-xl overflow-hidden border border-gray-200 shadow-inner">

@@ -77,7 +77,7 @@ export default function CartComponent() {
   }
 
   return (
-    <div className="flex flex-col w-full min-h-screen p-6">
+    <div className="flex flex-col w-full h-screen p-6 overflow-scroll">
       {loading ? (
         <div className="flex items-center justify-center h-full">
           <Loader />

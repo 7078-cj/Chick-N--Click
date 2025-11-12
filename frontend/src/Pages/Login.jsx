@@ -8,12 +8,14 @@ import logo from "../assets/hoc_logo.png";
 function Login() {
   const { loginUser } = useContext(AuthContext);
   const nav = useNavigate();
+
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // 👈 NEW STATE
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); 
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true); // start loading
+    setLoading(true);
     try {
       const data = await loginUser(e);
       if (data.user.role === "admin") nav("/admin");
@@ -22,7 +24,7 @@ function Login() {
       setError(err.message);
       setTimeout(() => setError(""), 4000);
     } finally {
-      setLoading(false); // stop loading regardless
+      setLoading(false);
     }
   };
 
@@ -76,14 +78,26 @@ function Login() {
               required
               disabled={loading}
             />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              className="w-full px-4 py-3 rounded-full border border-gray-300 focus:border-[#FF9119] outline-none text-gray-700 placeholder-gray-400"
-              required
-              disabled={loading}
-            />
+
+            {/* Password Field with Toggle */}
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                className="w-full px-4 py-3 rounded-full border border-gray-300 focus:border-[#FF9119] outline-none text-gray-700 placeholder-gray-400 pr-12"
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-[#FF9119] focus:outline-none text-sm"
+                tabIndex={-1}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
 
             <div className="flex justify-between text-xs text-gray-500">
               <span>
@@ -95,7 +109,6 @@ function Login() {
                   Sign Up
                 </a>
               </span>
-             
             </div>
 
             <button

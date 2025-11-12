@@ -10,6 +10,8 @@ function Register() {
   const { loginUser } = useContext(AuthContext);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // 👈 NEW
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // 👈 NEW
   const [location, setLocation] = useState({
     lat: null,
     lng: null,
@@ -25,7 +27,6 @@ function Register() {
 
     const phone = e.target.phone_number.value.trim();
 
-    // ✅ Phone validation: only digits and must be exactly 10 digits
     if (!/^\d{10}$/.test(phone)) {
       setError("Please enter a valid 10-digit phone number (digits only).");
       setLoading(false);
@@ -156,21 +157,45 @@ function Register() {
               required
             />
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              className="px-4 py-2 border border-gray-300 rounded-full text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none"
-              required
-            />
+            {/* Password Field with Toggle */}
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                className="w-full px-4 py-2 border border-gray-300 rounded-full text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none pr-12"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-[#FF9119] text-sm focus:outline-none"
+                tabIndex={-1}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
 
-            <input
-              type="password"
-              name="password_confirmation"
-              placeholder="Confirm Password"
-              className="px-4 py-2 border border-gray-300 rounded-full text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none"
-              required
-            />
+            {/* Confirm Password Field with Toggle */}
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="password_confirmation"
+                placeholder="Confirm Password"
+                className="w-full px-4 py-2 border border-gray-300 rounded-full text-gray-700 placeholder-gray-400 focus:border-[#FF9119] outline-none pr-12"
+                required
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setShowConfirmPassword(!showConfirmPassword)
+                }
+                className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-[#FF9119] text-sm focus:outline-none"
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? "Hide" : "Show"}
+              </button>
+            </div>
 
             {/* Phone Field */}
             <div className="flex items-center border border-gray-300 rounded-full px-4 py-2 focus-within:border-[#FF9119]">
@@ -183,7 +208,6 @@ function Register() {
                 maxLength={10}
                 pattern="\d{10}"
                 onInput={(e) => {
-                  // Prevent non-digit input
                   e.target.value = e.target.value.replace(/\D/g, "");
                 }}
                 required
