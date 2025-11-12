@@ -73,7 +73,7 @@ function Login() {
             <input
               type="text"
               name="email"
-              placeholder="Username or Email"
+              placeholder="Email"
               className="w-full px-4 py-3 rounded-full border border-gray-300 focus:border-[#FF9119] outline-none text-gray-700 placeholder-gray-400"
               required
               disabled={loading}
