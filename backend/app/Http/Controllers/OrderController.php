@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Utils\Distance;
 use App\Utils\GcashCheckout;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -62,11 +63,32 @@ class OrderController extends Controller implements HasMiddleware
 
             CartItem::where('user_id', $user->id)->delete();
             DB::commit();
+            
+            $dis = Distance::getDistance($order->latitude, $order->longitude);
+
+            if ($order->type == "pickup") {
+                $dis_price = 0;
+            } else {
+                $base_km = 3;
+                $base_price = 55;
+                $extra_price = 10;
+
+                if ($dis <= $base_km) {
+                    $dis_price = $base_price;
+                } else {
+                    $extra_km = ceil($dis - $base_km); 
+                    $dis_price = $base_price + ($extra_km * $extra_price);
+                }
+            }
+            $order->total_price = $order->total_price + $dis_price ;
+            $order->save();
 
             // Now handle external services (outside transaction)
             $checkout = GcashCheckout::createCheckout($order);
 
-            $order->total_price = $order->total_price + 30;
+            
+
+            $order->total_price = $order->total_price + 30 ;
             $order->save();
 
             Http::post(config('services.websocket.http_url') . "/broadcast/order", [

@@ -8,6 +8,7 @@ import {
   Image,
 } from "@mantine/core";
 import UserLocationMap from "./LeafletMap";
+import { Distance } from "../utils/Distance";
 
 
 function OrderDetailsModal({ opened, order, setOpened }) {
@@ -17,6 +18,26 @@ function OrderDetailsModal({ opened, order, setOpened }) {
   const totalPrice = order.total_price ? parseFloat(order.total_price) : 0;
   const subtotal = totalPrice - 30;
   const url = import.meta.env.VITE_API_URL || ""; 
+
+    const dis = Distance(order.latitude, order.longitude)
+  
+      let dis_price = 0;
+      let extra_km = 0;
+  
+      if (order.type === "pickup") {
+          dis_price = 0;
+      } else {
+          const base_km = 3;
+          const base_price = 55;
+          const extra_price = 10;
+  
+          if (dis <= base_km) {
+              dis_price = base_price;
+          } else {
+              extra_km = Math.ceil(dis - base_km); 
+              dis_price = base_price + (extra_km * extra_price);
+          }
+      }
 
   return (
     <Modal
@@ -61,6 +82,14 @@ function OrderDetailsModal({ opened, order, setOpened }) {
               <span>Paymongo Fee</span>
               <span>₱30.00</span>
             </div>
+            <div className="flex flex-col justify-between mt-1">
+                <span>Extra Km: {extra_km}</span>
+                <div className="flex justify-between mt-1">
+                  <span>Delivery Fee</span>
+                  <span>₱{dis_price}</span>
+                </div>
+            </div>
+
             <Divider my="xs" variant="dashed" />
             <div className="flex justify-between font-semibold">
               <span>Total</span>

@@ -4,6 +4,7 @@ import CartItemCard from "../Components/CartItemCard";
 import AppButton from "../Components/AppButton";
 import AuthContext from "../Contexts/AuthContext";
 import UserLocationMap from "../Components/LeafletMap";
+import { Distance } from "../utils/Distance";
 
 function CheckoutPage() {
   const { cart, placeOrder, placingOrder,total } = useContext(CartContext);
@@ -58,7 +59,27 @@ function CheckoutPage() {
       fetchUser();
     }, []);
 
+    const dis = Distance(location.lat, location.lng)
 
+    let dis_price = 0;
+    let extra_km = 0;
+
+    if (orderType === "pickup") {
+        dis_price = 0;
+    } else {
+        const base_km = 3;
+        const base_price = 55;
+        const extra_price = 10;
+
+        if (dis <= base_km) {
+            dis_price = base_price;
+        } else {
+            extra_km = Math.ceil(dis - base_km); 
+            dis_price = base_price + (extra_km * extra_price);
+        }
+    }
+
+    
   return (
     <div className="flex flex-row gap-6 p-6 bg-white h-screen w-full font-sans">
     <div className="flex flex-col w-full h-full">
@@ -109,13 +130,21 @@ function CheckoutPage() {
                 <span>Paymongo Fee</span>
                 <span>₱30</span>
             </div>
+            
+            <div className="flex flex-col justify-between mt-1">
+                <span>Extra Km: {extra_km}</span>
+                <div className="flex justify-between mt-1">
+                  <span>Delivery Fee</span>
+                  <span>₱{dis_price}</span>
+                </div>
+            </div>
             </div>
 
             <div className="w-full flex flex-col gap-2">
             {/* Total */}
                 <div className="mt-4 bg-yellow-100 rounded-lg p-4 flex justify-between items-center font-bold text-lg w-full">
                     <span>TOTAL</span>
-                    <span>₱{total + 30}</span>
+                    <span>₱{total + 30 + dis_price}</span>
                 </div>
 
                 {/* Checkout button */}

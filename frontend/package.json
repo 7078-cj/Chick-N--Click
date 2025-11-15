@@ -17,6 +17,7 @@
     "@tailwindcss/vite": "^4.1.13",
     "leaflet": "^1.9.4",
     "leaflet-geosearch": "^4.2.1",
+    "leaflet-routing-machine": "^3.2.12",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

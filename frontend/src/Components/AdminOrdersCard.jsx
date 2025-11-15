@@ -99,18 +99,18 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
             <Text fw={500}>
               Location:{" "}
               <Text span c="teal.8">
-                {order.user?.location || "No location provided"}
+                {order.location || "No location provided"}
               </Text>
             </Text>
 
             <Text size="xs" c="dimmed">
               Lat:{" "}
               <Text span c="orange.8">
-                {order.user?.latitude || "N/A"}
+                {order.latitude || "N/A"}
               </Text>{" "}
               | Lng:{" "}
               <Text span c="orange.8">
-                {order.user?.longitude || "N/A"}
+                {order.longitude || "N/A"}
               </Text>
             </Text>
 

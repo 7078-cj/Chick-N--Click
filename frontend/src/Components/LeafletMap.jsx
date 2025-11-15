@@ -10,9 +10,19 @@ import {
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
-
+import "leaflet-routing-machine";
+import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 
 import markerIcon from "../assets/custom_marker.svg";
+
+// =============================
+// 🔹 HOC Destination
+// =============================
+const HOC_LOCATION = {
+  lat: 14.958753194320153,
+  lng: 120.75846924744896,
+  name: "HOC - House of Chicken",
+};
 
 // =============================
 // 🔹 Custom Leaflet Marker Icon
@@ -26,13 +36,42 @@ const customIcon = new L.Icon({
 });
 
 // =============================
+// 🔹 Routing Component
+// =============================
+function RouteToHOC({ userLoc }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!userLoc?.lat || !userLoc?.lng) return;
+
+    const routingControl = L.Routing.control({
+      waypoints: [
+        L.latLng(userLoc.lat, userLoc.lng),
+        L.latLng(HOC_LOCATION.lat, HOC_LOCATION.lng),
+      ],
+      lineOptions: {
+        addWaypoints: false,
+        styles: [{ color: "#007bff", weight: 4 }],
+      },
+      draggableWaypoints: false,
+      fitSelectedRoutes: true,
+      show: false,
+    }).addTo(map);
+
+    return () => map.removeControl(routingControl);
+  }, [userLoc, map]);
+
+  return null;
+}
+
+// =============================
 // 🔹 Helper component: Update map center when location changes
 // =============================
 function SetViewOnLocation({ position }) {
   const map = useMap();
   useEffect(() => {
-    if (position) {
-      map.flyTo(position, 15, { duration: 1.2 }); // smooth animation
+    if (position?.lat && position?.lng) {
+      map.flyTo(position, 15, { duration: 1.2 });
     }
   }, [map, position]);
   return null;
@@ -92,13 +131,11 @@ export default function UserLocationMap({ editMode, setLocation, location, user 
   // =============================
   useEffect(() => {
     const initLocation = async () => {
-      // Priority 1: Prop location
       if (location?.lat && location?.lng) {
         setUserLoc(location);
         return;
       }
 
-      // Priority 2: User coordinates from props
       if (user?.latitude && user?.longitude) {
         const newLoc = {
           lat: user.latitude,
@@ -112,7 +149,6 @@ export default function UserLocationMap({ editMode, setLocation, location, user 
         return;
       }
 
-      // Priority 3: Browser Geolocation
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
           async (pos) => {
@@ -192,79 +228,79 @@ export default function UserLocationMap({ editMode, setLocation, location, user 
   // =============================
   return (
     <div style={{ height: "100%", width: "100%", position: "relative" }}>
-    {/* 🔍 Search bar */}
-    {editMode && (
-      <div
-        style={{
-          position: "absolute",
-          top: 20,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          background: "#fff",
-          borderRadius: "30px",
-          padding: "5px 10px",
-          boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-          width: "320px",
-        }}
-      >
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="🔍 Search location..."
+      {/* 🔍 Search bar */}
+      {editMode && (
+        <div
           style={{
-            border: "none",
-            outline: "none",
-            flex: 1,
-            fontSize: "14px",
-            padding: "8px",
+            position: "absolute",
+            top: 20,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            background: "#fff",
             borderRadius: "30px",
-            color: "#333",
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault(); // 🚫 Prevent reload
-              handleSearch();     // 🔍 Trigger search manually
-            }
-          }}
-        />
-        {search && (
-          <button
-            type="button"
-            onClick={() => setSearch("")}
-            style={{
-              border: "none",
-              background: "transparent",
-              fontSize: "18px",
-              cursor: "pointer",
-              color: "#888",
-              marginRight: "5px",
-            }}
-          >
-            ×
-          </button>
-        )}
-        <button
-          type="button" // ✅ Important: prevent form submission
-          onClick={handleSearch}
-          style={{
-            border: "none",
-            background: "#007bff",
-            color: "#fff",
-            borderRadius: "20px",
-            padding: "6px 15px",
-            cursor: "pointer",
-            fontSize: "14px",
-            transition: "0.3s",
+            padding: "5px 10px",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+            width: "320px",
           }}
         >
-          Go
-        </button>
-      </div>
-    )}
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="🔍 Search location..."
+            style={{
+              border: "none",
+              outline: "none",
+              flex: 1,
+              fontSize: "14px",
+              padding: "8px",
+              borderRadius: "30px",
+              color: "#333",
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSearch();
+              }
+            }}
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              style={{
+                border: "none",
+                background: "transparent",
+                fontSize: "18px",
+                cursor: "pointer",
+                color: "#888",
+                marginRight: "5px",
+              }}
+            >
+              ×
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleSearch}
+            style={{
+              border: "none",
+              background: "#007bff",
+              color: "#fff",
+              borderRadius: "20px",
+              padding: "6px 15px",
+              cursor: "pointer",
+              fontSize: "14px",
+              transition: "0.3s",
+            }}
+          >
+            Go
+          </button>
+        </div>
+      )}
 
       {/* 🗺️ Map */}
       <MapContainer
@@ -276,6 +312,8 @@ export default function UserLocationMap({ editMode, setLocation, location, user 
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
         />
+
+        {/* USER Marker */}
         {userLoc.lat && userLoc.lng && (
           <Marker position={[userLoc.lat, userLoc.lng]} icon={customIcon}>
             <Popup>
@@ -285,6 +323,17 @@ export default function UserLocationMap({ editMode, setLocation, location, user 
             </Popup>
           </Marker>
         )}
+
+        {/* HOC Marker */}
+        <Marker position={[HOC_LOCATION.lat, HOC_LOCATION.lng]} icon={customIcon}>
+          <Popup>
+            🍗 <b>{HOC_LOCATION.name}</b>
+          </Popup>
+        </Marker>
+
+        {/* Route */}
+        {userLoc.lat && userLoc.lng && <RouteToHOC userLoc={userLoc} />}
+
         <ClickHandler setLocation={setLocation} editMode={editMode} />
         <SetViewOnLocation position={[userLoc.lat, userLoc.lng]} />
       </MapContainer>

@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
 @import "tailwindcss";
+@import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
+
 
 
 @tailwind utilities;

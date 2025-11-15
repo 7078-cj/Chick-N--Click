@@ -18,8 +18,8 @@ export default function Settings() {
   const [error, setError] = useState(null);
 
   const [location, setLocation] = useState({
-    lat: null,
-    lng: null,
+    lat: 14.958753194320153,   // HOC default
+    lng: 120.75846924744896,
     city: "",
     country: "",
     full: "",
