@@ -50,12 +50,25 @@ function RouteToHOC({ userLoc }) {
         L.latLng(HOC_LOCATION.lat, HOC_LOCATION.lng),
       ],
       lineOptions: {
-        addWaypoints: false,
+        addWaypoints: true,
         styles: [{ color: "#007bff", weight: 4 }],
       },
       draggableWaypoints: false,
       fitSelectedRoutes: true,
-      show: false,
+      show: false, 
+      createMarker: function (i, wp, nWps) {
+        
+        let icon = customIcon;
+        if (i === 1) {
+          
+          icon = L.icon({
+            iconUrl: markerIcon, 
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+          });
+        }
+        return L.marker(wp.latLng, { icon });
+      },
     }).addTo(map);
 
     return () => map.removeControl(routingControl);
