@@ -1,7 +1,7 @@
 import React from 'react'
 import FoodList from './FoodList'
 
-import deal1 from "../assets/deal1.png";
+import deal1 from "../assets/BANNER.svg";
 
 function Menu() {
   return (
@@ -12,7 +12,7 @@ function Menu() {
                 <img
                   src={deal1}
                   alt="Chicken Bucket"
-                  className="w-full h-[250px]"
+                  className="w-[100%] h-[90%]"
                 />
               </div>
             

@@ -9,6 +9,7 @@ import {
 } from "@mantine/core";
 import UserLocationMap from "./LeafletMap";
 import { Distance } from "../utils/Distance";
+import gcash from "../assets/gcash_icon.svg";
 
 
 function OrderDetailsModal({ opened, order, setOpened }) {
@@ -97,13 +98,15 @@ function OrderDetailsModal({ opened, order, setOpened }) {
             </div>
           </div>
 
-          <div className="mt-4 flex items-center gap-2">
-            <Image
-              src="/path/to/gcash-logo.png"
+          <div className="mt-4 flex flex-row justify-between items-center gap-2">
+            <div className="w-10 h-10">
+              <Image
+              src={gcash}
               alt="GCash"
-              width={24}
-              height={24}
+              
             />
+            </div>
+            
             <Text size="sm" c="dimmed">
               Paid via {order.payment_method || "GCash"}
             </Text>

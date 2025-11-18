@@ -5,6 +5,7 @@ import AppButton from "../Components/AppButton";
 import AuthContext from "../Contexts/AuthContext";
 import UserLocationMap from "../Components/LeafletMap";
 import { Distance } from "../utils/Distance";
+import gcash from "../assets/gcash_icon.svg";
 
 function CheckoutPage() {
   const { cart, placeOrder, placingOrder,total } = useContext(CartContext);
@@ -114,9 +115,9 @@ function CheckoutPage() {
         <button className="mt-4 flex items-center justify-between border border-gray-300 rounded-full px-4 py-3">
           <span className="text-blue-500 font-medium">Pay with GCash</span>
           <img
-            src="/gcash-logo.png"
+            src={gcash}
             alt="GCash"
-            className="w-6 h-6"
+            className="w-10 h-10"
           />
         </button>
         <div className="m-2 flex flex-col justify-between h-full items-center">

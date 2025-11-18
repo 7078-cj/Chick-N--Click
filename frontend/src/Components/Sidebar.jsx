@@ -1,6 +1,7 @@
 import { LayoutGrid, CreditCard, ShoppingCart, LogOut } from "lucide-react";
 import { useContext } from "react";
 import AuthContext from "../Contexts/AuthContext";
+import hocLogo from "../assets/Logo_Single.png";
 
 export default function Sidebar({setActiveTab, activeTab}) {
   const {  logOut } = useContext(AuthContext);
@@ -12,7 +13,7 @@ export default function Sidebar({setActiveTab, activeTab}) {
       {/* Logo */}
       <div className="mb-12">
         <img
-          src="/hoc_logo.png" 
+          src={hocLogo}
           alt="Logo"
           className="w-12 h-12 object-contain"
         />

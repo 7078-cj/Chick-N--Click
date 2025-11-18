@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, Text, Title, Button, Center, Loader, Stack, Divider } from "@mantine/core";
 import { IconCheck, IconX, IconAlertTriangle } from "@tabler/icons-react";
+import logo from "../assets/hoc_logo.png";
 
 export default function CheckoutSuccess() {
   const { order_id } = useParams();
@@ -83,15 +84,17 @@ export default function CheckoutSuccess() {
       case "success":
         return (
           <Stack align="center" spacing="md">
-            <IconCheck size={64} color="green" />
-            <Title order={2} c="green">
+            <div className="flex justify-center mb-4">
+               <img src={logo} alt="Click n' Chick" className="h-16" />
+            </div>
+            <Title order={2} c="orange">
               Payment Successful!
             </Title>
             <Text c="dimmed" ta="center">
               Thank you for your purchase. Your order #{order_id} has been confirmed.
             </Text>
             {renderDetails()}
-            <Button component={Link} to="/home" color="green" size="md" radius="md">
+            <Button component={Link} to="/home" color="orange" size="md" radius="md">
               Continue Shopping
             </Button>
           </Stack>

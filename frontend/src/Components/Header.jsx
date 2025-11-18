@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { Group, Button, Drawer, Stack } from "@mantine/core";
 import { Search, MoreHorizontal, ShoppingCart, PhoneCall } from "lucide-react";
-import hocLogo from "../assets/hoc_logo.png";
+import hocLogo from "../assets/Logo_banner.png";
 import { useNavigate } from "react-router-dom";
 import CartDrawer from "./CartComponent";
 import AppButton from "./AppButton";
