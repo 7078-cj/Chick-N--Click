@@ -10,7 +10,7 @@ import AuthContext from "../Contexts/AuthContext";
 import AuthModal from "./AuthModal";
 import { FoodContext } from "../Contexts/FoodProvider";
 
-export default function Header({ variant = "default" }) {
+export default function Header({ variant = "default" , search = true}) {
   const nav = useNavigate();
   const [opened, setOpened] = useState(false);
   const { user } = useContext(AuthContext);
@@ -36,7 +36,7 @@ export default function Header({ variant = "default" }) {
               {/* Right Icons */}
               <div className="items-center gap-2 flex justify-center px-6">
                 {/* Search bar with live functionality */}
-                <div className="flex items-center w-full max-w-md bg-orange-50 border border-orange-200 rounded-full px-4 py-2">
+                {search && <div className="flex items-center w-full max-w-md bg-orange-50 border border-orange-200 rounded-full px-4 py-2">
                   <Search size={16} className="text-gray-400 mr-2" />
                   <input
                     type="text"
@@ -54,7 +54,8 @@ export default function Header({ variant = "default" }) {
                       ✕
                     </button>
                   )}
-                </div>
+                </div> }
+                
 
                 {/* More button */}
                 <AppButton

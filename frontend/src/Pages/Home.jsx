@@ -4,6 +4,7 @@ import Feature from "../Components/Feature";
 import AppButton from "../Components/AppButton";
 import Menu from "../Components/Menu";
 import CartComponent from "../Components/CartComponent";
+import { FastForward } from "lucide-react";
 
 
 function Home() {
@@ -13,7 +14,7 @@ function Home() {
     <div className="flex flex-row items-start justify-start w-full h-full">
       <div className={`${activeTab == "menu" ? 'w-[75%]' : 'w-full'}`}>
         {/* Header */}
-        <Header variant="home" />
+        <Header variant="home" search={activeTab == 'menu' }/>
         
         {/* Tabs */}
         <div className="flex justify-start w-full p-5 mt-6 ">
