@@ -209,27 +209,53 @@ class OrderController extends Controller implements HasMiddleware
     public function allOrders(Request $request)
     {
         $this->authorize('isAdmin', Order::class);
+
         $user = $request->user();
-
-        if ($user && $user->role === "admin") {
-            $perPage = $request->get('per_page', 10); // default 10 per page
-
-            $all_orders = Order::with(['items.food', 'user', 'items.food.categories'])
-                ->orderBy('created_at', 'desc')
-                ->paginate($perPage);
-
-            return response()->json([
-                'orders' => $all_orders->items(),
-                'current_page' => $all_orders->currentPage(),
-                'last_page' => $all_orders->lastPage(),
-                'total' => $all_orders->total(),
-                'per_page' => $all_orders->perPage(),
-            ], 200);
+        if (!$user || $user->role !== "admin") {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        $perPage = $request->get('per_page', 10);
+        $status = $request->get('status');       
+        $category = $request->get('category');    
+        $search = $request->get('search');       
+
+        
+        $query = Order::with(['items.food.categories', 'user']);
+
+       
+        if ($status && $status !== "all") {
+            $query->where("status", $status);
+        }
+
+        
+        if ($category && $category !== "all") {
+            $query->whereHas("items.food.categories", function ($q) use ($category) {
+                $q->where("name", "LIKE", "%{$category}%");
+            });
+        }
+
+       
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where("id", $search)
+                ->orWhereHas("user", function ($uq) use ($search) {
+                    $uq->where("first_name", "LIKE", "%{$search}%")
+                        ->orWhere("last_name", "LIKE", "%{$search}%");
+                });
+            });
+        }
+
+        // Paginate after filtering
+        $orders = $query->orderBy("created_at", "desc")->paginate($perPage);
+
         return response()->json([
-            'message' => 'Unauthorized'
-        ], 403);
+            'orders' => $orders->items(),
+            'current_page' => $orders->currentPage(),
+            'last_page' => $orders->lastPage(),
+            'total' => $orders->total(),
+            'per_page' => $orders->perPage(),
+        ]);
     }
 
     public function deleteOrder(Order $order){
