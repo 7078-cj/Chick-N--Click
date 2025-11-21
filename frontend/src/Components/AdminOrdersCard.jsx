@@ -212,7 +212,7 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
           </div>
           
         </div>
-        <div className="w-full flex flex-row items-end justify-end">
+        <div className="w-full flex flex-row items-end gap-4 justify-end">
             <Button
               color="red"
               size="md"
@@ -235,7 +235,7 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
       </Card>
 
       <OrderDetailsModal opened={opened} order={order} setOpened={setOpened} />
-      
+
       <DeleteModal
         opened={deleteOpened}
         onClose={() => setDeleteOpened(false)}
