@@ -31,35 +31,59 @@ class CartItemController extends Controller  implements HasMiddleware
             'drinks.*.size' => 'string|nullable',
         ]);
 
-        // --- Add or update the main food item ---
-        $cartItem = $user->Cart()->updateOrCreate(
-            ['food_id' => $foodId, 'parent_cart_item_id' => null], // main items have no parent
+        // Main food item
+        $cartItem = $user->cart()->updateOrCreate(
+            ['food_id' => $foodId, 'parent_cart_item_id' => null],
             ['quantity' => $validated['quantity'] ?? 1]
         );
 
-        // --- Handle Sides ---
+        /* ---------------------------
+        ADD OR INCREMENT SIDES
+        ---------------------------- */
         if (!empty($validated['sides'])) {
             foreach ($validated['sides'] as $side) {
-                $user->Cart()->Create(
-                    [
+
+                $existingSide = $user->cart()->where([
+                    'parent_cart_item_id' => $cartItem->id,
+                    'food_id' => $side['id']
+                ])->first();
+
+                if ($existingSide) {
+                    // Increment quantity
+                    $existingSide->increment('quantity');
+                } else {
+                    // Create new side
+                    $user->cart()->create([
                         'food_id' => $side['id'],
-                        'parent_cart_item_id' => $cartItem->id, // tie to main cart item
-                         'quantity' => 1,
-                    ]
-                );
+                        'parent_cart_item_id' => $cartItem->id,
+                        'quantity' => 1,
+                    ]);
+                }
             }
         }
 
-        // --- Handle Drinks ---
+        /* ---------------------------
+        ADD OR INCREMENT DRINKS
+        ---------------------------- */
         if (!empty($validated['drinks'])) {
             foreach ($validated['drinks'] as $drink) {
-                $user->Cart()->Create(
-                    [
+
+                $existingDrink = $user->cart()->where([
+                    'parent_cart_item_id' => $cartItem->id,
+                    'food_id' => $drink['id']
+                ])->first();
+
+                if ($existingDrink) {
+                    // Increment quantity
+                    $existingDrink->increment('quantity');
+                } else {
+                    // Create new drink
+                    $user->cart()->create([
                         'food_id' => $drink['id'],
-                        'parent_cart_item_id' => $cartItem->id, // tie to main cart item
+                        'parent_cart_item_id' => $cartItem->id,
                         'quantity' => 1,
-                    ]
-                );
+                    ]);
+                }
             }
         }
 
