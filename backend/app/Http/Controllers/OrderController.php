@@ -218,7 +218,7 @@ class OrderController extends Controller implements HasMiddleware
         $perPage = $request->get('per_page', 10);
         $status = $request->get('status');       
         $category = $request->get('category');    
-        $search = $request->get('search');       
+            
 
         
         $query = Order::with(['items.food.categories', 'user']);
@@ -235,16 +235,6 @@ class OrderController extends Controller implements HasMiddleware
             });
         }
 
-       
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where("id", $search)
-                ->orWhereHas("user", function ($uq) use ($search) {
-                    $uq->where("first_name", "LIKE", "%{$search}%")
-                        ->orWhere("last_name", "LIKE", "%{$search}%");
-                });
-            });
-        }
 
         // Paginate after filtering
         $orders = $query->orderBy("created_at", "desc")->paginate($perPage);

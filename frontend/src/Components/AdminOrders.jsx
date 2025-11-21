@@ -19,16 +19,13 @@ function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const [filter, setFilter] = useState("all"); 
-  const [categoryFilter, setCategoryFilter] = useState("all"); 
+  const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
-  
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const perPage = 10;
 
-  // WebSocket
   const wsRef = useRef(null);
   const [newOrderBanner, setNewOrderBanner] = useState(false);
 
@@ -36,14 +33,14 @@ function AdminOrders() {
   const wsUrl = import.meta.env.VITE_WS_URL;
 
   // -------------------------------
-  // Fetch orders WITH backend filters
+  // Fetch paginated orders (NO SEARCH)
   // -------------------------------
   const fetchOrders = async (pageNumber = 1) => {
     try {
       setLoading(true);
 
       const res = await fetch(
-        `${url}/api/orders/all?page=${pageNumber}&per_page=${perPage}&status=${filter}&category=${categoryFilter}&search=${search}`,
+        `${url}/api/orders/all?page=${pageNumber}&per_page=${perPage}&status=${filter}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -52,7 +49,8 @@ function AdminOrders() {
         }
       );
 
-      if (!res.ok) throw new Error("Failed to fetch orders");
+      if (!res.ok) throw new Error("Failed to fetch");
+
       const data = await res.json();
 
       setOrders(data.orders || []);
@@ -66,7 +64,7 @@ function AdminOrders() {
   };
 
   // -------------------------------
-  // Status update
+  // Update order status
   // -------------------------------
   const updateStatus = async (orderId, status) => {
     try {
@@ -79,7 +77,8 @@ function AdminOrders() {
         body: JSON.stringify({ status }),
       });
 
-      if (!res.ok) throw new Error("Failed status update");
+      if (!res.ok) throw new Error("Update failed");
+
       const data = await res.json();
 
       setOrders((prev) =>
@@ -126,7 +125,7 @@ function AdminOrders() {
   };
 
   // -------------------------------
-  // WebSocket connection
+  // Connect WebSocket
   // -------------------------------
   useEffect(() => {
     if (!token) return;
@@ -145,6 +144,7 @@ function AdminOrders() {
     };
 
     ws.onclose = () => console.log("WS Closed");
+
     return () => ws.close();
   }, [token, user, page]);
 
@@ -156,17 +156,33 @@ function AdminOrders() {
   }, [page]);
 
   // -------------------------------
-  // Fetch when filters change
-  // Reset to page 1
+  // Reset to page 1 when status filter changes
   // -------------------------------
   useEffect(() => {
     setPage(1);
     fetchOrders(1);
-  }, [filter, categoryFilter, search]);
+  }, [filter]);
 
   // -------------------------------
-  // Colors
+  // CLIENT-SIDE SEARCH FILTER (ONLY CURRENT PAGE)
   // -------------------------------
+  const filteredOrders = orders.filter((order) => {
+    const text = search.toLowerCase();
+
+    const matchesFilter = filter === "all" || order.status === filter;
+
+    const matchesSearch =
+      order.id.toString().includes(text) ||
+      order.user?.first_name?.toLowerCase().includes(text) ||
+      order.user?.last_name?.toLowerCase().includes(text) ||
+      (order.user &&
+        `${order.user.first_name} ${order.user.last_name}`
+          .toLowerCase()
+          .includes(text));
+
+    return matchesFilter && matchesSearch;
+  });
+
   const statusColors = {
     pending: "yellow",
     approved: "blue",
@@ -192,25 +208,22 @@ function AdminOrders() {
         />
       </Group>
 
-      {/* Filters */}
-      <Group>
-        <SegmentedControl
-          value={filter}
-          onChange={setFilter}
-          radius="xl"
-          color="orange"
-          fullWidth
-          data={[
-            { label: "All", value: "all" },
-            { label: "Pending", value: "pending" },
-            { label: "Approved", value: "approved" },
-            { label: "Declined", value: "declined" },
-            { label: "Completed", value: "completed" },
-            { label: "Cancelled", value: "cancelled" },
-          ]}
-        />
-
-      </Group>
+      {/* Status Filter */}
+      <SegmentedControl
+        value={filter}
+        onChange={setFilter}
+        radius="xl"
+        color="orange"
+        fullWidth
+        data={[
+          { label: "All", value: "all" },
+          { label: "Pending", value: "pending" },
+          { label: "Approved", value: "approved" },
+          { label: "Declined", value: "declined" },
+          { label: "Completed", value: "completed" },
+          { label: "Cancelled", value: "cancelled" },
+        ]}
+      />
 
       {/* Banner */}
       {newOrderBanner && (
@@ -219,35 +232,27 @@ function AdminOrders() {
           color="green"
           onClose={() => setNewOrderBanner(false)}
         >
-          <b>New order received!</b> Go to page 1 to view it.
+          <b>New order received!</b> Go to page 1 to see it.
         </Notification>
       )}
 
-      {/* Table Header */}
+      {/* Column Titles */}
       <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] border-b px-4 py-3">
         <Text fw={700}>Order Info</Text>
-        <Text fw={700} ta="center">
-          Status
-        </Text>
-        <Text fw={700} ta="center">
-          Update Status
-        </Text>
-        <Text fw={700} ta="center">
-          ETC
-        </Text>
-        <Text fw={700} ta="right">
-          Total
-        </Text>
+        <Text fw={700} ta="center">Status</Text>
+        <Text fw={700} ta="center">Update Status</Text>
+        <Text fw={700} ta="center">ETC</Text>
+        <Text fw={700} ta="right">Total</Text>
       </div>
 
       {/* Order List */}
       {loading ? (
         <Loader color="orange" size="lg" />
-      ) : orders.length > 0 ? (
+      ) : filteredOrders.length > 0 ? (
         <>
           <ScrollArea h="80vh">
             <Stack>
-              {orders.map((order) => (
+              {filteredOrders.map((order) => (
                 <AdminOrdersCard
                   key={order.id}
                   order={order}
@@ -259,6 +264,7 @@ function AdminOrders() {
             </Stack>
           </ScrollArea>
 
+          {/* Pagination */}
           <Group justify="center" mt="md">
             <Pagination
               total={totalPages}
