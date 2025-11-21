@@ -210,14 +210,6 @@ function AdminOrders() {
           ]}
         />
 
-        <TextInput
-          placeholder="Category..."
-          value={categoryFilter}
-          onChange={(e) =>
-            setCategoryFilter(e.target.value.toLowerCase() || "all")
-          }
-          radius="xl"
-        />
       </Group>
 
       {/* Banner */}
