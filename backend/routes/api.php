@@ -30,7 +30,7 @@ Route::get('/orders/all', [OrderController::class, 'allOrders']);
 Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder']);
 Route::put('/order/{id}/status', [OrderController::class, 'updateOrderStatus']);
 Route::put('/order/{id}/etc', [OrderController::class, 'updateOrderETC']);
-Route::delete('/order/{id}/delete', [OrderController::class, 'deleteOrder']);
+Route::delete('/order/{order}/delete', [OrderController::class, 'deleteOrder']);
 
 Route::apiResource('foods', FoodController::class);
 Route::apiResource('category', CategoryController::class);
