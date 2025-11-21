@@ -248,17 +248,17 @@ class OrderController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function deleteOrder(Order $order){
+    // public function deleteOrder(Order $order){
         
-        $this->authorize('isAdmin', Order::class);
-        Http::post(config('services.websocket.http_url') ."/broadcast/food", [
-            "event" => "delete",
-            "order"  => $order
-        ]);
+    //     $this->authorize('isAdmin', Order::class);
+    //     Http::post(config('services.websocket.http_url') ."/broadcast/food", [
+    //         "event" => "delete",
+    //         "order"  => $order
+    //     ]);
 
-        $order->delete();
+    //     $order->delete();
 
-        return response()->json(['message' => 'Order deleted successfully'], 200);
-    }
+    //     return response()->json(['message' => 'Order deleted successfully'], 200);
+    // }
 
 }

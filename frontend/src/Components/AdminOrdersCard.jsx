@@ -13,9 +13,8 @@ import {
   Group,
 } from "@mantine/core";
 import AuthContext from "../Contexts/AuthContext";
-import UserLocationMap from "./LeafletMap";
 import OrderDetailsModal from "./OrderDetailsModal";
-import DeleteModal from "./DeleteModal";
+
 
 function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
   const url = import.meta.env.VITE_API_URL;
@@ -27,7 +26,7 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
     lng: order.user.longitude,
     full: order.user.location,
   });
-  const [deleteOpened, setDeleteOpened] = useState(false);
+  // const [deleteOpened, setDeleteOpened] = useState(false);
 
   // 🔹 Update ETC API
   const updateETC = async () => {
@@ -61,26 +60,26 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
     }
   };
 
-  const deleteOrder = async () => {
-    try {
-      const res = await fetch(`${url}/api/order/${order.id}/delete`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  // const deleteOrder = async () => {
+  //   try {
+  //     const res = await fetch(`${url}/api/order/${order.id}/delete`, {
+  //       method: "DELETE",
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
 
-      if (!res.ok) throw new Error("Failed to delete order");
+  //     if (!res.ok) throw new Error("Failed to delete order");
 
-      // Remove from UI
-      setOrders(prev => prev.filter(o => o.id !== order.id));
+  //     // Remove from UI
+  //     setOrders(prev => prev.filter(o => o.id !== order.id));
 
-      setDeleteOpened(false);
-    } catch (err) {
-      console.error(err);
-      alert("Error deleting order");
-    }
-  };
+  //     setDeleteOpened(false);
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert("Error deleting order");
+  //   }
+  // };
 
   // 🔹 Debounce ETC updates
   useEffect(() => {
@@ -213,14 +212,14 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
           
         </div>
         <div className="w-full flex flex-row items-end gap-4 justify-end">
-            <Button
+            {/* <Button
               color="red"
               size="md"
               variant="light"
               onClick={() => setDeleteOpened(true)}
             >
               Delete
-            </Button>
+            </Button> */}
             <Button
                 mt={6}
                 color={statusColors[order.status]}
@@ -236,12 +235,12 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
 
       <OrderDetailsModal opened={opened} order={order} setOpened={setOpened} />
 
-      <DeleteModal
+      {/* <DeleteModal
         opened={deleteOpened}
         onClose={() => setDeleteOpened(false)}
         onConfirm={deleteOrder}
         itemName={`Order #${order.id}`}
-      />
+      /> */}
     </>
   );
 }
