@@ -11,7 +11,7 @@ echo "Running storage link..."
 php artisan storage:link || true   # skip if already exists
 
 echo "Running migrations and seeding..."
-php artisan migrate
+php artisan migrate --seed
 
 
 
