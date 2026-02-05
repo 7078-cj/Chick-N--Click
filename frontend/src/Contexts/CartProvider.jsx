@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import AuthContext from "./AuthContext";
 import PayWithGcash from "../Components/PayWithGcash";
+import { useNavigate } from "react-router-dom";
 
 export const CartContext = createContext();
 
@@ -11,6 +12,7 @@ export const CartProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [placingOrder, setPlacingOrder] = useState(false);
     const url = import.meta.env.VITE_API_URL;
+    const nav = useNavigate()
 
     const fetchCart = async () => {
         try {
@@ -140,6 +142,7 @@ export const CartProvider = ({ children }) => {
             alert("Error placing order.");
         } finally {
             setPlacingOrder(false);
+            nav('/home')
         }
         };
 
