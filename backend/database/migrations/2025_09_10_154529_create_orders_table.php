@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('latitude')->nullable();
             $table->string('location')->nullable();
             $table->string('paid_at')->nullable();
+            $table->string('proof_of_payment')->nullable();
             $table->timestamps();
         });
     }

@@ -84,7 +84,7 @@ export const OrderProvider = ({ children }) => {
             ws.close();
         };
         
-    }, [user,token]);
+    }, [token]);
 
     useEffect(() => {
         if (token) {

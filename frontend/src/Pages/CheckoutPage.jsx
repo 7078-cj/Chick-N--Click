@@ -6,59 +6,35 @@ import AuthContext from "../Contexts/AuthContext";
 import UserLocationMap from "../Components/LeafletMap";
 import { Distance } from "../utils/Distance";
 import gcash from "../assets/gcash_icon.svg";
+import { Button, FileButton, Image, Text } from "@mantine/core";
+import { ImageIcon } from "lucide-react";
 
 function CheckoutPage() {
   const { cart, placeOrder, placingOrder,total } = useContext(CartContext);
   const url = import.meta.env.VITE_API_URL;
-  const { token } = useContext(AuthContext);
-  const [user, setUser] = useState(null);
+  const { token, user } = useContext(AuthContext);
   const [location, setLocation] = useState({
-        lat: null,
-        lng: null,
+        lat: user.latitude,
+        lng: user.longitude,
         city: "",
         country: "",
-        full: "",
+        full: user.location
       });
   const [orderType, setOrderType] = useState("");
+  const [proof, setProof] = useState(null)
+  const [preview, setPreview] = useState(null)
 
   const handleChange = (e) => {
     setOrderType(e.target.value);
     
   };
 
-
-  const fetchUser = async () => {
-      try {
-        const res = await fetch(`${url}/api/user`, {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-  
-        if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
-  
-        const data = await res.json();
-     
-        setUser(data);
-        
-  
-        if (data.location) {
-          setLocation({
-            lat: data.latitude,
-            lng: data.longitude,
-            full: data.location,
-            
-          });
-        }
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
-      }
-    };
-  
-    useEffect(() => {
-      fetchUser();
-    }, []);
+  const handleFileChange = (file) => {
+    if (file) {
+      setProof(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
 
     const dis = Distance(location.lat, location.lng)
 
@@ -82,19 +58,19 @@ function CheckoutPage() {
 
     
   return (
-    <div className="flex flex-row gap-6 p-6 bg-white h-screen w-full font-sans">
+    <div className="flex flex-row w-full h-screen gap-6 p-6 font-sans bg-white">
     <div className="flex flex-col w-full h-full">
       {/* Cart Summary */}
-      <h2 className="text-3xl font-extrabold text-orange-500 leading-tight">
+      <h2 className="text-3xl font-extrabold leading-tight text-orange-500">
           CART <br /> SUMMARY
         </h2>
-      <div className="w-full  bg-white rounded-xl shadow-sm p-6 flex flex-col justify-between h-screen">
+      <div className="flex flex-col justify-between w-full h-screen p-6 bg-white shadow-sm rounded-xl">
         
 
         {/* Order type dropdown */}
         <div className="mt-6">
           <select
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700"
+            className="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded-xl"
             value={orderType} 
             onChange={handleChange} 
           >
@@ -112,17 +88,17 @@ function CheckoutPage() {
         </div>
 
         {/* GCash option */}
-        <button className="mt-4 flex items-center justify-between border border-gray-300 rounded-full px-4 py-3">
-          <span className="text-blue-500 font-medium">Pay with GCash</span>
+        <button className="flex items-center justify-between px-4 py-3 mt-4 border border-gray-300 rounded-full">
+          <span className="font-medium text-blue-500">Pay with GCash</span>
           <img
             src={gcash}
             alt="GCash"
             className="w-10 h-10"
           />
         </button>
-        <div className="m-2 flex flex-col justify-between h-full items-center">
+        <div className="flex flex-col items-center justify-between h-full m-2">
             {/* Totals */}
-            <div className="mt-6 text-sm w-full">
+            <div className="w-full mt-6 text-sm">
             <div className="flex justify-between">
                 <span>Sub Total</span>
                 <span>₱{total}</span>
@@ -141,18 +117,61 @@ function CheckoutPage() {
             </div>
             </div>
 
-            <div className="w-full flex flex-col gap-2">
+            <div className="flex flex-col w-full gap-2">
             {/* Total */}
-                <div className="mt-4 bg-yellow-100 rounded-lg p-4 flex justify-between items-center font-bold text-lg w-full">
+                <div className="flex items-center justify-between w-full p-4 mt-4 text-lg font-bold bg-yellow-100 rounded-lg">
                     <span>TOTAL</span>
                     <span>₱{total + 30 + dis_price}</span>
                 </div>
+
+                {/* ================= IMAGE UPLOAD ================= */}
+        <div>
+          <Text fw={600} size="sm" mb={6}>
+            Import Proof of Payment
+          </Text>
+
+          <div
+            className="flex flex-col items-center justify-center p-8 text-sm text-gray-500 transition border-2 border-orange-400 border-dashed cursor-pointer rounded-xl hover:bg-orange-50"
+            onClick={() => document.getElementById("food-upload-btn").click()}
+          >
+            {preview ? (
+              <Image
+                src={preview}
+                height={150}
+                radius="md"
+                alt="preview"
+                className="object-cover"
+              />
+            ) : (
+              <>
+                <ImageIcon size={40} color="#f97316" />
+                <p className="mt-2 text-center">
+                  Browse and select an image.....
+                </p>
+              </>
+            )}
+          </div>
+
+          <div className="flex justify-center mt-4">
+            <FileButton
+              id="food-upload-btn"
+              onChange={handleFileChange}
+              accept="image/*"
+            >
+              {(props) => (
+                <Button {...props} color="orange" radius="xl" size="sm">
+                  Upload
+                </Button>
+              )}
+            </FileButton>
+          </div>
+        </div>
 
                 {/* Checkout button */}
                  <AppButton
                     useCase="menu"
                     size="lg"
-                    onClick={() => placeOrder(orderType)}
+                    onClick={() => placeOrder({orderType: orderType, location, proof})}
                     disabled={placingOrder || !orderType}
                     className={`w-full ${!orderType ? "opacity-50 cursor-not-allowed" : ""}`} 
                   >
@@ -160,18 +179,23 @@ function CheckoutPage() {
                   </AppButton>
                 </div>
             </div>
+
+            
+            
         </div>
+
+        
       </div>
 
       {/* Order List */}
-      <div className="w-full bg-gray-50 rounded-xl shadow-sm p-6">
-        <div className="flex justify-between items-center">
+      <div className="w-full p-6 shadow-sm bg-gray-50 rounded-xl">
+        <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold">Order List</h2>
            
         </div>
 
         {/* Order Item */}
-        <div className="mt-6 flex items-center rounded-xl overflow-hidden">
+        <div className="flex items-center mt-6 overflow-hidden rounded-xl">
           <div className="flex-1 space-y-4">
                       {cart.length > 0 ? (
                         cart.map((item) => (
@@ -198,7 +222,7 @@ function CheckoutPage() {
         {/* Map placeholder */}
         <div className="relative flex-1 bg-gray-100 rounded-lg">
           <UserLocationMap
-                            editMode={false}
+                            editMode={true}
                             setLocation={setLocation}
                             location={location}
                             user={user}
@@ -210,7 +234,7 @@ function CheckoutPage() {
         <div className="mt-4 text-sm">
           <p className="font-bold text-gray-900">Your Pinned Location</p>
           <div className="flex items-center mt-2">
-            <span className="text-orange-500 mr-2">📍</span>
+            <span className="mr-2 text-orange-500">📍</span>
             <span className="font-medium">{location.full}</span>
             
           </div>

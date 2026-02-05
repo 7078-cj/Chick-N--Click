@@ -74,7 +74,7 @@ export const FoodProvider = ({ children }) => {
     return () => {
       ws.close();
     };
-  }, [token, user]);
+  }, [token]);
 
   // Handle incoming food events
   const handleFoodEvent = (msg) => {

@@ -15,8 +15,9 @@ app.add_middleware(
     allow_origins=[origin.strip() for origin in origins if origin.strip()],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
+
 
 # -------------------------
 # Connection Manager
@@ -49,9 +50,11 @@ class ConnectionManager:
         for conn in to_remove:
             self.disconnect(conn)
 
+
 # Managers for order and food
 order_manager = ConnectionManager()
 food_manager = ConnectionManager()
+
 
 # -------------------------
 # WebSocket Routes
@@ -62,10 +65,14 @@ async def order_ws(websocket: WebSocket, client_id: int):
     try:
         while True:
             data = await websocket.receive_text()
-            await order_manager.broadcast(f"Client {client_id}: {data}", sender=websocket)
+            print(data)
+            await order_manager.broadcast(
+                f"Client {client_id}: {data}", sender=websocket
+            )
     except WebSocketDisconnect:
         order_manager.disconnect(websocket)
         await order_manager.broadcast(f"Client {client_id} left", sender=websocket)
+
 
 @app.websocket("/ws/food/{client_id}")
 async def food_ws(websocket: WebSocket, client_id: int):
@@ -73,10 +80,14 @@ async def food_ws(websocket: WebSocket, client_id: int):
     try:
         while True:
             data = await websocket.receive_text()
-            await food_manager.broadcast(f"Client {client_id}: {data}", sender=websocket)
+            print(data)
+            await food_manager.broadcast(
+                f"Client {client_id}: {data}", sender=websocket
+            )
     except WebSocketDisconnect:
         food_manager.disconnect(websocket)
         await food_manager.broadcast(f"Client {client_id} left", sender=websocket)
+
 
 # -------------------------
 # HTTP Broadcast Routes
@@ -88,10 +99,11 @@ async def broadcast_order(request: Request):
         "type": "order",
         "event": data.get("event", ""),
         "order": data.get("order", {}),
-        "user_id": data.get("user_id", "")
+        "user_id": data.get("user_id", ""),
     }
     await order_manager.broadcast(json.dumps(payload))
     return {"status": "ok", "broadcasted": payload}
+
 
 @app.post("/broadcast/food")
 async def broadcast_food(request: Request):
@@ -99,10 +111,11 @@ async def broadcast_food(request: Request):
     payload = {
         "type": "food",
         "event": data.get("event", ""),
-        "food": data.get("food", {})
+        "food": data.get("food", {}),
     }
     await food_manager.broadcast(json.dumps(payload))
     return {"status": "ok", "broadcasted": payload}
+
 
 # -------------------------
 # Run app

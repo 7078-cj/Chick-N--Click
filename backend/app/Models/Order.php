@@ -22,6 +22,7 @@ class Order extends Model
         'latitude',
         'longitude',
         'location',
+        'proof_of_payment'
     ];
 
     public function user()

@@ -13,6 +13,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller implements HasMiddleware
 {
@@ -27,10 +28,13 @@ class OrderController extends Controller implements HasMiddleware
    public function placeOrder(Request $request)
     {
         $user = $request->user();
-        $request->validate([
+        $validated = $request->validate([
             'type' => 'required|in:delivery,pickup',
+            'location' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'proof_of_payment'   => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif', 'max:5120'],
         ]);
-
     
         $cartItems = CartItem::with('food')->where('user_id', $user->id)->get();
 
@@ -42,15 +46,52 @@ class OrderController extends Controller implements HasMiddleware
         try {
             $total = $cartItems->sum(fn($item) =>($item->food->price * $item->quantity));
 
-            $order = Order::create([
-                'user_id'   => $user->id,
-                'total_price' => $total,
-                'status'    => 'pending',
-                'type'    => $request->type,
-                'latitude'  => $user->latitude,
-                'longitude' => $user->longitude,
-                'location'  => $user->location,
-            ]);
+            $validated['user_id'] = $user->id;
+            $validated['total_price'] = $total;
+            $validated['status'] = 'pending';
+
+            if ($request->hasFile('proof_of_payment')) {
+                $file = $request->file('proof_of_payment');
+
+                if (!$file->isValid()) {
+                    return response()->json(['message' => 'Invalid file upload.'], 400);
+                }
+
+                try {
+                    // Create Cloudinary instance with SSL disabled for Windows
+                    $client = new \GuzzleHttp\Client(['verify' => false]);
+                    
+                    $cloudinary = new \Cloudinary\Cloudinary([
+                        'cloud' => [
+                            'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                            'api_key' => config('filesystems.disks.cloudinary.key'),
+                            'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                        ],
+                        'url' => ['secure' => true],
+                    ]);
+                    
+                    $cloudinary->configuration->cloud->api_http_client = $client;
+                    
+                    $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
+                        'folder' => 'foods',
+                    ]);
+
+                    $validated['proof_of_payment'] = $result['secure_url'];
+                    
+                    Log::info('Cloudinary upload successful proof_of_payment', [
+                        'url' => $result['secure_url'],
+                        'public_id' => $result['public_id']
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::error('Cloudinary upload failed: ' . $e->getMessage());
+                    return response()->json([
+                        'message' => 'Failed to upload image.',
+                        'error' => $e->getMessage(),
+                    ], 500);
+                }
+            }
+
+            $order = Order::create($validated);
 
             foreach ($cartItems as $item) {
                 OrderItem::create([
@@ -63,6 +104,8 @@ class OrderController extends Controller implements HasMiddleware
 
             CartItem::where('user_id', $user->id)->delete();
             DB::commit();
+
+            
             
             $dis = Distance::getDistance($order->latitude, $order->longitude);
 
@@ -83,20 +126,12 @@ class OrderController extends Controller implements HasMiddleware
             $order->total_price = $order->total_price + $dis_price ;
             $order->save();
 
-            // Now handle external services (outside transaction)
-            $checkout = GcashCheckout::createCheckout($order);
-
-            
-
-            $order->total_price = $order->total_price + 30 ;
-            $order->save();
-
             Http::post(config('services.websocket.http_url') . "/broadcast/order", [
                 'event' => 'create',
                 'order' => $order->load('items.food', 'items.food.categories', 'user'),
             ]);
 
-            return $checkout;
+            return response()->json(['message'=>'Order Placed']);
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -104,37 +104,45 @@ export const CartProvider = ({ children }) => {
         removeCartItem(foodId);
     };
 
-    const placeOrder = async (type) => {
+    const placeOrder = async ({ orderType, location, proof }) => {
         if (cart.length === 0) {
-        alert("Your cart is empty!");
-        return;
+            alert("Your cart is empty!");
+            return;
         }
 
         try {
-        setPlacingOrder(true);
-        const res = await fetch(`${url}/api/order/place`, {
+            setPlacingOrder(true);
+
+            const formData = new FormData();
+            formData.append("type", orderType);
+            formData.append("location", location.full);
+            formData.append("latitude", location.lat);
+            formData.append("longitude", location.lng);
+
+            if (proof) {
+            formData.append("proof_of_payment", proof);
+            }
+
+            const res = await fetch(`${url}/api/order/place`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                Accept: "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ type }),
-            credentials: "include",
-        });
+            body: formData,
+            });
 
-        const data = await res.json();
-       
-        setCart([]); 
-        setTotal(0);
+            const data = await res.json();
+            console.log(data);
 
-        PayWithGcash(data)
         } catch (err) {
-        console.error(err);
-        alert("Error placing order.");
+            console.error(err);
+            alert("Error placing order.");
         } finally {
-        setPlacingOrder(false);
+            setPlacingOrder(false);
         }
-    };
+        };
+
     
     const context ={
         fetchCart:fetchCart,
