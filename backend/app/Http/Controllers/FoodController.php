@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Food;
+use App\Utils\Image;
+use App\Utils\Websocket;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class FoodController extends Controller implements HasMiddleware
 {
@@ -64,42 +67,43 @@ class FoodController extends Controller implements HasMiddleware
             if ($request->hasFile('thumbnail')) {
                 $file = $request->file('thumbnail');
 
-                if (!$file->isValid()) {
-                    return response()->json(['message' => 'Invalid file upload.'], 400);
-                }
+                // if (!$file->isValid()) {
+                //     return response()->json(['message' => 'Invalid file upload.'], 400);
+                // }
 
-                try {
-                    // Create Cloudinary instance with SSL disabled for Windows
-                    $client = new \GuzzleHttp\Client(['verify' => false]);
+                // try {
+                //     // Create Cloudinary instance with SSL disabled for Windows
+                //     $client = new \GuzzleHttp\Client(['verify' => false]);
                     
-                    $cloudinary = new \Cloudinary\Cloudinary([
-                        'cloud' => [
-                            'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
-                            'api_key' => config('filesystems.disks.cloudinary.key'),
-                            'api_secret' => config('filesystems.disks.cloudinary.secret'),
-                        ],
-                        'url' => ['secure' => true],
-                    ]);
+                //     $cloudinary = new \Cloudinary\Cloudinary([
+                //         'cloud' => [
+                //             'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                //             'api_key' => config('filesystems.disks.cloudinary.key'),
+                //             'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                //         ],
+                //         'url' => ['secure' => true],
+                //     ]);
                     
-                    $cloudinary->configuration->cloud->api_http_client = $client;
+                //     $cloudinary->configuration->cloud->api_http_client = $client;
                     
-                    $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
-                        'folder' => 'foods',
-                    ]);
+                //     $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
+                //         'folder' => 'foods',
+                //     ]);
 
-                    $validated['thumbnail'] = $result['secure_url'];
+                //     $validated['thumbnail'] = $result['secure_url'];
                     
-                    Log::info('Cloudinary upload successful', [
-                        'url' => $result['secure_url'],
-                        'public_id' => $result['public_id']
-                    ]);
-                } catch (\Throwable $e) {
-                    Log::error('Cloudinary upload failed: ' . $e->getMessage());
-                    return response()->json([
-                        'message' => 'Failed to upload image.',
-                        'error' => $e->getMessage(),
-                    ], 500);
-                }
+                //     Log::info('Cloudinary upload successful', [
+                //         'url' => $result['secure_url'],
+                //         'public_id' => $result['public_id']
+                //     ]);
+                // } catch (\Throwable $e) {
+                //     Log::error('Cloudinary upload failed: ' . $e->getMessage());
+                //     return response()->json([
+                //         'message' => 'Failed to upload image.',
+                //         'error' => $e->getMessage(),
+                //     ], 500);
+                // }
+                $validated['thumbnail'] = Image::uploadImage($file);
             }
 
             $food = Food::create($validated);
@@ -108,17 +112,18 @@ class FoodController extends Controller implements HasMiddleware
                 $food->categories()->sync($validated['categories']);
             }
 
-            $websocketUrl = config('services.websocket.http_url');
-            if ($websocketUrl) {
-                try {
-                    Http::post($websocketUrl . "/broadcast/food", [
-                        "event" => "created",
-                        "food"  => $food->load('categories'),
-                    ]);
-                } catch (\Exception $e) {
-                    Log::warning('Websocket broadcast failed: ' . $e->getMessage());
-                }
-            }
+            // $websocketUrl = config('services.websocket.http_url');
+            // if ($websocketUrl) {
+            //     try {
+            //         Http::post($websocketUrl . "/broadcast/food", [
+            //             "event" => "created",
+            //             "food"  => $food->load('categories'),
+            //         ]);
+            //     } catch (\Exception $e) {
+            //         Log::warning('Websocket broadcast failed: ' . $e->getMessage());
+            //     }
+            // }
+            Websocket::broadcast('food', 'created', $food->load('categories'));
 
             return response()->json($food->load('categories'), 201);
 
@@ -174,44 +179,46 @@ class FoodController extends Controller implements HasMiddleware
 
                 try {
                     // Create Cloudinary instance
-                    $client = new \GuzzleHttp\Client(['verify' => false]);
+                    // $client = new \GuzzleHttp\Client(['verify' => false]);
                     
-                    $cloudinary = new \Cloudinary\Cloudinary([
-                        'cloud' => [
-                            'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
-                            'api_key' => config('filesystems.disks.cloudinary.key'),
-                            'api_secret' => config('filesystems.disks.cloudinary.secret'),
-                        ],
-                        'url' => ['secure' => true],
-                    ]);
+                    // $cloudinary = new \Cloudinary\Cloudinary([
+                    //     'cloud' => [
+                    //         'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                    //         'api_key' => config('filesystems.disks.cloudinary.key'),
+                    //         'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                    //     ],
+                    //     'url' => ['secure' => true],
+                    // ]);
                     
-                    $cloudinary->configuration->cloud->api_http_client = $client;
+                    // $cloudinary->configuration->cloud->api_http_client = $client;
 
-                    // Delete old image if exists
-                    if ($food->thumbnail && str_contains($food->thumbnail, 'res.cloudinary.com')) {
-                        try {
-                            $urlPath = parse_url($food->thumbnail, PHP_URL_PATH);
-                            $pathParts = explode('/', $urlPath);
-                            $publicIdWithExt = end($pathParts);
-                            $publicId = pathinfo($publicIdWithExt, PATHINFO_FILENAME);
+                    // // Delete old image if exists
+                    // if ($food->thumbnail && str_contains($food->thumbnail, 'res.cloudinary.com')) {
+                    //     try {
+                    //         $urlPath = parse_url($food->thumbnail, PHP_URL_PATH);
+                    //         $pathParts = explode('/', $urlPath);
+                    //         $publicIdWithExt = end($pathParts);
+                    //         $publicId = pathinfo($publicIdWithExt, PATHINFO_FILENAME);
                             
-                            // Find the folder (usually "foods")
-                            $folderIndex = array_search('foods', $pathParts);
-                            if ($folderIndex !== false) {
-                                $folder = $pathParts[$folderIndex];
-                                $cloudinary->uploadApi()->destroy($folder . '/' . $publicId);
-                            }
-                        } catch (\Exception $e) {
-                            Log::warning('Failed to delete old Cloudinary image: ' . $e->getMessage());
-                        }
-                    }
+                    //         // Find the folder (usually "foods")
+                    //         $folderIndex = array_search('foods', $pathParts);
+                    //         if ($folderIndex !== false) {
+                    //             $folder = $pathParts[$folderIndex];
+                    //             $cloudinary->uploadApi()->destroy($folder . '/' . $publicId);
+                    //         }
+                    //     } catch (\Exception $e) {
+                    //         Log::warning('Failed to delete old Cloudinary image: ' . $e->getMessage());
+                    //     }
+                    // }
+                    Image::deleteImage($food->thumbnail, 'foods');
 
-                    // Upload new image
-                    $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
-                        'folder' => 'foods',
-                    ]);
+                    // // Upload new image
+                    // $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
+                    //     'folder' => 'foods',
+                    // ]);
 
-                    $validated['thumbnail'] = $result['secure_url'];
+                    $validated['thumbnail'] = Image::uploadImage($file);
+
                 } catch (\Throwable $e) {
                     Log::error('Cloudinary upload failed: ' . $e->getMessage());
                     return response()->json([
@@ -232,17 +239,18 @@ class FoodController extends Controller implements HasMiddleware
                 $food->categories()->sync([]);
             }
 
-            $websocketUrl = config('services.websocket.http_url');
-            if ($websocketUrl) {
-                try {
-                    Http::post($websocketUrl . "/broadcast/food", [
-                        "event" => "updated",
-                        "food"  => $food->load('categories')
-                    ]);
-                } catch (\Exception $e) {
-                    Log::warning('Websocket broadcast failed: ' . $e->getMessage());
-                }
-            }
+            // $websocketUrl = config('services.websocket.http_url');
+            // if ($websocketUrl) {
+            //     try {
+            //         Http::post($websocketUrl . "/broadcast/food", [
+            //             "event" => "updated",
+            //             "food"  => $food->load('categories')
+            //         ]);
+            //     } catch (\Exception $e) {
+            //         Log::warning('Websocket broadcast failed: ' . $e->getMessage());
+            //     }
+            // }
+            Websocket::broadcast('food', 'updated', $food->load('categories'));
 
             return response()->json($food->load('categories'), 200);
 
@@ -274,49 +282,24 @@ class FoodController extends Controller implements HasMiddleware
 
             // Delete from Cloudinary if URL exists
             if ($food->thumbnail && str_contains($food->thumbnail, 'res.cloudinary.com')) {
-                try {
-                    $client = new \GuzzleHttp\Client(['verify' => false]);
-                    
-                    $cloudinary = new \Cloudinary\Cloudinary([
-                        'cloud' => [
-                            'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
-                            'api_key' => config('filesystems.disks.cloudinary.key'),
-                            'api_secret' => config('filesystems.disks.cloudinary.secret'),
-                        ],
-                        'url' => ['secure' => true],
-                    ]);
-                    
-                    $cloudinary->configuration->cloud->api_http_client = $client;
-
-                    $urlPath = parse_url($food->thumbnail, PHP_URL_PATH);
-                    $pathParts = explode('/', $urlPath);
-                    $publicIdWithExt = end($pathParts);
-                    $publicId = pathinfo($publicIdWithExt, PATHINFO_FILENAME);
-                    
-                    $folderIndex = array_search('foods', $pathParts);
-                    if ($folderIndex !== false) {
-                        $folder = $pathParts[$folderIndex];
-                        $cloudinary->uploadApi()->destroy($folder . '/' . $publicId);
-                    }
-                } catch (\Exception $e) {
-                    Log::warning('Failed to delete Cloudinary image: ' . $e->getMessage());
-                }
+                Image::deleteImage($food->thumbnail, 'foods');
             }
 
             $foodData = $food->load('categories');
             $food->delete();
 
-            $websocketUrl = config('services.websocket.http_url');
-            if ($websocketUrl) {
-                try {
-                    Http::post($websocketUrl . "/broadcast/food", [
-                        "event" => "deleted",
-                        "food"  => $foodData,
-                    ]);
-                } catch (\Exception $e) {
-                    Log::warning('Websocket broadcast failed: ' . $e->getMessage());
-                }
-            }
+            // $websocketUrl = config('services.websocket.http_url');
+            // if ($websocketUrl) {
+            //     try {
+            //         Http::post($websocketUrl . "/broadcast/food", [
+            //             "event" => "deleted",
+            //             "food"  => $foodData,
+            //         ]);
+            //     } catch (\Exception $e) {
+            //         Log::warning('Websocket broadcast failed: ' . $e->getMessage());
+            //     }
+            // }
+            Websocket::broadcast('food', 'deleted', $foodData);
 
             return response()->json(['message' => 'Food deleted successfully'], 200);
 
