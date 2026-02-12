@@ -28,10 +28,7 @@ class Websocket
         $websocketUrl = config('services.websocket.http_url');
             if ($websocketUrl) {
                 try {
-                    Http::post($websocketUrl . "/broadcast/{$type}", [
-                        "event" => $event,
-                        $type  => $data_sent
-                    ]);
+                    Http::post($websocketUrl . "/broadcast/{$type}", $data_sent);
                 } catch (\Exception $e) {
                     Log::warning('Websocket broadcast failed: ' . $e->getMessage());
                 }

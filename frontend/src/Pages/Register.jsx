@@ -82,30 +82,25 @@ function Register() {
     }
   };
 
-  useEffect(() => {
-    if (location?.lat && location?.lng) {
-      console.log("📍 Location set:", location);
-    }
-  }, [location]);
 
   return (
     <div className="flex min-h-screen bg-[#FFF9F1] font-sans w-full">
       {/* LEFT PANEL */}
-      <div className="flex flex-col justify-center items-start flex-1 px-24">
+      <div className="flex flex-col items-start justify-center flex-1 px-24">
         <h1 className="text-[#B54719] font-extrabold text-5xl leading-none hoc_font">
           CREATE AN
         </h1>
         <h1 className="text-[#FF9119] font-extrabold text-6xl mb-6 leading-none hoc_font">
           ACCOUNT!
         </h1>
-        <p className="text-gray-600 text-sm max-w-xs">
+        <p className="max-w-xs text-sm text-gray-600">
           Join Click n' Chicks — where your account clicks with endless flavor!
         </p>
       </div>
 
       {/* RIGHT PANEL (FORM CARD) */}
-      <div className="flex justify-center items-center flex-1 relative px-6 w-full">
-        <div className="bg-white rounded-2xl shadow-md p-10 w-full">
+      <div className="relative flex items-center justify-center flex-1 w-full px-6">
+        <div className="w-full p-10 bg-white shadow-md rounded-2xl">
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <img src={logo} alt="Click n' Chick" className="h-20" />
@@ -199,12 +194,12 @@ function Register() {
 
             {/* Phone Field */}
             <div className="flex items-center border border-gray-300 rounded-full px-4 py-2 focus-within:border-[#FF9119]">
-              <span className="text-gray-500 mr-2 select-none">+63</span>
+              <span className="mr-2 text-gray-500 select-none">+63</span>
               <input
                 type="text"
                 name="phone_number"
                 placeholder="Enter your phone number"
-                className="flex-1 outline-none text-gray-700 placeholder-gray-400"
+                className="flex-1 text-gray-700 placeholder-gray-400 outline-none"
                 maxLength={10}
                 pattern="\d{10}"
                 onInput={(e) => {
@@ -216,7 +211,7 @@ function Register() {
 
             {/* Map Selector */}
             <div className="mt-4">
-              <p className="text-xs text-gray-500 mb-2 ml-2">
+              <p className="mb-2 ml-2 text-xs text-gray-500">
                 Select your location
               </p>
               <div className="w-full h-[220px] rounded-xl overflow-hidden border border-gray-200 shadow-inner">
@@ -228,7 +223,7 @@ function Register() {
                 />
               </div>
               {location.full && (
-                <p className="mt-2 text-xs text-gray-600 text-center italic">
+                <p className="mt-2 text-xs italic text-center text-gray-600">
                   📍 {location.full}
                 </p>
               )}
@@ -255,7 +250,7 @@ function Register() {
           </form>
 
           {/* Login Redirect */}
-          <p className="mt-4 text-center text-gray-600 text-sm">
+          <p className="mt-4 text-sm text-center text-gray-600">
             Already have an account?{" "}
             <a
               href="/login"

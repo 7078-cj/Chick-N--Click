@@ -146,7 +146,7 @@ function AdminOrders() {
     ws.onclose = () => console.log("WS Closed");
 
     return () => ws.close();
-  }, [token, user, page]);
+  }, []);
 
   // -------------------------------
   // Fetch on page change
@@ -195,7 +195,7 @@ function AdminOrders() {
     <Stack gap="md">
       {/* Header */}
       <Group justify="space-between">
-        <h1 className="hoc_font text-amber-600 font-extrabold text-2xl">
+        <h1 className="text-2xl font-extrabold hoc_font text-amber-600">
           Admin Orders
         </h1>
 

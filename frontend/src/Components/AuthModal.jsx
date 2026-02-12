@@ -104,11 +104,6 @@ function AuthModal({ opened, onClose }) {
     }
   };
 
-  useEffect(() => {
-    if (location?.lat && location?.lng) {
-      console.log("📍 Location set:", location);
-    }
-  }, [location]);
 
   return (
     <Modal
@@ -125,7 +120,7 @@ function AuthModal({ opened, onClose }) {
         body: "p-0",
       }}
     >
-      <div className="bg-white rounded-2xl p-10 max-w-lg mx-auto relative">
+      <div className="relative max-w-lg p-10 mx-auto bg-white rounded-2xl">
         {/* Logo */}
         <div className="flex justify-center mb-4">
           <img src={logo} alt="Click n' Chick" className="h-16" />
@@ -140,7 +135,7 @@ function AuthModal({ opened, onClose }) {
             <h2 className="text-[#FF9119] text-4xl font-extrabold text-center mb-4 leading-none hoc_font">
               BES-TIES!
             </h2>
-            <p className="text-center text-gray-600 text-sm mb-6">
+            <p className="mb-6 text-sm text-center text-gray-600">
               Join Click n' Chicks — where your food clicks with your cravings!
             </p>
           </>
@@ -152,7 +147,7 @@ function AuthModal({ opened, onClose }) {
             <h2 className="text-[#FF9119] text-4xl font-extrabold text-center mb-4 leading-none hoc_font">
               ACCOUNT!
             </h2>
-            <p className="text-center text-gray-600 text-sm mb-6">
+            <p className="mb-6 text-sm text-center text-gray-600">
               Join Click n' Chicks — where your account clicks with endless flavor!
             </p>
           </>
@@ -310,12 +305,12 @@ function AuthModal({ opened, onClose }) {
 
             {/* Phone Number */}
             <div className="flex items-center border border-gray-300 rounded-full px-4 py-2 focus-within:border-[#FF9119]">
-              <span className="text-gray-500 mr-2 select-none">+63</span>
+              <span className="mr-2 text-gray-500 select-none">+63</span>
               <input
                 type="text"
                 name="phone_number"
                 placeholder="Enter your phone number"
-                className="flex-1 outline-none text-gray-700 placeholder-gray-400"
+                className="flex-1 text-gray-700 placeholder-gray-400 outline-none"
                 maxLength={10}
                 pattern="\d{10}"
                 onInput={(e) => {
@@ -327,7 +322,7 @@ function AuthModal({ opened, onClose }) {
 
             {/*  Map Picker */}
             <div className="mt-3">
-              <p className="text-xs text-gray-500 mb-2 ml-2">Select your location</p>
+              <p className="mb-2 ml-2 text-xs text-gray-500">Select your location</p>
               <div className="w-full h-[180px] rounded-xl overflow-hidden border border-gray-200 shadow-inner">
                 <UserLocationMap
                   editMode={true}
@@ -337,7 +332,7 @@ function AuthModal({ opened, onClose }) {
                 />
               </div>
               {location.full && (
-                <p className="mt-2 text-xs text-gray-600 text-center italic">
+                <p className="mt-2 text-xs italic text-center text-gray-600">
                   📍 {location.full}
                 </p>
               )}
@@ -361,7 +356,7 @@ function AuthModal({ opened, onClose }) {
               )}
             </button>
 
-            <p className="text-center text-gray-600 text-sm">
+            <p className="text-sm text-center text-gray-600">
               Already have an account?{" "}
               <button
                 type="button"

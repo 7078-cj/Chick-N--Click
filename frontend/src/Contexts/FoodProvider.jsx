@@ -74,10 +74,11 @@ export const FoodProvider = ({ children }) => {
     return () => {
       ws.close();
     };
-  }, [token]);
+  }, [user]);
 
   // Handle incoming food events
   const handleFoodEvent = (msg) => {
+    console.log(msg)
     const { event, food } = msg;
 
     setFoods((prevFoods) => {

@@ -14,7 +14,6 @@ import gcash from "../assets/gcash_icon.svg";
 
 function OrderDetailsModal({ opened, order, setOpened }) {
   if (!order) return null;
-  console.log(order)
 
   const totalPrice = order.total_price ? parseFloat(order.total_price) : 0;
   const subtotal = totalPrice - 30;
@@ -50,10 +49,10 @@ function OrderDetailsModal({ opened, order, setOpened }) {
       radius="lg"
       overlayProps={{ opacity: 0.4, blur: 4 }}
     >
-      <div className="flex flex-col md:flex-row gap-8 p-6 bg-gradient-to-br from-white to-gray-50 rounded-lg">
+      <div className="flex flex-col gap-8 p-6 rounded-lg md:flex-row bg-gradient-to-br from-white to-gray-50">
         {/* Left: Payment + Map */}
-        <div className="bg-white border border-gray-100 p-6 rounded-lg shadow-sm flex flex-col justify-between w-full h-fit md:w-1/3">
-          <div className="w-full h-64 rounded-lg overflow-hidden shadow-md mb-6">
+        <div className="flex flex-col justify-between w-full p-6 bg-white border border-gray-100 rounded-lg shadow-sm h-fit md:w-1/3">
+          <div className="w-full h-64 mb-6 overflow-hidden rounded-lg shadow-md">
             <UserLocationMap
               editMode={false}
               setLocation={() => {}}
@@ -74,7 +73,7 @@ function OrderDetailsModal({ opened, order, setOpened }) {
           </Text>
 
           <Divider my="md" />
-          <div className="text-sm space-y-1">
+          <div className="space-y-1 text-sm">
             <div className="flex justify-between">
               <span>Orders Total</span>
               <span>₱{subtotal.toFixed(2)}</span>
@@ -98,7 +97,7 @@ function OrderDetailsModal({ opened, order, setOpened }) {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-row justify-between items-center gap-2">
+          <div className="flex flex-row items-center justify-between gap-2 mt-4">
             <div className="w-10 h-10">
               <Image
               src={gcash}
@@ -114,7 +113,7 @@ function OrderDetailsModal({ opened, order, setOpened }) {
         </div>
 
         {/* Right: Customer & Items */}
-        <div className="w-full h-fit bg-white border border-gray-100 p-6 rounded-lg shadow-sm flex flex-col justify-between">
+        <div className="flex flex-col justify-between w-full p-6 bg-white border border-gray-100 rounded-lg shadow-sm h-fit">
           <div>
             <Text fw={700} size="xl" mb={2}>
               {order.user?.first_name
@@ -165,7 +164,7 @@ function OrderDetailsModal({ opened, order, setOpened }) {
               {order.items?.map((item) => (
                 <div
                   key={item.id}
-                  className="flex justify-between items-center mb-3 bg-gray-50 rounded-md p-2 hover:bg-gray-100 transition"
+                  className="flex items-center justify-between p-2 mb-3 transition rounded-md bg-gray-50 hover:bg-gray-100"
                 >
                   <div className="w-12 h-12 mr-2">
                     <Image
@@ -198,7 +197,7 @@ function OrderDetailsModal({ opened, order, setOpened }) {
             </div>
 
             {order.note && (
-              <div className="mt-4 p-3 bg-gray-50 border rounded-md">
+              <div className="p-3 mt-4 border rounded-md bg-gray-50">
                 <Text size="sm" fw={600}>
                   Note:
                 </Text>
@@ -207,7 +206,7 @@ function OrderDetailsModal({ opened, order, setOpened }) {
             )}
           </div>
 
-          <div className="mt-6 flex justify-end">
+          <div className="flex justify-end mt-6">
             <Button variant="light" color="orange" onClick={() => setOpened(false)}>
               Back
             </Button>
