@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@mantine/core";
 import OrdersModal from "./OrdersModal";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingBag   } from "lucide-react";
 import AppButton from "./AppButton";
 
 function Order() {
@@ -16,7 +16,7 @@ function Order() {
             roundedType="full"
             onClick={() => setOrdersOpen(true)}
             iconOnly
-            icon={ShoppingCart}
+            icon={ShoppingBag}
         />
 
       

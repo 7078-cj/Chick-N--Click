@@ -77,28 +77,28 @@ export default function CartComponent() {
   }
 
   return (
-    <div className="flex flex-col w-full h-screen p-6 overflow-scroll">
-      {loading ? (
-        <div className="flex items-center justify-center h-full">
-          <Loader />
+  <div className="flex flex-col h-screen font-sans bg-gray-50">
+    {loading ? (
+      <div className="flex items-center justify-center flex-1">
+        <Loader />
+      </div>
+    ) : (
+      <>
+        {/* ================= HEADER ================= */}
+        <div className="px-6 pt-6">
+          <h1 className="text-3xl font-extrabold leading-tight text-orange-600 hoc_font">
+            CART <br /> SUMMARY
+          </h1>
         </div>
-      ) : (
-        <>
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-medium leading-tight text-orange-600 hoc_font">
-              CART <br />
-              SUMMARY
-            </h1>
-          </div>
 
-          {/* Cart Items */}
-          <div className="flex-1 space-y-4">
-            {cart.length > 0 ? (
-              cart.map((item) => (
+        {/* ================= CART ITEMS ================= */}
+        <div className="flex-1 px-6 mt-6 overflow-y-auto">
+          {cart.length > 0 ? (
+            <div className="pb-6 space-y-4">
+              {cart.map((item) => (
                 <div
                   key={item.food_id}
-                  className={`relative ${
+                  className={`relative transition-all ${
                     selectedItems.includes(item.food_id)
                       ? "ring-2 ring-orange-500 rounded-xl"
                       : ""
@@ -114,20 +114,27 @@ export default function CartComponent() {
                     selectedItems={selectedItems}
                   />
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-500">No items in cart</p>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-500">
+              No items in cart
+            </div>
+          )}
+        </div>
 
-          {/* Subtotal + Action Button */}
-          {cart.length > 0 && (
-            <div className="mt-8">
-              <div className="flex justify-between mb-4 font-bold">
+        {/* ================= BOTTOM SUMMARY ================= */}
+        {cart.length > 0 && (
+          <div className="sticky bottom-0 bg-white shadow-md">
+            <div className="px-6 py-4">
+              
+              {/* Subtotal */}
+              <div className="flex justify-between mb-4 text-base font-bold">
                 <span>SUB TOTAL</span>
                 <span>₱{total}</span>
               </div>
 
+              {/* Action Button */}
               {selectedItems.length > 0 ? (
                 <AppButton
                   useCase="remove"
@@ -148,9 +155,10 @@ export default function CartComponent() {
                 </AppButton>
               )}
             </div>
-          )}
-        </>
-      )}
-    </div>
-  );
+          </div>
+        )}
+      </>
+    )}
+  </div>
+);
 }

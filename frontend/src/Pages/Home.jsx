@@ -11,49 +11,57 @@ function Home() {
   const [activeTab, setActiveTab] = useState("menu");
 
   return (
-    <div className="flex flex-row items-start justify-start w-full h-full">
-      <div className={`${activeTab == "menu" ? 'w-[75%]' : 'w-full'}`}>
-        {/* Header */}
-        <Header variant="home" search={activeTab == 'menu' }/>
-        
-        {/* Tabs */}
-        <div className="flex justify-start w-full p-5 mt-6 ">
-          <div className="flex gap-5 p-1 rounded-full">
-            <AppButton
-              useCase={activeTab === "featured" ? "tabActive" : "tabInactive"}
-              roundedType="full"
-              size="md"
-              bold={true}
-              onClick={() => setActiveTab("featured")}
-            >
-              FEATURED
-            </AppButton>
+  <div className="flex h-screen overflow-hidden bg-gray-50">
 
-            <AppButton
-              useCase={activeTab === "menu" ? "tabActive" : "tabInactive"}
-              roundedType="full"
-              size="md"
-              bold={true}
-              onClick={() => setActiveTab("menu")}
-            >
-              MENU
-            </AppButton>
-          </div>
-        </div>
+    {/* ================= MAIN CONTENT ================= */}
+    <div
+      className={`flex flex-col transition-all duration-300 ${
+        activeTab === "menu" ? "w-[75%]" : "w-full"
+      }`}
+    >
+      {/* Header */}
+      <Header variant="home" search={activeTab === "menu"} />
 
-        {/* Tab Content */}
-        <div className="h-full mt-6">
-         
-            {activeTab === "featured" && <Feature />}
-            {activeTab === "menu" && <Menu/>}
+      {/* Tabs */}
+      <div className="px-6 mt-6">
+        <div className="flex gap-4">
+          <AppButton
+            useCase={activeTab === "featured" ? "tabActive" : "tabInactive"}
+            roundedType="full"
+            size="md"
+            bold
+            onClick={() => setActiveTab("featured")}
+          >
+            FEATURED
+          </AppButton>
 
+          <AppButton
+            useCase={activeTab === "menu" ? "tabActive" : "tabInactive"}
+            roundedType="full"
+            size="md"
+            bold
+            onClick={() => setActiveTab("menu")}
+          >
+            MENU
+          </AppButton>
         </div>
       </div>
-      {activeTab === "menu" && <div className="flex flex-col p-5 w-[25%] h-full items-center justify-center sticky top-0">
-          <CartComponent/>
-      </div>}
+
+      {/* Scrollable Content Area */}
+      <div className="flex-1 px-6 mt-6 overflow-y-auto">
+        {activeTab === "featured" && <Feature />}
+        {activeTab === "menu" && <Menu />}
+      </div>
     </div>
-  );
+
+    {/* ================= CART SIDEBAR ================= */}
+    {activeTab === "menu" && (
+      <div className="w-[25%]  bg-white shadow-lg p-2">
+        <CartComponent />
+      </div>
+    )}
+  </div>
+);
 }
 
 export default Home;
