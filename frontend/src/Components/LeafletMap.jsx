@@ -13,116 +13,11 @@ import { OpenStreetMapProvider } from "leaflet-geosearch";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 
-import markerIcon from "../assets/custom_marker.svg";
 
-// =============================
-// 🔹 HOC Destination
-// =============================
-const HOC_LOCATION = {
-  lat: 14.958753194320153,
-  lng: 120.75846924744896,
-  name: "HOC - House of Chicken",
-};
+import { ClickHandler, customIcon, handleSearch, HOC_LOCATION, initLocation, SetViewOnLocation } from "../utils/Map";
+import RouteToHOC from "./RouteToHOC";
 
-// =============================
-// 🔹 Custom Leaflet Marker Icon
-// =============================
-const customIcon = new L.Icon({
-  iconUrl: markerIcon,
-  iconSize: [40, 40], 
-  iconAnchor: [20, 40], 
-  popupAnchor: [0, -38], 
-  className: "custom-marker",
-});
 
-// =============================
-// 🔹 Routing Component
-// =============================
-function RouteToHOC({ userLoc }) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!userLoc?.lat || !userLoc?.lng) return;
-
-    const routingControl = L.Routing.control({
-      waypoints: [
-        L.latLng(userLoc.lat, userLoc.lng),
-        L.latLng(HOC_LOCATION.lat, HOC_LOCATION.lng),
-      ],
-      lineOptions: {
-        addWaypoints: true,
-        styles: [{ color: "#007bff", weight: 4 }],
-      },
-      draggableWaypoints: false,
-      fitSelectedRoutes: true,
-      show: false, 
-      createMarker: function (i, wp, nWps) {
-        
-        let icon = customIcon;
-        if (i === 1) {
-          
-          icon = L.icon({
-            iconUrl: markerIcon, 
-            iconSize: [40, 40],
-            iconAnchor: [20, 40],
-          });
-        }
-        return L.marker(wp.latLng, { icon });
-      },
-    }).addTo(map);
-
-    return () => map.removeControl(routingControl);
-  }, [userLoc, map]);
-
-  return null;
-}
-
-// =============================
-// 🔹 Helper component: Update map center when location changes
-// =============================
-function SetViewOnLocation({ position }) {
-  const map = useMap();
-  useEffect(() => {
-    if (position?.lat && position?.lng) {
-      map.flyTo(position, 15, { duration: 1.2 });
-    }
-  }, [map, position]);
-  return null;
-}
-
-// =============================
-// 🔹 Handle map clicks (only in edit mode)
-// =============================
-function ClickHandler({ setLocation, editMode }) {
-  useMapEvents({
-    click: async (e) => {
-      if (!editMode) return;
-      const { lat, lng } = e.latlng;
-
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
-        );
-        const data = await res.json();
-
-        setLocation({
-          lat,
-          lng,
-          city:
-            data.address.city ||
-            data.address.town ||
-            data.address.village ||
-            "",
-          country: data.address.country || "",
-          full: data.display_name || "",
-        });
-      } catch {
-        setLocation({ lat, lng, city: "", country: "", full: "" });
-      }
-    },
-  });
-  return null;
-}
 
 // =============================
 // 🔹 Main Map Component
@@ -139,68 +34,10 @@ export default function UserLocationMap({ editMode, setLocation, location, user 
     full: "",
   });
 
-  // =============================
-  // 🔸 Initialize User Location
-  // =============================
   useEffect(() => {
-    const initLocation = async () => {
-      if (location?.lat && location?.lng) {
-        setUserLoc(location);
-        return;
-      }
-
-      if (user?.latitude && user?.longitude) {
-        const newLoc = {
-          lat: user.latitude,
-          lng: user.longitude,
-          city: user.location || "",
-          country: "",
-          full: user.location || "",
-        };
-        setUserLoc(newLoc);
-        setLocation(newLoc);
-        return;
-      }
-
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          async (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            try {
-              const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
-              );
-              const data = await res.json();
-              const newLoc = {
-                lat,
-                lng,
-                city:
-                  data.address.city ||
-                  data.address.town ||
-                  data.address.village ||
-                  "",
-                country: data.address.country || "",
-                full: data.display_name || "",
-              };
-              setUserLoc(newLoc);
-              setLocation(newLoc);
-            } catch {
-              setUserLoc({ lat, lng, city: "", country: "", full: "" });
-              setLocation({ lat, lng, city: "", country: "", full: "" });
-            }
-          },
-          (err) => console.error("Geolocation error:", err)
-        );
-      }
-    };
-
-    initLocation();
+    initLocation(location, setUserLoc, setLocation);
   }, [location, user, setLocation]);
 
-  // =============================
-  // 🔸 Keep location in sync with user prop
-  // =============================
   useEffect(() => {
     if (user?.latitude && user?.longitude) {
       setLocation({
@@ -214,101 +51,42 @@ export default function UserLocationMap({ editMode, setLocation, location, user 
   }, [user, setLocation]);
 
   // =============================
-  // 🔸 Handle Search Input
-  // =============================
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!search.trim()) return;
-
-    const results = await provider.search({ query: search });
-    if (results.length > 0) {
-      const { x: lng, y: lat, label } = results[0];
-      const newLoc = {
-        lat,
-        lng,
-        city: label.split(",")[0] || "",
-        country: label.split(",").pop() || "",
-        full: label,
-      };
-
-      setUserLoc(newLoc);
-      setLocation(newLoc);
-    }
-  };
-
-  // =============================
   // 🔹 UI Render
   // =============================
   return (
-    <div style={{ height: "100%", width: "100%", position: "relative" }}>
+    <div className="relative w-full h-full">
       {/* 🔍 Search bar */}
       {editMode && (
-        <div
-          style={{
-            position: "absolute",
-            top: 20,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            background: "#fff",
-            borderRadius: "30px",
-            padding: "5px 10px",
-            boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-            width: "320px",
-          }}
-        >
+        <div className="absolute top-5 left-1/2 -translate-x-1/2 z-[1000] flex items-center bg-white rounded-full px-2 py-1 shadow-lg w-[320px]">
+          
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="🔍 Search location..."
-            style={{
-              border: "none",
-              outline: "none",
-              flex: 1,
-              fontSize: "14px",
-              padding: "8px",
-              borderRadius: "30px",
-              color: "#333",
-            }}
+            className="flex-1 px-2 py-2 text-sm text-gray-700 border-none rounded-full outline-none"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                handleSearch();
+                handleSearch(e,search, setUserLoc, setLocation, provider);
               }
             }}
           />
+
           {search && (
             <button
               type="button"
               onClick={() => setSearch("")}
-              style={{
-                border: "none",
-                background: "transparent",
-                fontSize: "18px",
-                cursor: "pointer",
-                color: "#888",
-                marginRight: "5px",
-              }}
+              className="mr-1 text-lg text-gray-500 bg-transparent"
             >
               ×
             </button>
           )}
+
           <button
             type="button"
-            onClick={handleSearch}
-            style={{
-              border: "none",
-              background: "#007bff",
-              color: "#fff",
-              borderRadius: "20px",
-              padding: "6px 15px",
-              cursor: "pointer",
-              fontSize: "14px",
-              transition: "0.3s",
-            }}
+            onClick={(e) => handleSearch(e,search, setUserLoc, setLocation, provider)}
+            className="px-4 py-1 text-sm text-white transition bg-blue-600 rounded-full hover:bg-blue-700"
           >
             Go
           </button>
@@ -319,7 +97,7 @@ export default function UserLocationMap({ editMode, setLocation, location, user 
       <MapContainer
         center={[userLoc.lat, userLoc.lng]}
         zoom={13}
-        style={{ height: "100%", width: "100%", borderRadius: "10px" }}
+        className="w-full h-full rounded-lg"
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -352,4 +130,5 @@ export default function UserLocationMap({ editMode, setLocation, location, user 
       </MapContainer>
     </div>
   );
+
 }

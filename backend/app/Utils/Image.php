@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 class Image
 {
-    public static function uploadImage($file)
+    public static function uploadImage($file, $folder)
     {
         if (!$file->isValid()) {
             return response()->json(['message' => 'Invalid file upload.'], 400);
@@ -29,7 +29,7 @@ class Image
             $cloudinary->configuration->cloud->api_http_client = $client;
                     
             $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
-                'folder' => 'foods',
+                'folder' => $folder,
             ]);
 
             Log::info('Cloudinary upload successful proof_of_payment', [

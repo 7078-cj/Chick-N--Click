@@ -7,7 +7,6 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Utils\Distance;
-use App\Utils\GcashCheckout;
 use App\Utils\Image;
 use App\Utils\Websocket;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -16,7 +15,7 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+
 
 class OrderController extends Controller implements HasMiddleware
 {
@@ -56,44 +55,7 @@ class OrderController extends Controller implements HasMiddleware
             if ($request->hasFile('proof_of_payment')) {
                 $file = $request->file('proof_of_payment');
 
-                // if (!$file->isValid()) {
-                //     return response()->json(['message' => 'Invalid file upload.'], 400);
-                // }
-
-                // try {
-                //     // Create Cloudinary instance with SSL disabled for Windows
-                //     $client = new \GuzzleHttp\Client(['verify' => false]);
-                    
-                //     $cloudinary = new \Cloudinary\Cloudinary([
-                //         'cloud' => [
-                //             'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
-                //             'api_key' => config('filesystems.disks.cloudinary.key'),
-                //             'api_secret' => config('filesystems.disks.cloudinary.secret'),
-                //         ],
-                //         'url' => ['secure' => true],
-                //     ]);
-                    
-                //     $cloudinary->configuration->cloud->api_http_client = $client;
-                    
-                //     $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
-                //         'folder' => 'foods',
-                //     ]);
-
-                //     $validated['proof_of_payment'] = $result['secure_url'];
-                    
-                //     Log::info('Cloudinary upload successful proof_of_payment', [
-                //         'url' => $result['secure_url'],
-                //         'public_id' => $result['public_id']
-                //     ]);
-                // } catch (\Throwable $e) {
-                //     Log::error('Cloudinary upload failed: ' . $e->getMessage());
-                //     return response()->json([
-                //         'message' => 'Failed to upload image.',
-                //         'error' => $e->getMessage(),
-                //     ], 500);
-                // }
-
-                $validated['proof_of_payment'] = Image::uploadImage($file);
+                $validated['proof_of_payment'] = Image::uploadImage($file, 'proof');
             }
 
             $order = Order::create($validated);
@@ -130,11 +92,7 @@ class OrderController extends Controller implements HasMiddleware
             }
             $order->total_price = $order->total_price + $dis_price ;
             $order->save();
-
-            // Http::post(config('services.websocket.http_url') . "/broadcast/order", [
-            //     'event' => 'create',
-            //     'order' => $order->load('items.food', 'items.food.categories', 'user'),
-            // ]);
+            
             Websocket::broadcast('order', 'created', $order->load('items.food', 'items.food.categories', 'user'));
 
             return response()->json(['message'=>'Order Placed']);
