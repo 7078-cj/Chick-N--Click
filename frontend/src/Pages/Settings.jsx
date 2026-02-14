@@ -9,10 +9,9 @@ import { showNotification } from "@mantine/notifications";
 export default function Settings() {
   const url = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
-  const { token, logOut } = useContext(AuthContext);
+  const { token, logOut, setUser, user } = useContext(AuthContext);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -129,7 +128,7 @@ export default function Settings() {
       }
 
       const updated = await res.json();
-      setUser(updated);
+      setUser(updated.user);
       setIsEditing(false);
 
       showNotification({
@@ -162,7 +161,7 @@ export default function Settings() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center w-screen h-screen text-center">
-        <p className="text-red-600 font-semibold mb-4">
+        <p className="mb-4 font-semibold text-red-600">
           ⚠️ {error}
         </p>
         <button
