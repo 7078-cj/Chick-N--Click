@@ -73,16 +73,14 @@ async def order_ws(websocket: WebSocket, client_id: int):
         order_manager.disconnect(websocket)
 
 
-@app.websocket("/ws/food/{client_id}")
-async def food_ws(websocket: WebSocket, client_id: int):
+@app.websocket("/ws/food")
+async def food_ws(websocket: WebSocket):
     await food_manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
             print(data)
-            await food_manager.broadcast(
-                f"Client {client_id}: {data}", sender=websocket
-            )
+            await food_manager.broadcast(f"Client: {data}", sender=websocket)
     except WebSocketDisconnect:
         food_manager.disconnect(websocket)
 

@@ -51,9 +51,7 @@ export const FoodProvider = ({ children }) => {
 
   // WebSocket connection for real-time updates
   useEffect(() => {
-    if (!token || !user) return;
-
-    const ws = new WebSocket(`${wsUrl}/ws/food/${user.id}`);
+    const ws = new WebSocket(`${wsUrl}/ws/food`);
     wsRef.current = ws;
 
     ws.onmessage = (event) => {
@@ -78,7 +76,6 @@ export const FoodProvider = ({ children }) => {
 
   // Handle incoming food events
   const handleFoodEvent = (msg) => {
-    console.log(msg)
     const { event, food } = msg;
 
     setFoods((prevFoods) => {
