@@ -52,24 +52,44 @@ export const OrderProvider = ({ children }) => {
         }
     };
 
+    const handleOrderEvent = (msg) => {
+        const { event, order } = msg;
+        setOrders((prev) => {
+            switch (event) {
+                case "create":
+                return [order, ...prev];
+                
+
+                case "update":
+                return prev.map((o) => (o.id === order.id ? order : o));
+
+                case "cancelled":
+                return prev.map((o) =>
+                    o.id === order.id ? { ...o, status: "cancelled" } : o
+                );
+
+                case "delete":
+                return prev.filter((o) => o.id !== order.id);
+
+                default:
+                return prev;
+            }
+            });
+    };
+
     useEffect(() => {
         if (!token || !user) return;
         const ws = new WebSocket(`${wsUrl}/ws/order/${user?.id}`);
 
-        ws.onmessage = (event) => {
-            try {
-            const payload = JSON.parse(event.data);
 
-            if (payload.type === "order" && payload.event === "update") {
-                setOrders((prevOrders) =>
-                prevOrders.map((o) =>
-                    o.id === payload.order.id ? { ...o, ...payload.order } : o
-                )
-                );
-            }
-            } catch (err) {
-            console.error("WebSocket message error:", err);
-            }
+        ws.onopen = () => console.log("WS Connected");
+        ws.onmessage = (e) => {
+        try {
+            const msg = JSON.parse(e.data);
+            if (msg.type === "order") handleOrderEvent(msg);
+        } catch (err) {
+            console.error(err);
+        }
         };
 
         ws.onerror = (err) => {

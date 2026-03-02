@@ -24,17 +24,11 @@ class Websocket
                     ];
         }
 
-        $url = '';
         
-        if($event == 'notification'){
-            $url =  "/broadcast/{$type}/{$user_id}";
-        }else{
-            $url = "/broadcast/{$type}";
-        }
         $websocketUrl = config('services.websocket.http_url');
             if ($websocketUrl) {
                 try {
-                    Http::post($websocketUrl . $url , $data_sent);
+                    Http::post($websocketUrl . "/broadcast/{$type}", $data_sent);
                 } catch (\Exception $e) {
                     Log::warning('Websocket broadcast failed: ' . $e->getMessage());
                 }

@@ -96,7 +96,6 @@ function AdminOrders() {
   // -------------------------------
   const handleOrderEvent = (msg) => {
     const { event, order } = msg;
-
     setOrders((prev) => {
       switch (event) {
         case "create":
@@ -130,7 +129,7 @@ function AdminOrders() {
   useEffect(() => {
     if (!token) return;
 
-    const ws = new WebSocket(`${wsUrl}/ws/order/admin`);
+    const ws = new WebSocket(`${wsUrl}/ws/order`);
     wsRef.current = ws;
 
     ws.onopen = () => console.log("WS Connected");

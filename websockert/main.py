@@ -106,7 +106,7 @@ async def order_ws(websocket: WebSocket, user_id: int):
     except WebSocketDisconnect:
         order_manager.disconnect(websocket, user_id=user_id)
         
-@app.websocket("/ws/order/admin")
+@app.websocket("/ws/order")
 async def admin_order_ws(websocket: WebSocket):
     await admin_order_manager.connect(websocket)
     try:
@@ -158,7 +158,8 @@ async def broadcast_order(request: Request):
         "order": data.get("order", {}),
         "user_id": data.get("user_id", ""),
     }
-    await order_manager.broadcast(json.dumps(payload), user_id=int(payload["user_id"]))
+    print(payload)
+    await order_manager.broadcast(json.dumps(payload), user_id=payload["user_id"])
     await admin_order_manager.broadcast(json.dumps(payload))
     return {"status": "ok", "broadcasted": payload}
 

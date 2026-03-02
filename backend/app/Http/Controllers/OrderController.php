@@ -93,7 +93,7 @@ class OrderController extends Controller implements HasMiddleware
             $order->total_price = $order->total_price + $dis_price ;
             $order->save();
             
-            Websocket::broadcast('order', 'created', $order->load('items.food', 'items.food.categories', 'user'));
+            Websocket::broadcast('order', 'create', $order->load('items.food', 'items.food.categories', 'user'), $order->user->id);
 
             return response()->json(['message'=>'Order Placed']);
 
