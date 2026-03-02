@@ -23,54 +23,115 @@ app.add_middleware(
 # Connection Manager
 # -------------------------
 class ConnectionManager:
-    def __init__(self):
-        self.active_connections: list[WebSocket] = []
+    def __init__(self, isUserID: bool = False):
+        self.isUserID = isUserID
+        if self.isUserID:
+            # Store connections per user_id
+            self.active_connections: dict[int, list[WebSocket]] = {}
+        else:
+            self.active_connections: list[WebSocket] = []
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, user_id: int = None):
         await websocket.accept()
-        self.active_connections.append(websocket)
-        print(f"🔗 Client connected. Total: {len(self.active_connections)}")
+        if self.isUserID:
+            if user_id is None:
+                raise ValueError("user_id is required for per-user connections")
+            if user_id not in self.active_connections:
+                self.active_connections[user_id] = []
+            self.active_connections[user_id].append(websocket)
+            print(f"🔗 User {user_id} connected. Total: {len(self.active_connections[user_id])}")
+        else:
+            self.active_connections.append(websocket)
+            print(f"🔗 Client connected. Total: {len(self.active_connections)}")
 
-    def disconnect(self, websocket: WebSocket):
-        if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
-            print(f"❌ Client disconnected. Total: {len(self.active_connections)}")
+    def disconnect(self, websocket: WebSocket, user_id: int = None):
+        if self.isUserID:
+            if user_id in self.active_connections and websocket in self.active_connections[user_id]:
+                self.active_connections[user_id].remove(websocket)
+                print(f"❌ User {user_id} disconnected. Remaining: {len(self.active_connections[user_id])}")
+                if not self.active_connections[user_id]:
+                    del self.active_connections[user_id]
+        else:
+            if websocket in self.active_connections:
+                self.active_connections.remove(websocket)
+                print(f"❌ Client disconnected. Total: {len(self.active_connections)}")
 
-    async def broadcast(self, message: str, sender: WebSocket = None):
+    async def broadcast(self, message: str, sender: WebSocket = None, user_id: int = None):
         to_remove = []
-        for connection in self.active_connections:
-            if connection != sender:
-                try:
-                    await connection.send_text(message)
-                except Exception as e:
-                    print(f"⚠️ Failed to send to client: {e}")
-                    to_remove.append(connection)
 
-        # Remove broken connections
-        for conn in to_remove:
-            self.disconnect(conn)
+        if self.isUserID:
+            if user_id not in self.active_connections:
+                print(f"⚠️ No active connections for user {user_id}")
+                return
+            for conn in self.active_connections[user_id]:
+                try:
+                    await conn.send_text(message)
+                except Exception as e:
+                    print(f"⚠️ Failed to send to user {user_id}: {e}")
+                    to_remove.append(conn)
+            for conn in to_remove:
+                self.disconnect(conn, user_id)
+        else:
+            for conn in self.active_connections:
+                if conn != sender:
+                    try:
+                        await conn.send_text(message)
+                    except Exception as e:
+                        print(f"⚠️ Failed to send to client: {e}")
+                        to_remove.append(conn)
+            for conn in to_remove:
+                self.disconnect(conn)
 
 
 # Managers for order and food
-order_manager = ConnectionManager()
+order_manager = ConnectionManager(isUserID=True)
+admin_order_manager = ConnectionManager()
 food_manager = ConnectionManager()
+notification_manager = ConnectionManager(isUserID=True)
 
 
 # -------------------------
 # WebSocket Routes
 # -------------------------
-@app.websocket("/ws/order/{client_id}")
-async def order_ws(websocket: WebSocket, client_id: int):
-    await order_manager.connect(websocket)
+@app.websocket("/ws/order/{user_id}")
+async def order_ws(websocket: WebSocket, user_id: int):
+    await order_manager.connect(websocket, user_id=user_id)
     try:
         while True:
             data = await websocket.receive_text()
             print(data)
             await order_manager.broadcast(
-                f"Client {client_id}: {data}", sender=websocket
+                f"Client: {data}", sender=websocket
             )
     except WebSocketDisconnect:
-        order_manager.disconnect(websocket)
+        order_manager.disconnect(websocket, user_id=user_id)
+        
+@app.websocket("/ws/order/admin")
+async def admin_order_ws(websocket: WebSocket):
+    await admin_order_manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print(data)
+            await admin_order_manager.broadcast(
+                f"Client: {data}", sender=websocket
+            )
+    except WebSocketDisconnect:
+        admin_order_manager.disconnect(websocket)
+        
+@app.websocket("/ws/notify/{user_id}")
+async def notify_ws(websocket: WebSocket, user_id: int):
+    await notification_manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print(data)
+            await notification_manager.broadcast(
+                f"Client {user_id}: {data}", sender=websocket
+            )
+    except WebSocketDisconnect:
+        notification_manager.disconnect(websocket, user_id=user_id)
+
 
 
 @app.websocket("/ws/food")
@@ -97,9 +158,22 @@ async def broadcast_order(request: Request):
         "order": data.get("order", {}),
         "user_id": data.get("user_id", ""),
     }
-    await order_manager.broadcast(json.dumps(payload))
+    await order_manager.broadcast(json.dumps(payload), user_id=int(payload["user_id"]))
+    await admin_order_manager.broadcast(json.dumps(payload))
     return {"status": "ok", "broadcasted": payload}
 
+
+@app.post("/broadcast/notify")
+async def broadcast_notification(request: Request):
+    data = await request.json()
+    payload = {
+        "type": "notification",
+        "event": data.get("event", ""),
+        "order": data.get("order", {}),
+        "user_id": data.get("user_id", ""),
+    }
+    await notification_manager.broadcast(json.dumps(payload), user_id=int(payload["user_id"]))
+    return {"status": "ok", "broadcasted": payload}
 
 @app.post("/broadcast/food")
 async def broadcast_food(request: Request):

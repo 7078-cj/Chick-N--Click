@@ -130,7 +130,7 @@ function AdminOrders() {
   useEffect(() => {
     if (!token) return;
 
-    const ws = new WebSocket(`${wsUrl}/ws/order/${user?.id}`);
+    const ws = new WebSocket(`${wsUrl}/ws/order/admin`);
     wsRef.current = ws;
 
     ws.onopen = () => console.log("WS Connected");
