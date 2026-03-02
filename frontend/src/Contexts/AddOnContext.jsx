@@ -18,7 +18,6 @@ export const AddOnProvider = ({ children }) => {
            try {
                
                const res = await fetch(`${url}/api/sides`, {
-                   headers: { Authorization: `Bearer ${token}` },
                    credentials: "include",
                });
    
@@ -37,7 +36,6 @@ export const AddOnProvider = ({ children }) => {
            try {
                
                const res = await fetch(`${url}/api/drinks`, {
-                   headers: { Authorization: `Bearer ${token}` },
                    credentials: "include",
                });
    
