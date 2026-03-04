@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import {
   Card,
   Text,
@@ -6,27 +6,22 @@ import {
   NumberInput,
   Button,
   Badge,
-  Modal,
-  ScrollArea,
-  Image,
-  Divider,
-  Group,
 } from "@mantine/core";
 import AuthContext from "../Contexts/AuthContext";
 import OrderDetailsModal from "./OrderDetailsModal";
-
 
 function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
   const url = import.meta.env.VITE_API_URL;
   const { token } = useContext(AuthContext);
   const [etc, setEtc] = useState(order.estimated_time_of_completion || 0);
   const [opened, setOpened] = useState(false);
-  const [location, setLocation] = useState({
+  const initialETC = useRef(order.estimated_time_of_completion || 0);
+
+  const [location] = useState({
     lat: order.user.latitude,
     lng: order.user.longitude,
     full: order.user.location,
   });
-  // const [deleteOpened, setDeleteOpened] = useState(false);
 
   // 🔹 Update ETC API
   const updateETC = async () => {
@@ -45,7 +40,9 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
 
       setOrders((prev) =>
         prev.map((o) =>
-          o.id === order.id
+          o.id === order.id &&
+          o.estimated_time_of_completion !==
+            data.order.estimated_time_of_completion
             ? {
                 ...o,
                 estimated_time_of_completion:
@@ -54,40 +51,55 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
             : o
         )
       );
+
+      initialETC.current = data.order.estimated_time_of_completion;
     } catch (err) {
       console.error(err);
       alert("Error updating ETC");
     }
   };
 
-  // const deleteOrder = async () => {
-  //   try {
-  //     const res = await fetch(`${url}/api/order/${order.id}/delete`, {
-  //       method: "DELETE",
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-
-  //     if (!res.ok) throw new Error("Failed to delete order");
-
-  //     // Remove from UI
-  //     setOrders(prev => prev.filter(o => o.id !== order.id));
-
-  //     setDeleteOpened(false);
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert("Error deleting order");
-  //   }
-  // };
-
-  // 🔹 Debounce ETC updates
+  // 🔹 Debounce ETC updates only if changed
   useEffect(() => {
+    if (etc === initialETC.current) return; // no change, skip
+
     const delay = setTimeout(() => {
       if (etc > 0) updateETC();
     }, 1000);
+
     return () => clearTimeout(delay);
   }, [etc]);
+
+  // 🔹 Update status API
+  const handleUpdateStatus = async (newStatus) => {
+    if (newStatus === order.status) return; // no change
+
+    try {
+      const res = await fetch(`${url}/api/order/${order.id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update status");
+      const data = await res.json();
+
+      // Update only if different
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === order.id && o.status !== data.order.status
+            ? { ...o, status: data.order.status }
+            : o
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Error updating status");
+    }
+  };
 
   return (
     <>
@@ -96,7 +108,7 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
         withBorder
         radius="md"
         shadow="sm"
-        className="hover:shadow-md transition-shadow duration-200 bg-white"
+        className="transition-shadow duration-200 bg-white hover:shadow-md"
         style={{
           borderLeft: `6px solid var(--mantine-color-${statusColors[order.status]}-6)`,
         }}
@@ -144,14 +156,7 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
             </Text>
 
             {order.type && (
-              <Badge
-                color="gray"
-                variant="light"
-                size="lg"
-                radius="sm"
-                mt={4}
-                fw={500}
-              >
+              <Badge color="gray" variant="light" size="lg" radius="sm" mt={4} fw={500}>
                 {order.type}
               </Badge>
             )}
@@ -159,12 +164,7 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
 
           {/* 2️⃣ STATUS */}
           <div className="flex justify-center">
-            <Badge
-              color={statusColors[order.status]}
-              variant="filled"
-              size="lg"
-              radius="sm"
-            >
+            <Badge color={statusColors[order.status]} variant="filled" size="lg" radius="sm">
               {order.status.toUpperCase()}
             </Badge>
           </div>
@@ -180,7 +180,7 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
                 size="sm"
                 data={["pending", "approved", "declined", "completed"]}
                 value={order.status}
-                onChange={(value) => updateStatus(order.id, value)}
+                onChange={handleUpdateStatus}
                 w={150}
                 withinPortal
               />
@@ -188,7 +188,7 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
           </div>
 
           {/* 4️⃣ ETC */}
-          <div className="flex justify-center items-center">
+          <div className="flex items-center justify-center">
             <NumberInput
               placeholder="ETC"
               min={0}
@@ -207,40 +207,22 @@ function AdminOrdersCard({ order, statusColors, updateStatus, setOrders }) {
             <Text fw={700} c="green.7" size="lg">
               ₱{order.total_price}
             </Text>
-            
           </div>
-          
         </div>
-        <div className="w-full flex flex-row items-end gap-4 justify-end">
-            {/* <Button
-              color="red"
-              size="md"
-              variant="light"
-              onClick={() => setDeleteOpened(true)}
-            >
-              Delete
-            </Button> */}
-            <Button
-                mt={6}
-                color={statusColors[order.status]}
-                size="md"
-                onClick={() => setOpened(true)}
-                className=""
-              >
-                View Details
-              </Button>
+
+        <div className="flex flex-row items-end justify-end w-full gap-4">
+          <Button
+            mt={6}
+            color={statusColors[order.status]}
+            size="md"
+            onClick={() => setOpened(true)}
+          >
+            View Details
+          </Button>
         </div>
-        
       </Card>
 
       <OrderDetailsModal opened={opened} order={order} setOpened={setOpened} />
-
-      {/* <DeleteModal
-        opened={deleteOpened}
-        onClose={() => setDeleteOpened(false)}
-        onConfirm={deleteOrder}
-        itemName={`Order #${order.id}`}
-      /> */}
     </>
   );
 }

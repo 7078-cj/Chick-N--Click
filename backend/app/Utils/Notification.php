@@ -17,7 +17,7 @@ class Notification
             'declined' => "We’re sorry. Your order #{$order->id} has been declined. Please contact support for assistance.",
             'completed' => "Your order #{$order->id} has been completed. Thank you for ordering with us!",
             'cancelled' => "Your order #{$order->id} has been cancelled successfully.",
-            'update' => "Your order #{$order->id} status has been updated to {$order->status}.",
+            'update' => "Your order #{$order->id} ETC has been updated to {$order->estimated_time_of_completion} minutes.",
             default => "There is an update regarding your order #{$order->id}."
         };
 
