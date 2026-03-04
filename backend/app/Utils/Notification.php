@@ -1,37 +1,32 @@
 <?php
 
-namespace App\Utils; 
+namespace App\Utils;
 
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-
+use App\Models\Notification as ModelsNotification;
 
 class Notification
 {
     
-    public static function broadcast($type,$event,$data, $user_id = null)
+    public static function notify($type, $event, $user_id, $order = null)
     {
-        if(!$user_id){
-            $data_sent = [
-                        "event" => $event,
-                        $type  => $data
-                    ];
-        }else{
-            $data_sent = [
-                        "event" => $event,
-                        'user_id' => $user_id,
-                        $type  => $data
-                    ];
-        }
+        $title = ucfirst($type) . ' ' . ucfirst($event);
 
+        $body = match($event) {
+            'create' => "Your order #{$order->id} has been placed successfully. We are preparing it now.",
+            'approved' => "Good news! Your order #{$order->id} has been approved and is now being prepared.",
+            'declined' => "We’re sorry. Your order #{$order->id} has been declined. Please contact support for assistance.",
+            'completed' => "Your order #{$order->id} has been completed. Thank you for ordering with us!",
+            'cancelled' => "Your order #{$order->id} has been cancelled successfully.",
+            'update' => "Your order #{$order->id} status has been updated to {$order->status}.",
+            default => "There is an update regarding your order #{$order->id}."
+        };
 
-        $websocketUrl = config('services.websocket.http_url');
-            if ($websocketUrl) {
-                try {
-                    Http::post($websocketUrl . "/broadcast/{$type}", $data_sent);
-                } catch (\Exception $e) {
-                    Log::warning('Websocket broadcast failed: ' . $e->getMessage());
-                }
-            }
+        $notification = ModelsNotification::create([
+            'user_id' => $user_id,
+            'title'   => $title,
+            'body'    => $body,
+        ]);
+
+        Websocket::broadcast('notify', 'notification',$notification, $user_id);
     }
 }

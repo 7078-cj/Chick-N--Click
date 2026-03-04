@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Utils\Distance;
 use App\Utils\Image;
+use App\Utils\Notification;
 use App\Utils\Websocket;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -94,6 +95,7 @@ class OrderController extends Controller implements HasMiddleware
             $order->save();
             
             Websocket::broadcast('order', 'create', $order->load('items.food', 'items.food.categories', 'user'), $order->user->id);
+            Notification::notify('order', 'create', $order->user->id, $order);
 
             return response()->json(['message'=>'Order Placed']);
 
@@ -147,6 +149,7 @@ class OrderController extends Controller implements HasMiddleware
             'order' => $order->load('items'),
         ]);
         Websocket::broadcast('order', 'cancelled', $order->load('items'));
+        Notification::notify('order', 'cancelled', $order->user->id, $order);
 
         return response()->json(['message' => 'Order cancelled successfully', 'order' => $order], 200);
     }
@@ -176,6 +179,7 @@ class OrderController extends Controller implements HasMiddleware
             'user_id' => $order->user->id,
             'order' => $order->load('items.food','items.food.categories'),
         ]);
+        Notification::notify('order', $order->status, $order->user->id, $order);
 
         return response()->json(['message' => 'Order status updated', 'order' => $order], 200);
     }
@@ -202,6 +206,7 @@ class OrderController extends Controller implements HasMiddleware
             'user_id' => $order->user->id,
             'order' => $order->load('items.food','items.food.categories'),
         ]);
+        Notification::notify('order', 'update', $order->user->id, $order);
 
         return response()->json(['message' => 'Order status updated', 'order' => $order], 200);
     }
