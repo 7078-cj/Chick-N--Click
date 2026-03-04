@@ -135,12 +135,13 @@ export const CartProvider = ({ children }) => {
             });
 
             const data = await res.json();
-            console.log(data);
+            
 
         } catch (err) {
             console.error(err);
             alert("Error placing order.");
         } finally {
+            setCart([])
             setPlacingOrder(false);
             nav('/home')
         }
@@ -155,7 +156,8 @@ export const CartProvider = ({ children }) => {
         placingOrder:placingOrder,
         placeOrder:placeOrder,
         handleUpdate:handleUpdate,
-        handleRemove:handleRemove
+        handleRemove:handleRemove,
+        setCart: setCart
     
     }
 

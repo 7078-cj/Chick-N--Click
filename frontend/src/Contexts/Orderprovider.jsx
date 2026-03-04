@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import AuthContext from "./AuthContext";
+import { CartContext} from "./CartProvider";
 
 export const OrderContext = createContext();
 
 export const OrderProvider = ({ children }) => {
-    const { token, user } = useContext(AuthContext); 
+    const { token, user } = useContext(AuthContext);
+    const {setCart} = useContext(CartContext)
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const url = import.meta.env.VITE_API_URL;
