@@ -121,7 +121,7 @@ async def admin_order_ws(websocket: WebSocket):
         
 @app.websocket("/ws/notify/{user_id}")
 async def notify_ws(websocket: WebSocket, user_id: int):
-    await notification_manager.connect(websocket)
+    await notification_manager.connect(websocket, user_id=user_id)
     try:
         while True:
             data = await websocket.receive_text()
