@@ -16,19 +16,21 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 
 class OrderController extends Controller implements HasMiddleware
 {
     use AuthorizesRequests;
     
-      public static function middleware()
+    public static function middleware()
     {
         return [
             new Middleware('auth:sanctum')
         ];
     }
-   public function placeOrder(Request $request)
+
+    public function placeOrder(Request $request)
     {
         $user = $request->user();
         $validated = $request->validate([
@@ -36,7 +38,8 @@ class OrderController extends Controller implements HasMiddleware
             'location' => 'nullable|string|max:255',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
-            'proof_of_payment'   => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif', 'max:5120'],
+            'proof_of_payment' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif', 'max:5120'],
+            'reference_id' => 'nullable|string|max:255',
         ]);
     
         $cartItems = CartItem::with('food')->where('user_id', $user->id)->get();
@@ -47,7 +50,7 @@ class OrderController extends Controller implements HasMiddleware
 
         DB::beginTransaction();
         try {
-            $total = $cartItems->sum(fn($item) =>($item->food->price * $item->quantity));
+            $total = $cartItems->sum(fn($item) => ($item->food->price * $item->quantity));
 
             $validated['user_id'] = $user->id;
             $validated['total_price'] = $total;
@@ -55,7 +58,6 @@ class OrderController extends Controller implements HasMiddleware
 
             if ($request->hasFile('proof_of_payment')) {
                 $file = $request->file('proof_of_payment');
-
                 $validated['proof_of_payment'] = Image::uploadImage($file, 'proof');
             }
 
@@ -73,8 +75,6 @@ class OrderController extends Controller implements HasMiddleware
             CartItem::where('user_id', $user->id)->delete();
             DB::commit();
 
-            
-            
             $dis = Distance::getDistance($order->latitude, $order->longitude);
 
             if ($order->type == "pickup") {
@@ -87,17 +87,18 @@ class OrderController extends Controller implements HasMiddleware
                 if ($dis <= $base_km) {
                     $dis_price = $base_price;
                 } else {
-                    $extra_km = ceil($dis - $base_km); 
+                    $extra_km = ceil($dis - $base_km);
                     $dis_price = $base_price + ($extra_km * $extra_price);
                 }
             }
-            $order->total_price = $order->total_price + $dis_price ;
+
+            $order->total_price = $order->total_price + $dis_price;
             $order->save();
             
             Websocket::broadcast('order', 'create', $order->load('items.food', 'items.food.categories', 'user'), $order->user->id);
             Notification::notify('order', 'create', $order->user->id, $order);
 
-            return response()->json(['message'=>'Order Placed']);
+            return response()->json(['message' => 'Order Placed']);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -113,8 +114,7 @@ class OrderController extends Controller implements HasMiddleware
     {
         $user = $request->user();
 
-        
-        $orders = $user->Orders()->with('items.food','items.food.categories', 'user')->orderBy('created_at', 'desc')->get();
+        $orders = $user->Orders()->with('items.food', 'items.food.categories', 'user')->orderBy('created_at', 'desc')->get();
 
         if ($orders->isEmpty()) {
             return response()->json(['message' => 'No orders found'], 404);
@@ -125,9 +125,6 @@ class OrderController extends Controller implements HasMiddleware
         ], 200);
     }
 
-     /**
-     * Cancel order if still pending
-     */
     public function cancelOrder(Request $request, $orderId)
     {
         $user = $request->user();
@@ -144,7 +141,7 @@ class OrderController extends Controller implements HasMiddleware
         $order->status = 'cancelled';
         $order->save();
 
-        Http::post(config('services.websocket.http_url') ."/broadcast/order", [
+        Http::post(config('services.websocket.http_url') . "/broadcast/order", [
             'event' => 'cancelled',
             'order' => $order->load('items'),
         ]);
@@ -154,9 +151,6 @@ class OrderController extends Controller implements HasMiddleware
         return response()->json(['message' => 'Order cancelled successfully', 'order' => $order], 200);
     }
 
-    /**
-     * Admin updates order status
-     */
     public function updateOrderStatus(Request $request, $orderId)
     {
         $this->authorize('isAdmin', Order::class);
@@ -174,10 +168,10 @@ class OrderController extends Controller implements HasMiddleware
         $order->status = $request->status;
         $order->save();
 
-        Http::post(config('services.websocket.http_url') ."/broadcast/order", [
+        Http::post(config('services.websocket.http_url') . "/broadcast/order", [
             'event' => 'update',
             'user_id' => $order->user->id,
-            'order' => $order->load('items.food','items.food.categories'),
+            'order' => $order->load('items.food', 'items.food.categories'),
         ]);
         Notification::notify('order', $order->status, $order->user->id, $order);
 
@@ -201,10 +195,10 @@ class OrderController extends Controller implements HasMiddleware
         $order->estimated_time_of_completion = $request->etc;
         $order->save();
 
-        Http::post(config('services.websocket.http_url') ."/broadcast/order", [
+        Http::post(config('services.websocket.http_url') . "/broadcast/order", [
             'event' => 'update',
             'user_id' => $order->user->id,
-            'order' => $order->load('items.food','items.food.categories'),
+            'order' => $order->load('items.food', 'items.food.categories'),
         ]);
         Notification::notify('order', 'update', $order->user->id, $order);
 
@@ -221,27 +215,21 @@ class OrderController extends Controller implements HasMiddleware
         }
 
         $perPage = $request->get('per_page', 10);
-        $status = $request->get('status');       
-        $category = $request->get('category');    
-            
+        $status = $request->get('status');
+        $category = $request->get('category');
 
-        
         $query = Order::with(['items.food.categories', 'user']);
 
-       
         if ($status && $status !== "all") {
             $query->where("status", $status);
         }
 
-        
         if ($category && $category !== "all") {
             $query->whereHas("items.food.categories", function ($q) use ($category) {
                 $q->where("name", "LIKE", "%{$category}%");
             });
         }
 
-
-        // Paginate after filtering
         $orders = $query->orderBy("created_at", "desc")->paginate($perPage);
 
         return response()->json([
@@ -252,18 +240,4 @@ class OrderController extends Controller implements HasMiddleware
             'per_page' => $orders->perPage(),
         ]);
     }
-
-    // public function deleteOrder(Order $order){
-        
-    //     $this->authorize('isAdmin', Order::class);
-    //     Http::post(config('services.websocket.http_url') ."/broadcast/food", [
-    //         "event" => "delete",
-    //         "order"  => $order
-    //     ]);
-
-    //     $order->delete();
-
-    //     return response()->json(['message' => 'Order deleted successfully'], 200);
-    // }
-
 }

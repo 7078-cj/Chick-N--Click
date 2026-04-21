@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('longitude')->nullable();
             $table->string('latitude')->nullable();
             $table->string('location')->nullable();
-            $table->string('paid_at')->nullable();
+            $table->string('reference_id')->nullable();
             $table->string('proof_of_payment')->nullable();
             $table->timestamps();
         });

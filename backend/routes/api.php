@@ -21,7 +21,11 @@ Route::put('/user/update',[AuthController::class, 'updateUser'])->middleware('au
 Route::post('/logout',[AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/notifications', [NotificationController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/notifications/{notification}', [NotificationController::class, 'show'])->middleware('auth:sanctum');
+// Mark as read
+Route::put('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->middleware('auth:sanctum');
 
+// Delete notification
+Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->middleware('auth:sanctum');
 
 Route::get('/cart', [CartItemController::class, 'userCart']);
 Route::post('/cart/add/{foodId}', [CartItemController::class, 'addToCart']);

@@ -6,26 +6,25 @@ use App\Models\Notification;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+
 class NotificationController extends Controller
 {
-
     use AuthorizesRequests;
-        
-        public static function middleware()
-        {
-            return [
-                new Middleware('auth:sanctum')
-            ];
-        }
+
+    public static function middleware()
+    {
+        return [
+            new Middleware('auth:sanctum')
+        ];
+    }
+
     /**
-     * Display a listing of the authenticated user's notifications.
+     * Get all notifications of authenticated user
      */
     public function index(Request $request)
     {
-        // Get the authenticated user via token
         $user = $request->user();
 
-        // Return only this user's notifications
         $notifications = $user->notifications()->latest()->get();
 
         return response()->json([
@@ -35,13 +34,12 @@ class NotificationController extends Controller
     }
 
     /**
-     * Display the specified notification, only if it belongs to the authenticated user.
+     * Show single notification (with ownership check)
      */
     public function show(Request $request, Notification $notification)
     {
         $user = $request->user();
 
-        // Check if the notification belongs to this user
         if ($notification->user_id !== $user->id) {
             return response()->json([
                 'status' => 'error',
@@ -55,5 +53,53 @@ class NotificationController extends Controller
         ]);
     }
 
-    // Other methods (create, store, update, destroy) can also validate $user->id if needed
+    /**
+     * ✅ Mark notification as READ
+     */
+    public function markAsRead(Request $request, Notification $notification)
+    {
+        $user = $request->user();
+
+        if ($notification->user_id !== $user->id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized.'
+            ], 403);
+        }
+
+        // assuming you have 'is_read' boolean OR 'read_at' timestamp
+        $notification->update([
+            'is_read' => true,
+            // OR use:
+            // 'read_at' => now()
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Notification marked as read.',
+            'data' => $notification
+        ]);
+    }
+
+    /**
+     * ✅ Delete notification
+     */
+    public function destroy(Request $request, Notification $notification)
+    {
+        $user = $request->user();
+
+        if ($notification->user_id !== $user->id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized.'
+            ], 403);
+        }
+
+        $notification->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Notification deleted successfully.'
+        ]);
+    }
 }
