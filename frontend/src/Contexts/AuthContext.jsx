@@ -13,15 +13,14 @@ export function AuthProvider({children}) {
     );
 
     const [user, setUser] = useState(
-         JSON.parse(localStorage.getItem('user')) || null
+        JSON.parse(localStorage.getItem('user')) || null
     );
-   
 
     const nav = useNavigate()
 
     const url = import.meta.env.VITE_API_URL
 
-   const loginUser = async (e) => {
+    const loginUser = async (e) => {
         e.preventDefault();
         const url = import.meta.env.VITE_API_URL;
 
@@ -66,7 +65,6 @@ export function AuthProvider({children}) {
         setToken(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-       
     }
 
     var context = {
@@ -77,8 +75,8 @@ export function AuthProvider({children}) {
         setUser:setUser
     }
     return (
-      <AuthContext.Provider value={context}>
-        {children}
-      </AuthContext.Provider>
+        <AuthContext.Provider value={context}>
+            {children}
+        </AuthContext.Provider>
     )
-  }
+    }
